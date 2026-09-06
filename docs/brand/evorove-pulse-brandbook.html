@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Evorove — Pulse Brand Book</title>
+<link rel="icon" type="image/svg+xml" href="social/evorove-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #F7F1E4;
+    --ink: #0B0B0D;
+    --coral: #FF5A36;
+    --coral-wash: #FFE8E1;
+    --coral-deep: #C73618;
+    --lime: #C6FF00;
+    --lime-wash: #EEFF99;
+    --lime-ink: #4A4A00;
+    --clay: #9A8F83;
+    --mute: #6B6459;
+    --line: #E4DCCB;
+    --panel: #FFFCF6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+  a { color: inherit; }
+  img, svg { display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  .wordmark { font-family: "Bebas Neue", Impact, sans-serif; letter-spacing: 0.08em; }
+  .display { font-family: "Bebas Neue", Impact, sans-serif; letter-spacing: 0.01em; line-height: 0.86; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .sticker {
+    display: inline-block;
+    background: var(--lime);
+    color: var(--ink);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 11px;
+    padding: 6px 10px;
+    transform: rotate(-2deg);
+  }
+  .mark {
+    display: grid; place-items: center; border-radius: 50%;
+    background: var(--coral); color: var(--ink); flex: none;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(247,241,228,.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { max-width: 1120px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-brand .mark { width: 28px; height: 28px; }
+  .nav-brand span { font-size: 20px; }
+  header nav { display: flex; gap: 18px; overflow-x: auto; }
+  header nav a { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); text-decoration: none; white-space: nowrap; font-weight: 700; }
+  header nav a:hover { color: var(--ink); }
+
+  .hero { padding: 72px 0 0; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: end; }
+  .hero h1 { font-size: clamp(72px, 12vw, 148px); margin: 18px 0 20px; }
+  .hero .sub { font-size: 18px; color: var(--mute); max-width: 460px; line-height: 1.5; }
+  .hero-still { background: var(--panel); border: 1px solid var(--line); min-height: 420px; overflow: hidden; }
+  .hero-still img { width: 100%; height: 100%; object-fit: cover; min-height: 420px; }
+  .swatch-bar { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr; margin-top: 36px; }
+  .swatch-bar span { height: 18px; }
+  .swatch-bar .cream { background: var(--cream); border: 1px solid var(--line); border-left: 0; }
+  .swatch-bar .ink { background: var(--ink); }
+  .swatch-bar .coral { background: var(--coral); }
+  .swatch-bar .lime { background: var(--lime); }
+
+  section { padding: 88px 0; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--coral-deep); font-weight: 800; margin-bottom: 12px; }
+  h2 { font-family: "Bebas Neue", Impact, sans-serif; font-size: 56px; letter-spacing: .02em; line-height: .9; margin: 0 0 16px; }
+  .lead { font-size: 17px; color: var(--mute); max-width: 640px; line-height: 1.6; margin: 0 0 36px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); padding: 22px 24px; }
+  .card h3 { margin: 0 0 8px; font-size: 15px; }
+  .card p, .card li { color: var(--mute); font-size: 14px; line-height: 1.55; margin: 0; }
+  .card.ink { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .card.ink p, .card.ink li { color: #cfc6b6; }
+  .card.coral { background: var(--coral); color: var(--ink); border-color: var(--coral); }
+  .card.lime { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+
+  .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .chip { border: 1px solid var(--line); overflow: hidden; background: var(--panel); }
+  .chip .fill { height: 88px; }
+  .chip .meta { padding: 12px 14px 14px; }
+  .chip .name { font-weight: 700; font-size: 13px; }
+  .chip .hex { font-size: 12px; color: var(--clay); margin-top: 4px; }
+
+  .type-row { display: grid; grid-template-columns: 200px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--line); align-items: end; }
+  .type-row .label { font-size: 12px; color: var(--clay); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+  .type-bebas { font-family: "Bebas Neue", Impact, sans-serif; font-size: 64px; line-height: .85; letter-spacing: .02em; }
+  .type-inter { font-size: 22px; }
+  .type-mono { font-family: "IBM Plex Mono", monospace; font-size: 15px; color: var(--mute); }
+
+  .do-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .no { position: relative; }
+  .no::after {
+    content: "NO";
+    position: absolute; top: 14px; right: 14px;
+    background: var(--ink); color: var(--cream);
+    font-size: 11px; font-weight: 800; letter-spacing: .16em; padding: 4px 8px;
+  }
+  .fake-wheel {
+    width: 88px; height: 88px; margin: 18px auto; border-radius: 50%;
+    border: 8px solid #B87333; position: relative;
+  }
+  .fake-wheel i { position: absolute; left: 50%; top: 50%; width: 8px; height: 28px; background: #B87333; transform-origin: 50% 0; }
+  .chat-bubble { width: 120px; height: 72px; margin: 28px auto 12px; background: #e8e8e8; border-radius: 18px; position: relative; }
+  .chat-bubble::after { content: ""; position: absolute; left: 22px; bottom: -10px; border: 10px solid transparent; border-top-color: #e8e8e8; border-left-color: #e8e8e8; }
+
+  .avatar-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .avatar { aspect-ratio: 1; display: grid; place-items: center; }
+  .avatar.ink { background: var(--ink); }
+  .avatar.cream { background: var(--cream); border: 1px solid var(--line); }
+  .avatar.coral { background: var(--coral); }
+  .avatar .mark { width: 46%; height: 46%; }
+  .avatar.coral .mark { background: transparent; }
+  .caption { font-size: 12px; color: var(--clay); margin-top: 10px; line-height: 1.4; }
+
+  .still { width: 100%; border: 1px solid var(--line); }
+  .files { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .files th { text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--clay); padding: 0 0 12px; border-bottom: 1px solid var(--line); }
+  .files td { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .files code { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--panel); padding: 2px 6px; }
+
+  footer { padding: 40px 0 72px; color: var(--clay); font-size: 13px; }
+  @media (max-width: 860px) {
+    .hero-grid, .grid-2, .grid-3, .grid-4, .palette, .avatar-row, .do-grid, .type-row { grid-template-columns: 1fr; }
+    .swatch-bar { grid-template-columns: 1fr 1fr; }
+    header nav { display: none; }
+    h2 { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="nav-brand" href="#cover">
+      <span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/></svg></span>
+      <span class="wordmark">EVOROVE</span>
+    </a>
+    <nav>
+      <a href="#essence">Essence</a>
+      <a href="#mark">Mark</a>
+      <a href="#color">Color</a>
+      <a href="#type">Type</a>
+      <a href="#voice">Voice</a>
+      <a href="#dont">Don’t</a>
+      <a href="#avatars">Avatars</a>
+      <a href="#media">Media</a>
+      <a href="#files">Files</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="cover" style="border:0;padding-bottom:0">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="sticker">Pulse system · 2026</div>
+        <h1 class="display">EVOROVE<br />BRAND<br />BOOK.</h1>
+        <p class="sub">Inquiry to booked job. Cream room, ink law, coral engine, lime pulse. The five-spoke wheel and the bronze years are retired.</p>
+      </div>
+      <div class="hero-still">
+        <img src="social/evorove-still-torus-wide.png" alt="Glossy coral torus with a lime orbit on cream" />
+      </div>
+    </div>
+    <div class="swatch-bar">
+      <span class="cream"></span>
+      <span class="ink"></span>
+      <span class="coral"></span>
+      <span class="lime"></span>
+    </div>
+  </div>
+</section>
+
+<section id="essence">
+  <div class="wrap">
+    <div class="eyebrow">01 — Essence</div>
+    <h2>EVERY LEAD.<br />NO DEAD AIR.</h2>
+    <p class="lead">Evorove is a deterministic engine that carries an inbound inquiry through qualification, follow-up, and a booked job or accepted quote. The model rewrites a script the business already approved. The engine decides the next step. It is not a chatbot, not an intake form, not lead generation.</p>
+    <div class="grid-3">
+      <div class="card">
+        <h3>The object</h3>
+        <p>A torus. A closed cycle. The lead enters and does not fall off the ring. Inner hub = decision. Tube = the work. Lime orbit = follow-up still firing.</p>
+      </div>
+      <div class="card">
+        <h3>The room</h3>
+        <p>Warm cream, not a dark “AI void.” Industrial and expensive, like a studio for a physical object. Negative space is a feature.</p>
+      </div>
+      <div class="card">
+        <h3>The temperature</h3>
+        <p>Coral is heat. Lime is the live wire. Ink is the law. If a layout is missing one of the first two, it is not Pulse yet — it is a draft.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mark">
+  <div class="wrap">
+    <div class="eyebrow">02 — Mark</div>
+    <h2>TORUS, NOT A WHEEL.</h2>
+    <p class="lead">The 2D mark is a flat translation of the 3D hero: thick ring, solid hub, a short motion arc at 1–2 o’clock. Never five spokes. Never bronze. Never a chat bubble.</p>
+    <div class="grid-4" style="margin-bottom:28px">
+      <div class="card" style="display:grid;place-items:center;min-height:180px">
+        <span class="mark" style="width:88px;height:88px;color:var(--ink)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity=".45" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="card ink" style="display:grid;place-items:center;min-height:180px">
+        <span class="mark" style="width:88px;height:88px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity=".45" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="card coral" style="display:grid;place-items:center;min-height:180px">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="#0B0B0D" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="#0B0B0D"/><path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="#0B0B0D" stroke-width="1.6" opacity=".45" stroke-linecap="round"/></svg>
+      </div>
+      <div class="card lime" style="display:grid;place-items:center;min-height:180px">
+        <span class="mark" style="width:88px;height:88px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/></svg></span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Construction</h3>
+        <p>Viewbox 24. Ring radius 7.2, stroke 3.2. Hub radius 2.2, filled. Optional motion arc: a 9-unit sweep, stroke 1.6, 45% opacity. Sit the mark in a coral disc for badges. Favicon drops the arc — it dies at 16px.</p>
+      </div>
+      <div class="card">
+        <h3>Clear space &amp; crop</h3>
+        <p>Keep a gap of one hub-diameter around the disc. Profile photos are round: <b>never put the wordmark in the avatar</b>. Name lives in the account field. The lockup with EVOROVE under the disc is for square surfaces only (GitHub, press sheets).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="color">
+  <div class="wrap">
+    <div class="eyebrow">03 — Color</div>
+    <h2>FOUR PIGMENTS.<br />NO BRONZE.</h2>
+    <p class="lead">Tokens live in <span class="mono">web/app/src/brand/theme.ts</span>. Do not invent nearby hexes. If you need a quieter coral, use wash or deep — not a new orange.</p>
+    <div class="palette">
+      <div class="chip"><div class="fill" style="background:#F7F1E4;border-bottom:1px solid var(--line)"></div><div class="meta"><div class="name">Cream</div><div class="hex mono">#F7F1E4 · room</div></div></div>
+      <div class="chip"><div class="fill" style="background:#0B0B0D"></div><div class="meta"><div class="name">Ink</div><div class="hex mono">#0B0B0D · law</div></div></div>
+      <div class="chip"><div class="fill" style="background:#FF5A36"></div><div class="meta"><div class="name">Coral</div><div class="hex mono">#FF5A36 · engine</div></div></div>
+      <div class="chip"><div class="fill" style="background:#C6FF00"></div><div class="meta"><div class="name">Lime</div><div class="hex mono">#C6FF00 · pulse</div></div></div>
+      <div class="chip"><div class="fill" style="background:#FFE8E1"></div><div class="meta"><div class="name">Coral wash</div><div class="hex mono">#FFE8E1 · selected</div></div></div>
+      <div class="chip"><div class="fill" style="background:#C73618"></div><div class="meta"><div class="name">Coral deep</div><div class="hex mono">#C73618 · small type</div></div></div>
+      <div class="chip"><div class="fill" style="background:#EEFF99"></div><div class="meta"><div class="name">Lime wash</div><div class="hex mono">#EEFF99 · needs you</div></div></div>
+      <div class="chip"><div class="fill" style="background:#9A8F83"></div><div class="meta"><div class="name">Clay / mute / line</div><div class="hex mono">#9A8F83 · #6B6459 · #E4DCCB</div></div></div>
+    </div>
+    <div class="grid-3" style="margin-top:22px">
+      <div class="card"><h3>Coral</h3><p>Mark disc, selected state, one line of a display couplet. Not small body text on cream — that is coral deep.</p></div>
+      <div class="card"><h3>Lime</h3><p>Stickers, marketing CTA, “needs you,” the 3D orbit. Never paragraphs. Never a profile background.</p></div>
+      <div class="card"><h3>Ink on lime</h3><p>Cabinet primary buttons stay ink. Lime is the public pulse, not the operator chrome.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="type">
+  <div class="wrap">
+    <div class="eyebrow">04 — Type</div>
+    <h2>BEBAS FOR IMPACT.<br />INTER FOR WORK.</h2>
+    <div class="type-row"><div class="label">Display / wordmark</div><div class="type-bebas">EVOROVE · EVERY LEAD.</div></div>
+    <div class="type-row"><div class="label">UI / body · Inter</div><div class="type-inter">AI that carries an inquiry to a booked job — on a script you already approved.</div></div>
+    <div class="type-row"><div class="label">Technical · IBM Plex Mono</div><div class="type-mono">#FF5A36 · NEW_LEAD → QUALIFYING → BOOKED</div></div>
+    <p class="lead" style="margin-top:28px">Display is always caps. Tracking on the wordmark ~0.08em. Line-height on posters ~0.86. Second line of a couplet may go coral. Do not set paragraphs in Bebas. Do not revive Century Gothic.</p>
+  </div>
+</section>
+
+<section id="voice">
+  <div class="wrap">
+    <div class="eyebrow">05 — Voice</div>
+    <h2>DRY HEAT.<br />NO THEATER.</h2>
+    <p class="lead">English everywhere a customer can see it. Short sentences. Physical metaphors (ring, cycle, dead air). We do not promise a conversion rate. We do not call the first vertical “the product.”</p>
+    <div class="grid-2">
+      <div class="card lime">
+        <h3>Say</h3>
+        <p>Inquiry in. Booked job out. The model rewrites. The engine decides. Same engine, new DNA. Dead air is a product bug. Unfinished — on purpose. Building in public. On your script.</p>
+      </div>
+      <div class="card">
+        <h3>Never</h3>
+        <p>Chatbot. Intake assistant. Cold lead. CRM replacement. “AI lawyer.” “Compliant with TCPA.” A percentage we will hit for you. Custom build for every vertical. Five-spoke flywheel nostalgia in public copy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dont">
+  <div class="wrap">
+    <div class="eyebrow">06 — Don’t</div>
+    <h2>RETIRED MOVES.</h2>
+    <div class="do-grid">
+      <div class="card no">
+        <div class="fake-wheel"><i style="transform:translate(-50%,0) rotate(0)"></i><i style="transform:translate(-50%,0) rotate(72deg)"></i><i style="transform:translate(-50%,0) rotate(144deg)"></i><i style="transform:translate(-50%,0) rotate(216deg)"></i><i style="transform:translate(-50%,0) rotate(288deg)"></i></div>
+        <h3>Five-spoke wheel</h3>
+        <p>The old Flywheel emblem. Bronze #B87333. Century Gothic. All three are archive-only.</p>
+      </div>
+      <div class="card no">
+        <div class="chat-bubble"></div>
+        <h3>Chat as the brand</h3>
+        <p>No bubbles, no robot heads, no handshake stock. The torus is the only object. Conversation is a channel, not the identity.</p>
+      </div>
+      <div class="card no">
+        <div style="height:88px;margin:18px 0;background:#FF5A36;display:grid;place-items:center;color:#fff;font-size:12px">coral 12px on cream fails</div>
+        <h3>Pretty but illegal contrast</h3>
+        <p>Small coral on white/cream is not readable enough. Use coral deep, or coral only at display size.</p>
+      </div>
+      <div class="card no">
+        <div style="height:88px;margin:18px 0;background:var(--lime);display:grid;place-items:center;font-family:'Bebas Neue',Impact,sans-serif;font-size:42px">EVOROVE</div>
+        <h3>Lime as a field for the name</h3>
+        <p>Lime is a sticker and a spark, not a wall. Profile and app icon stay coral or ink.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="avatars">
+  <div class="wrap">
+    <div class="eyebrow">07 — Avatars</div>
+    <h2>ONE FACE,<br />FOUR CROPS.</h2>
+    <p class="lead">Default profile is the coral disc on ink, mark only. Upload that on LinkedIn, X, YouTube, Bluesky, Discord. The lockup with the word is a square extra — LinkedIn will circle-crop it and eat EVOROVE.</p>
+    <div class="avatar-row">
+      <div>
+        <div class="avatar ink"><span class="mark"><svg width="42" height="42" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity=".45" stroke-linecap="round"/></svg></span></div>
+        <div class="caption"><b>Primary.</b> Ink field. Use everywhere a round crop is likely.</div>
+      </div>
+      <div>
+        <div class="avatar cream"><span class="mark"><svg width="42" height="42" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/></svg></span></div>
+        <div class="caption"><b>Cream.</b> Light directories, slides, a document header.</div>
+      </div>
+      <div>
+        <div class="avatar coral"><svg width="72" height="72" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="#0B0B0D" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="#0B0B0D"/></svg></div>
+        <div class="caption"><b>Full coral.</b> When the platform already supplies a dark tile.</div>
+      </div>
+      <div>
+        <div class="avatar cream" style="background:transparent;padding:18px">
+          <div style="width:100%;height:100%;border-radius:22%;background:var(--coral);display:grid;place-items:center">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="#0B0B0D" stroke-width="3.2"/><circle cx="12" cy="12" r="2.2" fill="#0B0B0D"/></svg>
+          </div>
+        </div>
+        <div class="caption"><b>App icon.</b> Rounded square, 1024. Matches the site favicon.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="media">
+  <div class="wrap">
+    <div class="eyebrow">08 — Multimedia</div>
+    <h2>THE ENGINE<br />AS AN OBJECT.</h2>
+    <p class="lead">Campaign photography is one thing: a glossy coral torus, lime orbit, cream studio, no people. Type sits beside it or over a cream veil. Feed posts are typographic posters — couplet + sticker + one sentence.</p>
+    <img class="still" src="social/evorove-still-torus-wide.png" alt="Wide torus still" />
+    <div class="grid-2" style="margin-top:16px">
+      <img class="still" src="social/evorove-still-torus-square.png" alt="Square torus still" />
+      <img class="still" src="social/evorove-still-torus-story.png" alt="Vertical torus still" />
+    </div>
+    <div class="grid-3" style="margin-top:22px">
+      <div class="card"><h3>Banners</h3><p>LinkedIn cream + lime sticker. X ink + cream wordmark. YouTube splits type and the 3D still. Safe zone: keep the name left of center.</p></div>
+      <div class="card"><h3>Feed</h3><p>1200×675 posters. One idea each: cycle vs capture, engine vs model, DNA vs custom build, dead air, unfinished. No screenshots of the cabinet in launch posts.</p></div>
+      <div class="card"><h3>Stories / Reels</h3><p>1080×1920. Display type in the lower third or over a cream veil. Motion: 9s torus spin, lime sparks, sticker tilt −2°.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="files" style="border:0">
+  <div class="wrap">
+    <div class="eyebrow">09 — Files</div>
+    <h2>KIT ON DISK.</h2>
+    <p class="lead">Source boards: <span class="mono">docs/brand/social/boards.html</span>. After deploy, public copies live at <span class="mono">/brand/…</span> on the site. Autopost needs that HTTPS URL, not a desktop path.</p>
+    <table class="files">
+      <thead><tr><th>File</th><th>Size</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td><code>evorove-avatar.png</code></td><td>800²</td><td>Default profile, all networks</td></tr>
+        <tr><td><code>evorove-avatar-cream.png</code></td><td>800²</td><td>Light surfaces</td></tr>
+        <tr><td><code>evorove-avatar-coral.png</code></td><td>800²</td><td>Dark tiles</td></tr>
+        <tr><td><code>evorove-avatar-lockup.png</code></td><td>800²</td><td>Square only — not a round profile</td></tr>
+        <tr><td><code>evorove-app-icon.png</code> / <code>.svg</code></td><td>1024²</td><td>App / PWA / TestFlight later</td></tr>
+        <tr><td><code>evorove-favicon.svg</code></td><td>32</td><td>Browser tab</td></tr>
+        <tr><td><code>evorove-linkedin-banner.png</code></td><td>1584×396</td><td>Company cover</td></tr>
+        <tr><td><code>evorove-x-header.png</code></td><td>1500×500</td><td>X header</td></tr>
+        <tr><td><code>evorove-youtube-banner.png</code></td><td>2560×1440</td><td>YouTube channel art</td></tr>
+        <tr><td><code>evorove-og.png</code></td><td>1200×630</td><td>Link unfurl</td></tr>
+        <tr><td><code>evorove-post-*.png</code></td><td>1200×675</td><td>Feed posters</td></tr>
+        <tr><td><code>evorove-ig-square.png</code></td><td>1080²</td><td>Instagram / square feed</td></tr>
+        <tr><td><code>evorove-story-*.png</code></td><td>1080×1920</td><td>Stories, Reels covers, TikTok later</td></tr>
+        <tr><td><code>evorove-still-torus-*.png</code></td><td>wide / 1:1 / 9:16</td><td>Campaign stills, no type</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Pulse tokens are the production UI. This book does not reopen bronze, the wheel, or a second product name.
+    Line: <b>Every lead. No dead air.</b>
+  </div>
+</footer>
+</body>
+</html>
