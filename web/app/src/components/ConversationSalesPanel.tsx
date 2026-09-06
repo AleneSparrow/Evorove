@@ -37,12 +37,12 @@ import {
  */
 
 const FOCUS_RING =
-  "outline-none focus-visible:ring-2 focus-visible:ring-[#B87333] focus-visible:ring-offset-2";
+  "outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2";
 
 function Field({ label, children }: { label: string; children: string | null | undefined }) {
   return (
     <div className="min-w-0">
-      <div className="text-[11px] font-medium text-[#9C9488] mb-0.5">{label}</div>
+      <div className="text-[11px] font-medium text-clay mb-0.5">{label}</div>
       <div className="text-sm break-words [overflow-wrap:anywhere]">
         {children?.trim() ? children : "Not captured yet"}
       </div>
@@ -59,7 +59,7 @@ function WrappingIdList({ ids }: { ids: readonly string[] }) {
           key={id}
           className="break-all [overflow-wrap:anywhere]"
           style={{ fontFamily: "'IBM Plex Mono', monospace" }}
-        >
+      >
           {id}
         </li>
       ))}
@@ -103,10 +103,10 @@ function ShadowResultCard({
 
   return (
     <article
-      className="rounded-lg border border-[#E7E5DE] p-3 min-w-0 overflow-hidden"
+      className="rounded-lg border border-line p-3 min-w-0 overflow-hidden"
       aria-labelledby={titleId}
       aria-busy={evaluating}
-    >
+  >
       <div className="flex items-start justify-between gap-2 flex-wrap min-w-0">
         <h4 id={titleId} className="text-xs font-semibold min-w-0 break-words [overflow-wrap:anywhere]">
           {copy.title}
@@ -115,30 +115,30 @@ function ShadowResultCard({
           {result.status.replace(/_/g, " ")}
         </span>
       </div>
-      <p className="text-[11px] text-[#6B6459] mt-1 leading-relaxed">{copy.description}</p>
+      <p className="text-[11px] text-mute mt-1 leading-relaxed">{copy.description}</p>
       <p className="text-[11px] font-medium mt-2 leading-relaxed" style={{ color: "#8A561B" }}>
         {SHADOW_NOT_SENT_NOTICE}
       </p>
 
       <dl className="flex flex-col gap-2 mt-3 min-w-0">
         <div className="min-w-0">
-          <dt className="text-[11px] font-medium text-[#9C9488]">Approved move</dt>
+          <dt className="text-[11px] font-medium text-clay">Approved move</dt>
           <dd className="text-xs mt-0.5 break-words [overflow-wrap:anywhere]">{salesMoveLabel(result.approved_move)}</dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-[11px] font-medium text-[#9C9488]">Proposed shadow reply</dt>
+          <dt className="text-[11px] font-medium text-clay">Proposed shadow reply</dt>
           <dd className="text-xs mt-0.5 break-words [overflow-wrap:anywhere]">
             {result.proposed_response_text?.trim() || "None"}
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-[11px] font-medium text-[#9C9488]">Live reply the customer received</dt>
+          <dt className="text-[11px] font-medium text-clay">Live reply the customer received</dt>
           <dd className="text-xs mt-0.5 break-words [overflow-wrap:anywhere]">
             {result.delivered_response_text?.trim() || "None recorded"}
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-[11px] font-medium text-[#9C9488]">Violations</dt>
+          <dt className="text-[11px] font-medium text-clay">Violations</dt>
           <dd className="text-xs mt-0.5 min-w-0">
             {result.violations.length === 0 ? (
               "None"
@@ -156,30 +156,30 @@ function ShadowResultCard({
       </dl>
 
       <div className="pt-3 mt-3 border-t border-[#F0EFE9] min-w-0">
-        <div className="text-[11px] font-medium text-[#9C9488] mb-2">Provenance</div>
-        <div className="flex flex-col gap-2 text-xs text-[#6B6459] min-w-0">
+        <div className="text-[11px] font-medium text-clay mb-2">Provenance</div>
+        <div className="flex flex-col gap-2 text-xs text-mute min-w-0">
           <div className="min-w-0">
-            <span className="font-medium text-[#151515]">Shadow ID</span>
+            <span className="font-medium text-ink">Shadow ID</span>
             <div className="break-all [overflow-wrap:anywhere] mt-1" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
               {result.shadow_id}
             </div>
           </div>
           <div className="min-w-0">
-            <span className="font-medium text-[#151515]">Source message</span>
+            <span className="font-medium text-ink">Source message</span>
             <div className="break-all [overflow-wrap:anywhere] mt-1" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
               {result.source_message_id}
             </div>
           </div>
           <div className="min-w-0">
-            <span className="font-medium text-[#151515]">Knowledge IDs</span>
+            <span className="font-medium text-ink">Knowledge IDs</span>
             <WrappingIdList ids={result.knowledge_ids} />
           </div>
           <div className="min-w-0">
-            <span className="font-medium text-[#151515]">Business facts</span>
+            <span className="font-medium text-ink">Business facts</span>
             <WrappingIdList ids={result.business_fact_ids} />
           </div>
           <div className="min-w-0">
-            <span className="font-medium text-[#151515]">Customer evidence IDs</span>
+            <span className="font-medium text-ink">Customer evidence IDs</span>
             <WrappingIdList ids={result.customer_evidence_ids} />
           </div>
           {(result.prompt_version || result.model_name) && (
@@ -203,7 +203,7 @@ function ShadowResultCard({
         </div>
       ) : (
         <fieldset className="mt-3 min-w-0" disabled={!canEvaluate}>
-          <legend className="text-[11px] font-medium text-[#9C9488] mb-2">Human evaluation</legend>
+          <legend className="text-[11px] font-medium text-clay mb-2">Human evaluation</legend>
           <div role="radiogroup" aria-label="Shadow evaluation" className="flex flex-col gap-1.5">
             {SALES_SHADOW_EVALUATION_VALUES.map((value) => {
               const inputId = `${formId}-${value}`;
@@ -211,8 +211,8 @@ function ShadowResultCard({
                 <label
                   key={value}
                   htmlFor={inputId}
-                  className={`flex items-start gap-2 text-xs rounded-lg px-2 py-1.5 border border-[#E7E5DE] min-w-0 ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#B87333]`}
-                >
+                  className={`flex items-start gap-2 text-xs rounded-lg px-2 py-1.5 border border-line min-w-0 ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-coral`}
+              >
                   <input
                     type="radio"
                     id={inputId}
@@ -223,7 +223,7 @@ function ShadowResultCard({
                     onChange={(event) => {
                       if (isSalesShadowEvaluation(event.target.value)) onSelectEvaluation(event.target.value);
                     }}
-                    className="mt-0.5 accent-[#B87333]"
+                    className="mt-0.5 accent-coral"
                   />
                   <span className="break-words [overflow-wrap:anywhere]">{SALES_SHADOW_EVALUATION_LABELS[value]}</span>
                 </label>
@@ -236,8 +236,8 @@ function ShadowResultCard({
             aria-busy={evaluating}
             onClick={onSubmitEvaluation}
             className={`mt-2 text-xs font-medium text-white px-3 py-2 rounded-lg disabled:opacity-50 ${FOCUS_RING}`}
-            style={{ backgroundColor: "#151515" }}
-          >
+            style={{ backgroundColor: "#0B0B0D" }}
+        >
             {evaluating ? "Recording…" : "Record evaluation"}
           </button>
         </fieldset>
@@ -386,15 +386,15 @@ export function ConversationSalesPanel({
   };
 
   return (
-    <div className="rounded-xl border border-[#E7E5DE] bg-white p-4 min-w-0 overflow-x-hidden">
+    <div className="rounded-xl border border-line bg-white p-4 min-w-0 overflow-x-hidden">
       <div className="text-xs font-semibold mb-1">Sales conversation</div>
-      <p className="text-[11px] text-[#9C9488] mb-3 leading-relaxed">
+      <p className="text-[11px] text-clay mb-3 leading-relaxed">
         Sales stage is conversation progress. Case status on the right is the business commitment
         (qualification, booking, won) and is decided separately.
       </p>
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-[#6B6459] py-2" role="status">
+        <div className="flex items-center gap-2 text-sm text-mute py-2" role="status">
           <Loader2 size={14} className="animate-spin" /> Loading sales context…
         </div>
       )}
@@ -412,7 +412,7 @@ export function ConversationSalesPanel({
       )}
 
       {!loading && !denied && !error && empty && (
-        <p className="text-sm text-[#6B6459]">
+        <p className="text-sm text-mute">
           {caseId
             ? "No sales conversation profile yet for this case."
             : "This conversation isn’t linked to a case, so there is no sales profile."}
@@ -429,18 +429,18 @@ export function ConversationSalesPanel({
               : null}
           </Field>
           {objection?.evidence_excerpt && (
-            <p className="text-xs text-[#6B6459] -mt-2 break-words [overflow-wrap:anywhere]">
+            <p className="text-xs text-mute -mt-2 break-words [overflow-wrap:anywhere]">
               “{objection.evidence_excerpt}”
             </p>
           )}
           <Field label="Last approved move">{context.last_move ? salesMoveLabel(context.last_move) : null}</Field>
           <div className="min-w-0">
-            <div className="text-[11px] font-medium text-[#9C9488] mb-0.5">Next approved action</div>
+            <div className="text-[11px] font-medium text-clay mb-0.5">Next approved action</div>
             <div className="text-sm font-medium break-words">{salesMoveLabel(context.next_approved_action)}</div>
-            <p className="text-xs text-[#6B6459] mt-0.5 break-words [overflow-wrap:anywhere]">
+            <p className="text-xs text-mute mt-0.5 break-words [overflow-wrap:anywhere]">
               {reasonCodeLabel(context.next_action_reason)}
             </p>
-            <p className="text-[11px] text-[#9C9488] mt-1 leading-relaxed">
+            <p className="text-[11px] text-clay mt-1 leading-relaxed">
               Chosen by sales policy, not by the model. This does not change price, discount, or booking rules.
             </p>
           </div>
@@ -456,21 +456,21 @@ export function ConversationSalesPanel({
           )}
 
           <div className="pt-3 border-t border-[#F0EFE9] min-w-0">
-            <div className="text-[11px] font-medium text-[#9C9488] mb-2">Provenance of the latest conversation turn</div>
+            <div className="text-[11px] font-medium text-clay mb-2">Provenance of the latest conversation turn</div>
             {!latest ? (
-              <p className="text-xs text-[#9C9488]">No sales turns recorded for this conversation yet.</p>
+              <p className="text-xs text-clay">No sales turns recorded for this conversation yet.</p>
             ) : (
-              <div className="flex flex-col gap-2 text-xs text-[#6B6459] min-w-0">
+              <div className="flex flex-col gap-2 text-xs text-mute min-w-0">
                 <div className="min-w-0">
-                  <span className="font-medium text-[#151515]">Knowledge IDs</span>
+                  <span className="font-medium text-ink">Knowledge IDs</span>
                   <WrappingIdList ids={latest.knowledge_ids} />
                 </div>
                 <div className="min-w-0">
-                  <span className="font-medium text-[#151515]">Business facts</span>
+                  <span className="font-medium text-ink">Business facts</span>
                   <WrappingIdList ids={latest.business_fact_ids} />
                 </div>
                 <div className="min-w-0">
-                  <span className="font-medium text-[#151515]">Customer evidence</span>
+                  <span className="font-medium text-ink">Customer evidence</span>
                   {latest.customer_evidence.length === 0 ? (
                     <div className="mt-1">None</div>
                   ) : (
@@ -491,13 +491,13 @@ export function ConversationSalesPanel({
 
       {caseId && (
         <div className="pt-3 mt-3 border-t border-[#F0EFE9] min-w-0">
-          <div className="text-[11px] font-medium text-[#9C9488] mb-1">Shadow comparison</div>
-          <p className="text-[11px] text-[#6B6459] mb-3 leading-relaxed">
+          <div className="text-[11px] font-medium text-clay mb-1">Shadow comparison</div>
+          <p className="text-[11px] text-mute mb-3 leading-relaxed">
             Drafts below are for staff comparison on this conversation only. They are not sent to the customer.
           </p>
 
           {shadowLoading && (
-            <div className="flex items-center gap-2 text-sm text-[#6B6459] py-2" role="status">
+            <div className="flex items-center gap-2 text-sm text-mute py-2" role="status">
               <Loader2 size={14} className="animate-spin" /> Loading shadow results…
             </div>
           )}
@@ -520,7 +520,7 @@ export function ConversationSalesPanel({
             aria-live="polite"
             aria-atomic="true"
             style={evaluationNotice ? { backgroundColor: "#E9F5EF", color: "#1E7B52" } : undefined}
-          >
+        >
             {evaluationNotice ?? ""}
           </div>
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -532,7 +532,7 @@ export function ConversationSalesPanel({
           </div>
 
           {!shadowLoading && !shadowDenied && !shadowError && conversationShadows.length === 0 && (
-            <p className="text-xs text-[#9C9488]">{shadowSalesUiCopy("none").description}</p>
+            <p className="text-xs text-clay">{shadowSalesUiCopy("none").description}</p>
           )}
 
           {!shadowLoading && conversationShadows.length > 0 && (

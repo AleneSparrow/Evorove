@@ -62,21 +62,21 @@ import {
  */
 
 const FOCUS_RING =
-  "outline-none focus-visible:ring-2 focus-visible:ring-[#B87333] focus-visible:ring-offset-2";
+  "outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2";
 
 const FILTER_PILL =
-  `inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#B87333] has-[:focus-visible]:ring-offset-2`;
+  `inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-coral has-[:focus-visible]:ring-offset-2`;
 
 function statusTone(status: SalesKnowledgeCard["status"]): { color: string; backgroundColor: string } {
   if (status === "APPROVED") return { color: "#1E7B52", backgroundColor: "#E9F5EF" };
   if (status === "REJECTED") return { color: "#8A3225", backgroundColor: "#FBEBE9" };
-  return { color: "#8A561B", backgroundColor: "#FFF8EE" };
+  return { color: "#C73618", backgroundColor: "#FFE8E1" };
 }
 
 function playbookTone(status: SalesPlaybook["status"]): { color: string; backgroundColor: string } {
   if (status === "PUBLISHED") return { color: "#1E7B52", backgroundColor: "#E9F5EF" };
   if (status === "ARCHIVED") return { color: "#6B6459", backgroundColor: "#F1F1EF" };
-  return { color: "#8A561B", backgroundColor: "#FFF8EE" };
+  return { color: "#C73618", backgroundColor: "#FFE8E1" };
 }
 
 function DetailFields({ fields }: { fields: KnowledgeCardDetailField[] }) {
@@ -84,13 +84,13 @@ function DetailFields({ fields }: { fields: KnowledgeCardDetailField[] }) {
     <dl className="flex flex-col gap-3 min-w-0">
       {fields.map((field) => (
         <div key={field.label} className="min-w-0">
-          <dt className="text-[11px] font-medium text-[#9C9488]">{field.label}</dt>
+          <dt className="text-[11px] font-medium text-clay">{field.label}</dt>
           <dd
             className={`text-sm mt-0.5 leading-relaxed min-w-0 ${
               field.label === "Knowledge ID" ? "break-all" : "break-words"
             } [overflow-wrap:anywhere]`}
             style={field.label === "Knowledge ID" ? { fontFamily: "'IBM Plex Mono', monospace" } : undefined}
-          >
+        >
             {field.values.length === 1 ? (
               field.values[0]
             ) : (
@@ -426,7 +426,7 @@ export function SalesPlaybookSettings({
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-[#6B6459] py-8" role="status">
+      <div className="flex items-center gap-2 text-sm text-mute py-8" role="status">
         <Loader2 size={16} className="animate-spin" /> Loading sales playbook…
       </div>
     );
@@ -450,22 +450,22 @@ export function SalesPlaybookSettings({
 
   return (
     <div className="min-w-0 overflow-x-hidden">
-      <p className="text-sm text-[#6B6459] mb-6 leading-relaxed">
+      <p className="text-sm text-mute mb-6 leading-relaxed">
         The sales playbook is the approved conversation method. It is separate from case status
         (qualification, booking, won). AI may phrase an approved move; it does not set prices,
         discounts, or bookings.
       </p>
 
       {playbook ? (
-        <div className="rounded-2xl border p-4 sm:p-5 mb-6 min-w-0" style={{ borderColor: "#E7E5DE" }}>
+        <div className="rounded-2xl border p-4 sm:p-5 mb-6 min-w-0" style={{ borderColor: "#E4DCCB" }}>
           <div className="flex items-start justify-between gap-3 flex-wrap min-w-0">
             <div className="flex items-start gap-3 min-w-0">
-              <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: "#B87333" }}>
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: "#FF5A36" }}>
                 <BookOpen size={18} />
               </span>
               <div className="min-w-0">
                 <h2 className="text-base font-semibold">Active playbook</h2>
-                <p className="text-sm text-[#6B6459] mt-0.5 break-words" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                <p className="text-sm text-mute mt-0.5 break-words" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
                   Version {playbook.version}
                   {playbook.published_at ? ` · published ${formatRelativeTime(playbook.published_at)}` : ""}
                 </p>
@@ -475,14 +475,14 @@ export function SalesPlaybookSettings({
               {PLAYBOOK_STATUS_LABELS[playbook.status]}
             </span>
           </div>
-          <p className="text-xs text-[#9C9488] mt-4 leading-relaxed">
+          <p className="text-xs text-clay mt-4 leading-relaxed">
             Read-only. A published playbook cannot be edited here. New methods are published as a new version.
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl border p-4 sm:p-5 mb-6" style={{ borderColor: "#E7E5DE", backgroundColor: "#FAFAF7" }}>
+        <div className="rounded-2xl border p-4 sm:p-5 mb-6" style={{ borderColor: "#E4DCCB", backgroundColor: "#FAFAF7" }}>
           <h2 className="text-base font-semibold">No published playbook</h2>
-          <p className="text-sm text-[#6B6459] mt-1 leading-relaxed">
+          <p className="text-sm text-mute mt-1 leading-relaxed">
             There is no live sales playbook for this business yet. Draft or archived versions, if any, are listed below. The engine will not use a draft as the live method.
           </p>
         </div>
@@ -493,7 +493,7 @@ export function SalesPlaybookSettings({
           <div className="text-sm font-semibold mb-3">Playbook versions</div>
           <div className="flex flex-col gap-2">
             {versions.map((item) => (
-              <div key={item.version} className="flex items-center justify-between gap-3 flex-wrap px-3 py-2.5 rounded-xl border border-[#E7E5DE] text-sm min-w-0">
+              <div key={item.version} className="flex items-center justify-between gap-3 flex-wrap px-3 py-2.5 rounded-xl border border-line text-sm min-w-0">
                 <span style={{ fontFamily: "'IBM Plex Mono', monospace" }}>v{item.version}</span>
                 <span className="text-xs px-2 py-0.5 rounded-full" style={playbookTone(item.status)}>
                   {PLAYBOOK_STATUS_LABELS[item.status]}
@@ -505,13 +505,13 @@ export function SalesPlaybookSettings({
       )}
 
       <div className="text-sm font-semibold mb-2">Knowledge cards</div>
-      <p className="text-sm text-[#6B6459] mb-4 leading-relaxed">
+      <p className="text-sm text-mute mb-4 leading-relaxed">
         Only approved cards may be used in a customer reply. Candidates stay unused until you approve or reject them.
       </p>
 
-      <div className="rounded-2xl border p-4 sm:p-5 mb-6 min-w-0" style={{ borderColor: "#E7E5DE" }}>
+      <div className="rounded-2xl border p-4 sm:p-5 mb-6 min-w-0" style={{ borderColor: "#E4DCCB" }}>
         <h3 className="text-sm font-semibold">Import JSON</h3>
-        <p className="text-sm text-[#6B6459] mt-1 leading-relaxed">{KNOWLEDGE_IMPORT_CANDIDATE_NOTICE}</p>
+        <p className="text-sm text-mute mt-1 leading-relaxed">{KNOWLEDGE_IMPORT_CANDIDATE_NOTICE}</p>
         {importStatusIgnored && (
           <p className="text-xs text-[#8A561B] mt-2 leading-relaxed">
             A status field in the file was ignored. Imported cards are always Candidate.
@@ -520,8 +520,8 @@ export function SalesPlaybookSettings({
         <div className="flex flex-wrap items-center gap-2 mt-4">
           <label
             htmlFor="knowledge-import-file"
-            className={`text-xs font-medium px-3 py-2 rounded-lg border border-[#E7E5DE] flex items-center gap-1.5 cursor-pointer ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#B87333] has-[:focus-visible]:ring-offset-2`}
-          >
+            className={`text-xs font-medium px-3 py-2 rounded-lg border border-line flex items-center gap-1.5 cursor-pointer ${FOCUS_RING} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-coral has-[:focus-visible]:ring-offset-2`}
+        >
             <Upload size={12} aria-hidden="true" />
             Choose JSON file
             <input
@@ -535,7 +535,7 @@ export function SalesPlaybookSettings({
               }}
             />
           </label>
-          <span className="text-xs text-[#6B6459] break-all [overflow-wrap:anywhere] min-w-0">
+          <span className="text-xs text-mute break-all [overflow-wrap:anywhere] min-w-0">
             {importFileName ?? "No file selected"}
           </span>
         </div>
@@ -546,8 +546,8 @@ export function SalesPlaybookSettings({
             aria-busy={validatingImport}
             onClick={() => void validateImport()}
             className={`text-xs font-medium text-white px-3 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
-            style={{ backgroundColor: "#151515" }}
-          >
+            style={{ backgroundColor: "#0B0B0D" }}
+        >
             {validatingImport && <Loader2 size={12} className="animate-spin" aria-hidden="true" />}
             Check import
           </button>
@@ -556,8 +556,8 @@ export function SalesPlaybookSettings({
             disabled={!canCommitKnowledgeImport(importValidation) || importing || validatingImport}
             aria-busy={importing}
             onClick={() => void commitImport()}
-            className={`text-xs font-medium px-3 py-2 rounded-lg border border-[#E7E5DE] flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
-          >
+            className={`text-xs font-medium px-3 py-2 rounded-lg border border-line flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
+        >
             {importing && <Loader2 size={12} className="animate-spin" aria-hidden="true" />}
             Import as candidates
           </button>
@@ -568,7 +568,7 @@ export function SalesPlaybookSettings({
           aria-live="polite"
           aria-atomic="true"
           style={importNotice ? { backgroundColor: "#E9F5EF", color: "#1E7B52" } : undefined}
-        >
+      >
           {importNotice ?? ""}
         </div>
         <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -584,7 +584,7 @@ export function SalesPlaybookSettings({
               <li
                 key={`${check.knowledge_id}:${check.version}`}
                 className="text-xs leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]"
-              >
+            >
                 <span className="break-all" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
                   {check.knowledge_id}
                 </span>
@@ -606,11 +606,11 @@ export function SalesPlaybookSettings({
               htmlFor={inputId}
               className={FILTER_PILL}
               style={{
-                borderColor: selected ? "#151515" : "#E7E5DE",
-                backgroundColor: selected ? "#151515" : "#fff",
-                color: selected ? "#fff" : "#6B6459",
+                borderColor: selected ? "#FF5A36" : "#E4DCCB",
+                backgroundColor: selected ? "#FFE8E1" : "#fff",
+                color: selected ? "#FF5A36" : "#6B6459",
               }}
-            >
+          >
               <input
                 type="radio"
                 id={inputId}
@@ -637,7 +637,7 @@ export function SalesPlaybookSettings({
         aria-live="polite"
         aria-atomic="true"
         style={reviewNotice ? { backgroundColor: "#E9F5EF", color: "#1E7B52" } : undefined}
-      >
+    >
         {reviewNotice ?? ""}
       </div>
       <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -649,7 +649,7 @@ export function SalesPlaybookSettings({
       </div>
 
       {visibleCards.length === 0 ? (
-        <p className="text-sm text-[#9C9488] py-4">
+        <p className="text-sm text-clay py-4">
           {cards && cards.length > 0 ? "No cards match this filter." : "No knowledge cards yet."}
         </p>
       ) : (
@@ -666,26 +666,26 @@ export function SalesPlaybookSettings({
             const confirmation = pendingHere ? knowledgeReviewConfirmation(pendingHere) : null;
             const showReviewActions = canConfirmKnowledgeReview(card.status, detailsOpen) && !pendingHere;
             return (
-              <article key={key} className="p-4 rounded-xl border border-[#E7E5DE] min-w-0 overflow-hidden" aria-busy={Boolean(pendingHere && reviewing)}>
+              <article key={key} className="p-4 rounded-xl border border-line min-w-0 overflow-hidden" aria-busy={Boolean(pendingHere && reviewing)}>
                 <div className="flex items-start justify-between gap-3 flex-wrap min-w-0">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-semibold leading-relaxed break-words [overflow-wrap:anywhere]">
                       {card.principle}
                     </h3>
                     <p
-                      className="text-xs text-[#6B6459] mt-1 break-all [overflow-wrap:anywhere]"
+                      className="text-xs text-mute mt-1 break-all [overflow-wrap:anywhere]"
                       style={{ fontFamily: "'IBM Plex Mono', monospace" }}
-                    >
+                  >
                       {card.knowledge_id}
                     </p>
                     {(source.title || source.location) && (
-                      <p className="text-xs text-[#6B6459] mt-0.5 break-words [overflow-wrap:anywhere]">
+                      <p className="text-xs text-mute mt-0.5 break-words [overflow-wrap:anywhere]">
                         {[source.title, source.location].filter(Boolean).join(" · ")}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] text-[#9C9488]" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                    <span className="text-[11px] text-clay" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
                       v{card.version}
                     </span>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium" style={statusTone(card.status)}>
@@ -703,19 +703,19 @@ export function SalesPlaybookSettings({
                   aria-expanded={detailsOpen}
                   aria-controls={detailsId}
                   onClick={() => toggleDetails(card)}
-                  className={`mt-3 text-xs font-medium text-[#B87333] rounded-sm ${FOCUS_RING}`}
-                >
+                  className={`mt-3 text-xs font-medium text-coral rounded-sm ${FOCUS_RING}`}
+              >
                   {detailsOpen ? "Hide details" : "View details"}
                 </button>
 
                 {detailsOpen && (
                   <div id={detailsId} className="mt-4 min-w-0">
                     <div className="rounded-lg p-3 sm:p-4 min-w-0 overflow-hidden" style={{ backgroundColor: "#FAFAF7" }}>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9C9488] mb-3">Card</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-clay mb-3">Card</p>
                       <DetailFields fields={details.identity} />
                     </div>
                     <div className="rounded-lg p-3 sm:p-4 mt-3 min-w-0 overflow-hidden" style={{ backgroundColor: "#FAFAF7" }}>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9C9488] mb-3">Policy rules</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-clay mb-3">Policy rules</p>
                       <DetailFields fields={details.policy} />
                     </div>
                   </div>
@@ -734,8 +734,8 @@ export function SalesPlaybookSettings({
                       disabled={reviewing}
                       onClick={(event) => startReview(card, "approve", event.currentTarget)}
                       className={`text-xs font-medium text-white px-3 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
-                      style={{ backgroundColor: "#151515" }}
-                    >
+                      style={{ backgroundColor: "#0B0B0D" }}
+                  >
                       <Check size={12} />
                       Approve
                     </button>
@@ -749,8 +749,8 @@ export function SalesPlaybookSettings({
                       }}
                       disabled={reviewing}
                       onClick={(event) => startReview(card, "reject", event.currentTarget)}
-                      className={`text-xs font-medium px-3 py-2 rounded-lg border border-[#E7E5DE] flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
-                    >
+                      className={`text-xs font-medium px-3 py-2 rounded-lg border border-line flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
+                  >
                       <X size={12} />
                       Reject
                     </button>
@@ -770,7 +770,7 @@ export function SalesPlaybookSettings({
                         cancelReview();
                       }
                     }}
-                  >
+                >
                     <p id={confirmTitleId} className="text-sm break-words [overflow-wrap:anywhere]">
                       Confirm {confirmation.actionLabel} of knowledge card{" "}
                       <span className="break-all" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
@@ -789,8 +789,8 @@ export function SalesPlaybookSettings({
                         aria-busy={reviewing}
                         onClick={review}
                         className={`text-xs font-medium text-white px-3 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 ${FOCUS_RING}`}
-                        style={{ backgroundColor: "#151515" }}
-                      >
+                        style={{ backgroundColor: "#0B0B0D" }}
+                    >
                         {reviewing && <Loader2 size={12} className="animate-spin" aria-hidden="true" />}
                         {knowledgeReviewPendingLabel(confirmation.action, reviewing)}
                       </button>
@@ -798,8 +798,8 @@ export function SalesPlaybookSettings({
                         type="button"
                         disabled={reviewing}
                         onClick={cancelReview}
-                        className={`text-xs font-medium px-3 py-2 rounded-lg border border-[#E7E5DE] disabled:opacity-50 ${FOCUS_RING}`}
-                      >
+                        className={`text-xs font-medium px-3 py-2 rounded-lg border border-line disabled:opacity-50 ${FOCUS_RING}`}
+                    >
                         Cancel
                       </button>
                     </div>
@@ -807,7 +807,7 @@ export function SalesPlaybookSettings({
                 )}
 
                 {!canReviewKnowledgeCard(card.status) && card.reviewed_at && (
-                  <p className="text-[11px] text-[#9C9488] mt-3">
+                  <p className="text-[11px] text-clay mt-3">
                     Reviewed {formatRelativeTime(card.reviewed_at)}
                   </p>
                 )}
