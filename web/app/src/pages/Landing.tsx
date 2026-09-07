@@ -44,7 +44,7 @@ export default function Landing() {
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
         {desktopHero ? (
-          <div className="absolute inset-y-0 right-[-8%] w-[58%] pointer-events-none ev-orbit-frame ev-orbit-hero" aria-hidden="true">
+          <div className="absolute top-[46%] right-0 -translate-y-1/2 w-[min(46%,540px)] aspect-square pointer-events-none ev-orbit-frame ev-orbit-desktop" aria-hidden="true">
             <Suspense fallback={null}>
               <OrbitScene variant="hero" />
             </Suspense>
