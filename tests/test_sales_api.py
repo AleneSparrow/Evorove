@@ -1,6 +1,7 @@
 """Staff Sales API contracts, review transitions, and tenant isolation."""
 
-from datetime import datetime, timezone
+from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,8 @@ from fastapi.testclient import TestClient
 
 from src.api.app import create_app
 from src.config import Settings
+from src.domain.conversations import Conversation, ConversationStatus, MessageRole
+from src.domain.events import EventType
 from src.domain.models import Lead, ProcessCase
 from src.domain.sales import (
     CustomerEvidence,
@@ -17,6 +20,8 @@ from src.domain.sales import (
     SalesMove,
     SalesPlaybookStatus,
     SalesPlaybookVersion,
+    SalesShadowResult,
+    SalesShadowStatus,
     SalesStage,
     SalesTurn,
 )
@@ -174,3 +179,286 @@ def test_knowledge_status_filter_and_missing_resources(sales_api_environment) ->
         "/api/v1/businesses/biz-1/sales/cases/unknown", headers=headers
     )
     assert missing.status_code == 404
+
+
+def _import_payload(knowledge_id: str = "imported-1", version: int = 1) -> dict:
+    return {
+        "cards": [{
+            "knowledge_id": knowledge_id,
+            "version": version,
+            "source": {"title": "Verified source", "location": "chapter 2"},
+            "principle": "Ask one grounded question.",
+            "applicable_when": ["stage == DISCOVERY"],
+            "prohibited_when": ["customer already answered"],
+            "required_sequence": [],
+            "forbidden_actions": ["invent facts"],
+            "approved_examples": ["What outcome matters most?"],
+        }]
+    }
+
+
+def test_knowledge_import_dry_run_then_candidate_only_import(sales_api_environment) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "import-owner@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    validate_path = "/api/v1/businesses/biz-1/sales/knowledge-cards/import/validate"
+    import_path = "/api/v1/businesses/biz-1/sales/knowledge-cards/import"
+
+    dry_run = client.post(validate_path, headers=headers, json=_import_payload())
+    assert dry_run.status_code == 200
+    assert dry_run.json() == {
+        "valid": True,
+        "imported": False,
+        "cards_are_candidates": True,
+        "checks": [{"knowledge_id": "imported-1", "version": 1, "status": "READY"}],
+    }
+    with factory() as uow:
+        assert uow.sales_knowledge.get("biz-1", "imported-1", 1) is None
+
+    imported = client.post(import_path, headers=headers, json=_import_payload())
+    assert imported.status_code == 200
+    assert imported.json()["imported"] is True
+    with factory() as uow:
+        card = uow.sales_knowledge.get("biz-1", "imported-1", 1)
+    assert card is not None
+    assert card.status is SalesKnowledgeStatus.CANDIDATE
+
+    conflict = client.post(import_path, headers=headers, json=_import_payload())
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "sales_knowledge_version_conflict"
+
+
+def test_knowledge_import_rejects_status_and_duplicate_payload_versions(sales_api_environment) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "strict-import@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    path = "/api/v1/businesses/biz-1/sales/knowledge-cards/import/validate"
+    payload = _import_payload()
+    payload["cards"][0]["status"] = "APPROVED"
+    assert client.post(path, headers=headers, json=payload).status_code == 422
+
+    duplicate = _import_payload()
+    duplicate["cards"].append(dict(duplicate["cards"][0]))
+    assert client.post(path, headers=headers, json=duplicate).status_code == 422
+
+
+def _seed_shadow_result(factory, *, business_id: str) -> None:
+    with factory() as uow:
+        uow.conversations.add(Conversation(
+            f"conversation-{business_id}", business_id, "0" * 64, "web",
+            ConversationStatus.AI_ACTIVE, NOW, NOW, NOW, NOW + timedelta(days=1),
+            lead_id=f"lead-{business_id}", case_id=f"case-{business_id}",
+        ))
+        uow.sales_shadow_results.add(SalesShadowResult(
+            f"shadow-{business_id}", business_id, f"case-{business_id}",
+            f"conversation-{business_id}", f"message-{business_id}",
+            SalesMove.ASK_DISCOVERY_QUESTION, SalesShadowStatus.VALID,
+            "What outcome matters most right now?",
+            "Thanks — a team member can help with the next step.",
+            (), (), (), (), "2026-09-06.v2", "test-model", NOW,
+        ))
+        uow.commit()
+
+
+def test_shadow_results_are_listed_evaluated_once_and_tenant_scoped(sales_api_environment) -> None:
+    client, factory = sales_api_environment
+    owner_token, owner_id = _signup(client, "shadow-owner@example.com")
+    other_token, other_id = _signup(client, "shadow-other@example.com")
+    _seed(factory, business_id="biz-1", user_id=owner_id)
+    _seed(factory, business_id="biz-2", user_id=other_id)
+    _seed_shadow_result(factory, business_id="biz-1")
+    owner = {"Authorization": f"Bearer {owner_token}"}
+    other = {"Authorization": f"Bearer {other_token}"}
+    list_path = "/api/v1/businesses/biz-1/sales/cases/case-biz-1/shadow-results"
+    evaluate_path = f"{list_path}/shadow-biz-1/evaluate"
+
+    listed = client.get(list_path, headers=owner)
+    assert listed.status_code == 200
+    result = listed.json()["results"][0]
+    assert result["shadow_id"] == "shadow-biz-1"
+    assert result["conversation_id"] == "conversation-biz-1"
+    assert result["status"] == "VALID"
+    assert result["approved_move"] == "ASK_DISCOVERY_QUESTION"
+    assert result["proposed_response_text"] == "What outcome matters most right now?"
+    assert result["delivered_response_text"] == "Thanks — a team member can help with the next step."
+    assert result["evaluation"] is None
+    assert client.get(list_path, headers=other).status_code == 403
+
+    evaluated = client.post(evaluate_path, headers=owner, json={"evaluation": "APPROVED"})
+    assert evaluated.status_code == 200
+    body = evaluated.json()
+    assert body["status"] == "EVALUATED"
+    assert body["evaluation"] == "APPROVED"
+    assert body["evaluated_by"] == owner_id
+    assert body["evaluated_at"] is not None
+
+    conflict = client.post(evaluate_path, headers=owner, json={"evaluation": "WRONG_TONE"})
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "sales_shadow_already_evaluated"
+
+    missing = client.post(
+        f"{list_path}/unknown/evaluate", headers=owner, json={"evaluation": "UNSAFE"},
+    )
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "sales_shadow_not_found"
+    assert client.post(
+        "/api/v1/businesses/biz-1/sales/cases/unknown/shadow-results/shadow-biz-1/evaluate",
+        headers=owner, json={"evaluation": "UNSAFE"},
+    ).status_code == 404
+    assert client.post(evaluate_path, headers=other, json={"evaluation": "UNSAFE"}).status_code == 403
+    assert client.post(evaluate_path, json={"evaluation": "APPROVED"}).status_code == 401
+
+
+def test_owner_supplies_missing_business_fact_without_taking_over_the_customer(
+    sales_api_environment,
+) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "fact-owner@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    with factory() as uow:
+        profile = uow.sales_profiles.get("biz-1", "case-biz-1", for_update=True)
+        assert profile is not None
+        waiting = replace(
+            profile,
+            stage=SalesStage.FOLLOW_UP,
+            last_move=SalesMove.REQUEST_BUSINESS_FACT,
+            metadata={
+                "pending_business_fact_request": {
+                    "needed_for": "presentation",
+                    "reason_code": "approved_presentation_knowledge_missing",
+                    "requested_at": NOW.isoformat(),
+                    "resume_stage": SalesStage.NEEDS_CONFIRMED.value,
+                }
+            },
+        )
+        uow.sales_profiles.save(waiting, profile.version, now=NOW)
+        uow.commit()
+
+    pending = client.get("/api/v1/businesses/biz-1/sales/cases/case-biz-1", headers=headers)
+    assert pending.status_code == 200
+    body = pending.json()
+    assert body["next_approved_action"] == "REQUEST_BUSINESS_FACT"
+    assert body["requires_human"] is False
+    assert body["pending_business_fact_request"]["needed_for"] == "presentation"
+
+    blank = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "   "},
+    )
+    assert blank.status_code == 422
+
+    supplied = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "We handle AC diagnostics for homes in this area."},
+    )
+    assert supplied.status_code == 200
+    saved = supplied.json()
+    assert saved["pending_business_fact_request"] is None
+    assert saved["stage"] == "NEEDS_CONFIRMED"
+    assert saved["next_approved_action"] == "PRESENT_RELEVANT_VALUE"
+    assert saved["requires_human"] is False
+
+
+def _pending_presentation_profile(factory, *, business_id: str) -> None:
+    with factory() as uow:
+        profile = uow.sales_profiles.get(business_id, f"case-{business_id}", for_update=True)
+        assert profile is not None
+        waiting = replace(
+            profile,
+            stage=SalesStage.FOLLOW_UP,
+            last_move=SalesMove.REQUEST_BUSINESS_FACT,
+            metadata={
+                "pending_business_fact_request": {
+                    "needed_for": "presentation",
+                    "reason_code": "approved_presentation_knowledge_missing",
+                    "requested_at": NOW.isoformat(),
+                    "resume_stage": SalesStage.NEEDS_CONFIRMED.value,
+                }
+            },
+        )
+        uow.sales_profiles.save(waiting, profile.version, now=NOW)
+        uow.commit()
+
+
+def test_owner_fact_continues_the_open_customer_conversation(sales_api_environment) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "resume-owner@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    _pending_presentation_profile(factory, business_id="biz-1")
+    with factory() as uow:
+        uow.conversations.add(Conversation(
+            "conversation-biz-1", "biz-1", "0" * 64, "web",
+            ConversationStatus.AI_ACTIVE, NOW, NOW, NOW, NOW + timedelta(days=1),
+            lead_id="lead-biz-1", case_id="case-biz-1",
+        ))
+        uow.commit()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    supplied = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "We handle AC diagnostics for homes in this area."},
+    )
+    assert supplied.status_code == 200
+    saved = supplied.json()
+    assert saved["pending_business_fact_request"] is None
+    assert saved["last_move"] == "PRESENT_RELEVANT_VALUE"
+    assert saved["stage"] == "PRESENTATION"
+    assert saved["next_approved_action"] == "ASK_FOR_COMMITMENT"
+    assert saved["requires_human"] is False
+
+    with factory() as uow:
+        messages = uow.conversation_messages.list_for_conversation("biz-1", "conversation-biz-1")
+        outbound = [item for item in messages if item.role is MessageRole.ASSISTANT]
+        assert len(outbound) == 1
+        text = outbound[0].text.casefold()
+        assert "set up to handle" in text
+        assert "discount" not in text
+        assert "team member" not in text
+        case = uow.cases.get("biz-1", "case-biz-1")
+        assert case is not None
+        assert case.current_state is ProcessState.QUALIFYING
+        events = uow.events.list_for_case("biz-1", "case-biz-1")
+        assert any(event.event_type == EventType.BUSINESS_FACT_RESUMED for event in events)
+
+    again = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "Same-day visits are available in this area."},
+    )
+    assert again.status_code == 200
+    with factory() as uow:
+        messages = uow.conversation_messages.list_for_conversation("biz-1", "conversation-biz-1")
+        outbound = [item for item in messages if item.role is MessageRole.ASSISTANT]
+        assert len(outbound) == 1
+
+
+def test_owner_fact_does_not_resume_a_human_owned_conversation(sales_api_environment) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "takeover-owner@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    _pending_presentation_profile(factory, business_id="biz-1")
+    with factory() as uow:
+        uow.conversations.add(Conversation(
+            "conversation-biz-1", "biz-1", "0" * 64, "web",
+            ConversationStatus.HUMAN_TAKEOVER_ACTIVE, NOW, NOW, NOW, NOW + timedelta(days=1),
+            lead_id="lead-biz-1", case_id="case-biz-1",
+        ))
+        uow.commit()
+    headers = {"Authorization": f"Bearer {token}"}
+    supplied = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "We handle AC diagnostics for homes in this area."},
+    )
+    assert supplied.status_code == 200
+    assert supplied.json()["stage"] == "NEEDS_CONFIRMED"
+    with factory() as uow:
+        messages = uow.conversation_messages.list_for_conversation("biz-1", "conversation-biz-1")
+        assert messages == ()
+

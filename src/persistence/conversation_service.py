@@ -24,6 +24,7 @@ from src.domain.models import DecisionType, ProcessEvent, utc_now
 from src.domain.commercial import BookingStatus, PaymentStatus, PaymentType, QuoteStatus
 from src.domain.qualification import IncomingMessage, LeadIntakeResult, QualificationReasonCode
 from src.domain.states import ProcessState
+from src.domain.sales import SalesShadowJob, SalesShadowJobStatus
 from src.engine.customer_response_generator import CustomerResponseGenerator
 from src.engine.decision_router import DecisionRequest
 from src.engine.intent_extractor import IntentExtractor
@@ -42,6 +43,7 @@ from .errors import (
 )
 from .lead_intake import PersistentLeadIntakeService
 from .repositories import UnitOfWork, UnitOfWorkFactory
+from .sales_live_turn import SalesLiveTurnService
 
 
 _EMAIL = re.compile(r"\b[^@\s]+@[^@\s]+\.[^@\s]+\b")
@@ -185,6 +187,8 @@ class ConversationService:
         *,
         reassurance_response_generator: ReassuranceResponseGenerator | None = None,
         universal_reassurance_response_generator: UniversalReassuranceResponseGenerator | None = None,
+        sales_turn_analyzer: object | None = None,
+        sales_response_generator: object | None = None,
         token_ttl_hours: int = 720,
     ) -> None:
         if not 1 <= token_ttl_hours <= 8_760:
@@ -199,6 +203,12 @@ class ConversationService:
             universal_reassurance_response_generator=universal_reassurance_response_generator,
         )
         self.commercial = CommercialWorkflowService()
+        self.sales_live = SalesLiveTurnService(
+            analyzer=sales_turn_analyzer,  # type: ignore[arg-type]
+            response_generator=sales_response_generator,  # type: ignore[arg-type]
+            commercial=self.commercial,
+            process_engine=self.intake.process_engine,
+        )
         self.token_ttl = timedelta(hours=token_ttl_hours)
 
     def create(
@@ -439,8 +449,9 @@ class ConversationService:
             conversation.conversation_id,
             limit=self.CONTEXT_MESSAGE_LIMIT,
         )
+        source_message_id = str(uuid4())
         uow.conversation_messages.add(ConversationMessage(
-            message_id=str(uuid4()),
+            message_id=source_message_id,
             business_id=conversation.business_id,
             conversation_id=conversation.conversation_id,
             sequence_number=sequence,
@@ -456,6 +467,7 @@ class ConversationService:
         self._maybe_reactivate_lost_case(uow, conversation, occurred_at)
         self._maybe_requalify_needs_human_case(uow, conversation, occurred_at)
 
+        live_sales_reply = False
         if conversation.status is ConversationStatus.AI_ACTIVE:
             case = (
                 uow.cases.get(conversation.business_id, conversation.case_id)
@@ -491,27 +503,39 @@ class ConversationService:
                     sms_consent=sms_consent,
                 )
                 conversation.link_case(result.lead_id, result.case_id)
-                response_text, response_reason = self._response_for_result(result, dna)
                 current_state = result.current_state
                 conversation.metadata["unresolved_items"] = list(
                     self._unresolved_items(result, dna)
                 )
                 self._track_questions(conversation, result, dna, occurred_at)
-                if current_state is ProcessState.QUALIFIED:
+                if current_state in {ProcessState.LOST, ProcessState.NEEDS_HUMAN}:
+                    response_text, response_reason = self._response_for_result(result, dna)
+                else:
                     case = uow.cases.get(conversation.business_id, result.case_id)
                     if case is None:
-                        raise RuntimeError("qualified intake result references a missing case")
-                    commercial_response = self.commercial.initialize(
+                        raise RuntimeError("sales live turn references a missing case")
+                    live = self.sales_live.run(
                         uow,
+                        conversation,
                         case,
                         dna,
-                        conversation.metadata,
+                        result.qualification,
+                        source_message_id=source_message_id,
+                        customer_text=message_text,
+                        prior_messages=prior_messages,
                         occurred_at=occurred_at,
                     )
-                    response_text = commercial_response.message_text
-                    response_reason = commercial_response.reason
-                    current_state = case.current_state
-                    conversation.metadata["unresolved_items"] = []
+                    response_text = live.message_text
+                    response_reason = live.reason
+                    current_state = live.process_state
+                    live_sales_reply = True
+                    if current_state in {
+                        ProcessState.QUALIFIED,
+                        ProcessState.QUOTED,
+                        ProcessState.BOOKED,
+                        ProcessState.WON,
+                    }:
+                        conversation.metadata["unresolved_items"] = []
             conversation.metadata["current_state"] = current_state.value
             if current_state is ProcessState.NEEDS_HUMAN:
                 # Fresh escalation (this branch only runs while the
@@ -531,8 +555,9 @@ class ConversationService:
             current_state = self._stored_state(conversation)
 
         outbound_time = utc_now()
+        response_message_id = str(uuid4())
         uow.conversation_messages.add(ConversationMessage(
-            message_id=str(uuid4()),
+            message_id=response_message_id,
             business_id=conversation.business_id,
             conversation_id=conversation.conversation_id,
             sequence_number=sequence + 1,
@@ -550,6 +575,16 @@ class ConversationService:
                 "resulting_state": current_state.value if current_state else None,
             },
         ))
+        if conversation.case_id is None:
+            raise RuntimeError("conversation response cannot enqueue shadow work without a case")
+        if not live_sales_reply:
+            uow.sales_shadow_jobs.add(SalesShadowJob(
+                job_id=str(uuid4()), business_id=conversation.business_id,
+                case_id=conversation.case_id, conversation_id=conversation.conversation_id,
+                source_message_id=source_message_id, response_message_id=response_message_id,
+                status=SalesShadowJobStatus.PENDING, retry_count=0, max_retries=3,
+                next_attempt_at=outbound_time, created_at=outbound_time, updated_at=outbound_time,
+            ))
         conversation.touch(outbound_time)
         if save_conversation:
             uow.conversations.save(conversation, expected_version)
@@ -720,16 +755,20 @@ class ConversationService:
         internal_message_id = "chat:" + hashlib.sha256(
             f"{conversation.conversation_id}\x1f{external_message_id}".encode("utf-8")
         ).hexdigest()
-        return self.intake.receive_in_unit_of_work(uow, IncomingMessage(
-            business_id=conversation.business_id,
-            channel=self.CHANNEL,
-            external_message_id=internal_message_id,
-            raw_text=message_text,
-            timestamp=occurred_at,
-            case_id=conversation.case_id,
-            conversation_context=context,
-            sms_consent=sms_consent,
-        ))
+        return self.intake.receive_in_unit_of_work(
+            uow,
+            IncomingMessage(
+                business_id=conversation.business_id,
+                channel=self.CHANNEL,
+                external_message_id=internal_message_id,
+                raw_text=message_text,
+                timestamp=occurred_at,
+                case_id=conversation.case_id,
+                conversation_context=context,
+                sms_consent=sms_consent,
+            ),
+            sales_led_conversation=True,
+        )
 
     def _context(
         self,

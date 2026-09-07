@@ -128,6 +128,46 @@ def test_anthropic_settings_require_credentials_without_exposing_key_in_repr(
     assert marker not in repr(settings)
 
 
+def test_openai_base_url_is_optional_and_must_be_http(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://example.invalid/test")
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_MODEL", "test-model")
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+    assert Settings.from_environment().openai_base_url is None
+
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://api.groq.com/openai/v1/")
+    settings = Settings.from_environment()
+    assert settings.openai_base_url == "https://api.groq.com/openai/v1"
+    assert settings.openai_compatible_configured
+
+    monkeypatch.setenv("OPENAI_BASE_URL", "not-a-url")
+    with pytest.raises(RuntimeError, match="OPENAI_BASE_URL"):
+        Settings.from_environment()
+
+
+def test_anthropic_may_carry_an_openai_compatible_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://example.invalid/test")
+    monkeypatch.setenv("AI_PROVIDER", "anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "anthropic-test-key")
+    monkeypatch.setenv("ANTHROPIC_MODEL", "claude-test")
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-test")
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+    assert Settings.from_environment().openai_compatible_configured is False
+
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-test-key")
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:8000/v1")
+    settings = Settings.from_environment()
+    assert settings.ai_provider == "anthropic"
+    assert settings.openai_compatible_configured is True
+    assert settings.openai_base_url == "http://127.0.0.1:8000/v1"
+
+
 def test_production_rejects_wildcard_cors_and_parses_public_chat_limits(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

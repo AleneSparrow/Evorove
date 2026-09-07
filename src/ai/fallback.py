@@ -15,6 +15,12 @@ bad key, or a business whose ai_permissions forbid the capability -- the
 conversation continues deterministically instead of erroring out. The
 customer notices a plainer wording, never a failure.
 
+When Anthropic is primary and an OpenAI-compatible adapter is also
+configured, `FallbackStructuredProvider` tries that second cloud first.
+Deterministic wording remains the last resort, not the only alternative to
+Anthropic. That is independence from one vendor's credits; it is not a
+custom foundation model.
+
 Every fallback is logged as a distinct event so a degraded deployment is
 visible in operations rather than silent: an AI outage must not look like
 business as usual on the dashboards.
@@ -129,4 +135,54 @@ def wrap_universal_reassurance_response_generator(
 ) -> UniversalReassuranceResponseGenerator:
     return FallbackGenerator(
         primary, deterministic, "universal_reassurance_response_generator"
+    )
+
+
+class FallbackStructuredProvider:
+    """Try the primary structured provider, then a second OpenAI-compatible one.
+
+    Independence from one vendor's credits is not a custom foundation model.
+    When Anthropic is primary and an OpenAI-compatible adapter is configured,
+    a credit/auth/outage failure continues the same constrained request on
+    the second cloud instead of jumping straight to deterministic wording.
+    Deterministic fallback still wraps the assembled runtime after this.
+    """
+
+    def __init__(
+        self,
+        primary: Any,
+        secondary: Any,
+        *,
+        primary_name: str,
+        secondary_name: str,
+    ) -> None:
+        self.primary = primary
+        self.secondary = secondary
+        self.primary_name = primary_name
+        self.secondary_name = secondary_name
+
+    def generate(self, request: Any) -> Any:
+        try:
+            return self.primary.generate(request)
+        except AIProviderError as exc:
+            _log_secondary_fallback(self.primary_name, self.secondary_name, exc)
+            return self.secondary.generate(request)
+
+
+def _log_secondary_fallback(
+    primary_name: str, secondary_name: str, exc: AIProviderError
+) -> None:
+    _LOGGER.log(
+        logging.WARNING,
+        json.dumps(
+            {
+                "event": "ai_provider_fallback_to_secondary",
+                "from": primary_name,
+                "to": secondary_name,
+                "category": getattr(exc, "category", "provider_error"),
+                "transient": getattr(exc, "transient", False),
+            },
+            separators=(",", ":"),
+            default=str,
+        ),
     )

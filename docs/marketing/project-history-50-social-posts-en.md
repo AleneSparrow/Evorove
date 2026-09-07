@@ -1,8 +1,12 @@
-# Flywheel: The Building Story in 50 Posts
+# Evorove: The Building Story in 50 Posts
 
-This series is based on the Git history and documentation in the `AleneSparrow/ai-business-process-engine` repository from August 11 through September 4, 2026. Each number is a standalone post. The LinkedIn version tells the fuller story; the X/Twitter version delivers the same idea in a shorter format.
+This series is based on the Git history and documentation in the `AleneSparrow/Evorove` repository from August 11 through September 4, 2026. Each number is a standalone post. The public product name is **Evorove**. Older working names (Atelier, Flywheel) appear only in the historical rebrand chapters.
 
-Recommended cadence: publish in order, three to five times per week. Use no more than three hashtags on LinkedIn and none on X. Use real diagrams, product screens, tests, and anonymized conversation excerpts as visuals.
+The LinkedIn version is for the [EVOROVE company page](https://www.linkedin.com/company/evorove). The X/Twitter version is the same idea in a shorter format (brand `@evorove` when that account exists; until then the connected Typefully set is the founder account). Optional third text: Bluesky, same length as X.
+
+Recommended cadence: publish in order, three to five times per week. Use no more than three hashtags on LinkedIn and none on X. Pair each post with one visual from `docs/brand/social/` or a real diagram, product screen, test, or anonymized conversation excerpt.
+
+**Media block (every post).** `type` = diagram | screenshot | quote-card | banner. `file` = path under `docs/brand/social/` or a product capture. `alt` = one English sentence. Do not post until `image_url` in the Zapier queue is a public HTTPS URL. Default quote-cards: `evorove-post-inquiry-cycle.png`, `evorove-post-capture-vs-cycle.png`. Profile kit: `evorove-avatar.png`, `evorove-linkedin-banner.png`, `evorove-x-header.png`.
 
 ---
 
@@ -581,11 +585,11 @@ We replaced Atelier across code and copy, created the brand book and visual syst
 
 The new name captured the ambition more clearly: each inbound conversation starts a cycle, and the data and outcomes from each turn make the system more useful.
 
-The rebrand was not just a word swap. It forced us to clarify which cycle we were actually building.
+The rebrand was not just a word swap. It forced us to clarify which cycle we were actually building. The public name later became Evorove; the cycle did not change.
 
 **X / Twitter**
 
-Atelier became Flywheel. We updated code, copy, the brand book, and the interface. The new name described the product better: every inbound conversation starts a managed cycle—not a one-off chat.
+Atelier became Flywheel. We updated code, copy, the brand book, and the interface. The name described a managed cycle—not a one-off chat. The public brand now is Evorove. The cycle is the same.
 
 ---
 
@@ -617,7 +621,7 @@ Legal firms became our first GTM focus, but legal remained a market vertical—n
 
 We added outbound webhooks for QUALIFIED and WON transitions—for Clio, Zapier, Make, or an existing CRM.
 
-It was important not to confuse integration with identity. Flywheel did not become a system of record simply because it could send an event elsewhere.
+It was important not to confuse integration with identity. Evorove did not become a system of record simply because it could send an event elsewhere.
 
 Its job remained the same: move an inbound conversation through the cycle. The webhook informed an external system about a fact the process had already created.
 
@@ -625,7 +629,7 @@ Integrations should extend the product, not blur its core.
 
 **X / Twitter**
 
-We added QUALIFIED/WON webhooks for CRMs, Zapier, and Make. That is a door to another system—not a new center of the product. Flywheel runs the cycle; the external system receives the confirmed fact.
+We added QUALIFIED/WON webhooks for CRMs, Zapier, and Make. That is a door to another system—not a new center of the product. Evorove runs the cycle; the external system receives the confirmed fact.
 
 ---
 
@@ -693,7 +697,7 @@ Live AI exposed unexpected failures: invalid output shape, weak confidence calib
 
 **LinkedIn**
 
-On August 17, we formalized the product frame: Flywheel has two connected surfaces—the customer widget and the business workspace.
+On August 17, we formalized the product frame: Evorove has two connected surfaces—the customer widget and the business workspace.
 
 We audited both with a goal of making them “brilliantly simple.” We found no typing indicator, a broken Mark resolved action, settings organized around backend concepts, and overly technical Business DNA language in the UI.
 
@@ -979,7 +983,7 @@ The system collected names, phones, ZIP codes, and services—then often handed 
 
 So we changed the default. New services became bookable, and qualified leads received a real next step. Without a configured price, the system did not invent one; it offered a consultation, visit, or demo time.
 
-That is when Flywheel became a closed-cycle engine rather than an intake assistant.
+That is when Evorove became a closed-cycle engine rather than an intake assistant.
 
 **X / Twitter**
 
@@ -987,13 +991,13 @@ The main pivot: lots of conversations, almost no bookings. We were collecting da
 
 ---
 
-## 50. Flywheel Started Selling Itself
+## 50. Evorove Started Selling Itself
 
 *Milestone date: September 3–4, 2026*
 
 **LinkedIn**
 
-The final test was inevitable: if Flywheel can move inbound inquiries to a booking, it should be able to book its own demo.
+The final test was inevitable: if Evorove can move inbound inquiries to a booking, it should be able to book its own demo.
 
 We ran the complete cycle on the product itself, expanded the evaluation matrix across dozens of conversations and different businesses, and added a deterministic sales playbook: discovery, commitment, objection handling, trial close, and nurture.
 
@@ -1005,16 +1009,41 @@ The story came full circle: we started with a process engine and built a product
 
 **X / Twitter**
 
-The final test: Flywheel must sell Flywheel. A demo inquiry follows the same cycle to a calendar slot. AI phrases the message. The playbook chooses the move. People remain responsible for safety. The product proves itself through its own process.
+The final test: Evorove must sell Evorove. A demo inquiry follows the same cycle to a calendar slot. AI phrases the message. The playbook chooses the move. People remain responsible for safety. The product proves itself through its own process.
+
+---
+
+## 51. The Public Name Is Evorove
+
+*Milestone date: September 6, 2026*
+
+**Media**
+- type: banner + quote-card
+- file: `docs/brand/social/evorove-linkedin-banner.png` (cover) · `docs/brand/social/evorove-post-inquiry-cycle.png` (feed)
+- alt: Evorove wordmark and the line inquiry in, booked job out.
+
+**LinkedIn (EVOROVE company page)**
+
+The engine did not change. The public name did.
+
+We are publishing as Evorove: an engine that takes an inquiry a business already has and carries it to a booked job or an accepted quote. The model rewrites a script. The engine decides.
+
+Building in public. Unfinished. End-customer payment is not connected yet.
+
+#SaaS #B2B #AI
+
+**X / Twitter**
+
+The public name is Evorove. Same job: inbound inquiry → booked job. Not lead gen. Building in public. Unfinished.
 
 ---
 
 ## Editorial Rules for the Series
 
-- Do not describe Flywheel as a CRM, chatbot, or intake assistant. The product passed through that stage historically, but its current position is a closed-cycle engine for inbound inquiries.
+- Do not describe Evorove as a CRM, chatbot, or intake assistant. The product passed through that stage historically, but its current position is a closed-cycle engine for inbound inquiries.
 - Do not promise end-customer payment collection. The repository implements PaymentRequest preparation, while actual customer payment collection is explicitly deferred.
 - Do not claim a specific conversion lift without customer data.
-- Do not claim that the product generates cold leads. Flywheel Demand is a separate, subsequent product direction.
+- Do not claim that the product generates cold leads. Demand generation is a separate, subsequent product direction.
 - Do not say that AI makes business decisions. It understands language and phrases an approved move; the process, Business DNA, and safety rules control the outcome.
 - When discussing universality, refer to cross-vertical test coverage rather than promising that the product works for every business without configuration.
 - Before sharing screenshots, hide names, phone numbers, email addresses, conversation tokens, webhook URLs, and internal identifiers.

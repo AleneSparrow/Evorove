@@ -7,28 +7,86 @@ from fastapi import APIRouter, Depends, Query
 from src.domain.auth import StaffUser
 from src.domain.models import utc_now
 from src.domain.sales import SalesKnowledgeStatus, SalesTurnAnalysis
+from src.engine.sales_live_turn import combined_business_facts
+from src.engine.sales_owner_facts import (
+    append_owner_business_fact,
+    pending_business_fact_request,
+)
 from src.engine.sales_policy import SalesPolicyEngine
+from src.persistence.errors import StaleSalesProfileError
+from src.persistence.sales_knowledge_import_service import SalesKnowledgeImportService
+from src.persistence.sales_live_turn import SalesLiveTurnService
+from src.persistence.sms_service import SmsService
 
 from ..dependencies import (
+    ApplicationContainer,
     BusinessIdPath,
     UnitOfWorkFactory,
+    get_container,
+    get_sms_service,
     get_unit_of_work_factory,
     require_own_business,
 )
-from ..errors import ConflictError, ResourceNotFoundError
+from ..errors import ConflictError, RequestDataError, ResourceNotFoundError
 from ..schemas import (
+    PendingBusinessFactRequestSchema,
     SalesCaseContextResponse,
     SalesKnowledgeCardListResponse,
     SalesKnowledgeCardSchema,
+    SalesKnowledgeImportRequest,
+    SalesKnowledgeImportResponse,
     SalesObjectionRecordSchema,
     SalesPlaybookListResponse,
     SalesPlaybookSchema,
     SalesTurnListResponse,
     SalesTurnSchema,
+    SalesShadowEvaluationRequest,
+    SalesShadowResultListResponse,
+    SalesShadowResultSchema,
+    SupplyBusinessFactRequest,
 )
 
 
 router = APIRouter(prefix="/api/v1/businesses/{business_id}/sales", tags=["sales"])
+
+
+@router.post("/knowledge-cards/import/validate", response_model=SalesKnowledgeImportResponse)
+def validate_knowledge_import(
+    business_id: BusinessIdPath,
+    body: SalesKnowledgeImportRequest,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+) -> SalesKnowledgeImportResponse:
+    try:
+        result = SalesKnowledgeImportService(unit_of_work_factory).validate(
+            business_id, tuple(card.to_service_item() for card in body.cards)
+        )
+    except ValueError as exc:
+        raise RequestDataError(str(exc)) from exc
+    return SalesKnowledgeImportResponse.from_result(result)
+
+
+@router.post("/knowledge-cards/import", response_model=SalesKnowledgeImportResponse)
+def import_knowledge_candidates(
+    business_id: BusinessIdPath,
+    body: SalesKnowledgeImportRequest,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+) -> SalesKnowledgeImportResponse:
+    try:
+        result = SalesKnowledgeImportService(unit_of_work_factory).import_candidates(
+            business_id,
+            tuple(card.to_service_item() for card in body.cards),
+            now=utc_now(),
+        )
+    except ValueError as exc:
+        raise RequestDataError(str(exc)) from exc
+    if not result.valid:
+        raise ConflictError(
+            "sales_knowledge_version_conflict",
+            "One or more knowledge card versions already exist",
+        )
+    return SalesKnowledgeImportResponse.from_result(result)
 
 
 @router.get("/playbook", response_model=SalesPlaybookSchema)
@@ -141,8 +199,123 @@ def get_case_sales_context(
         if profile is None:
             raise ResourceNotFoundError("sales_profile_not_found", "Sales profile was not found")
         objections = unit_of_work.sales_objections.list_for_case(business_id, case_id)
-        approved_knowledge_available = bool(unit_of_work.sales_knowledge.list_approved(business_id))
+        return _sales_case_context(unit_of_work, business_id, case_id, profile, objections)
 
+
+@router.post("/cases/{case_id}/business-facts", response_model=SalesCaseContextResponse)
+def supply_case_business_fact(
+    business_id: BusinessIdPath,
+    case_id: str,
+    body: SupplyBusinessFactRequest,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+    sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> SalesCaseContextResponse:
+    """Record a fact from the owner so the engine can keep talking to the customer."""
+
+    with unit_of_work_factory() as unit_of_work:
+        case = unit_of_work.cases.get(business_id, case_id)
+        if case is None:
+            raise ResourceNotFoundError("case_not_found", "Case was not found")
+        profile = unit_of_work.sales_profiles.get(business_id, case_id, for_update=True)
+        if profile is None:
+            raise ResourceNotFoundError("sales_profile_not_found", "Sales profile was not found")
+        pending = pending_business_fact_request(profile)
+        try:
+            now = utc_now()
+            updated = append_owner_business_fact(profile, body.text, now=now)
+            saved = unit_of_work.sales_profiles.save(updated, profile.version, now=now)
+            if pending is not None:
+                dna_version = unit_of_work.business_dna.get_active(business_id)
+                dna = {} if dna_version is None else dna_version.configuration
+                SalesLiveTurnService(
+                    response_generator=container.sales_response_generator,
+                ).resume_after_owner_fact(
+                    unit_of_work, case, dna, occurred_at=now, sms_service=sms_service,
+                )
+                saved = unit_of_work.sales_profiles.get(business_id, case_id) or saved
+        except ValueError as exc:
+            raise RequestDataError(str(exc)) from exc
+        except StaleSalesProfileError as exc:
+            raise ConflictError(
+                "sales_profile_version_conflict",
+                "Sales profile was updated by another request",
+            ) from exc
+        objections = unit_of_work.sales_objections.list_for_case(business_id, case_id)
+        response = _sales_case_context(unit_of_work, business_id, case_id, saved, objections)
+        unit_of_work.commit()
+    return response
+
+
+@router.get("/cases/{case_id}/turns", response_model=SalesTurnListResponse)
+def list_case_sales_turns(
+    business_id: BusinessIdPath,
+    case_id: str,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+) -> SalesTurnListResponse:
+    with unit_of_work_factory() as unit_of_work:
+        if unit_of_work.cases.get(business_id, case_id) is None:
+            raise ResourceNotFoundError("case_not_found", "Case was not found")
+        turns = unit_of_work.sales_turns.list_for_case(business_id, case_id)
+    return SalesTurnListResponse(turns=tuple(SalesTurnSchema.from_domain(value) for value in turns))
+
+
+@router.get("/cases/{case_id}/shadow-results", response_model=SalesShadowResultListResponse)
+def list_case_shadow_results(
+    business_id: BusinessIdPath,
+    case_id: str,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+) -> SalesShadowResultListResponse:
+    with unit_of_work_factory() as unit_of_work:
+        if unit_of_work.cases.get(business_id, case_id) is None:
+            raise ResourceNotFoundError("case_not_found", "Case was not found")
+        values = unit_of_work.sales_shadow_results.list_for_case(business_id, case_id)
+    return SalesShadowResultListResponse(
+        results=tuple(SalesShadowResultSchema.from_domain(value) for value in values)
+    )
+
+
+@router.post(
+    "/cases/{case_id}/shadow-results/{shadow_id}/evaluate",
+    response_model=SalesShadowResultSchema,
+)
+def evaluate_shadow_result(
+    business_id: BusinessIdPath,
+    case_id: str,
+    shadow_id: str,
+    body: SalesShadowEvaluationRequest,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+) -> SalesShadowResultSchema:
+    with unit_of_work_factory() as unit_of_work:
+        existing = unit_of_work.sales_shadow_results.get(business_id, case_id, shadow_id)
+        if existing is None:
+            raise ResourceNotFoundError("sales_shadow_not_found", "Sales shadow result was not found")
+        updated = unit_of_work.sales_shadow_results.evaluate(
+            business_id, case_id, shadow_id, evaluation=body.evaluation,
+            evaluated_by=user.user_id, evaluated_at=utc_now(),
+        )
+        if updated is None:
+            raise ConflictError(
+                "sales_shadow_already_evaluated", "Sales shadow result can only be evaluated once"
+            )
+        unit_of_work.commit()
+    return SalesShadowResultSchema.from_domain(updated)
+
+
+def _sales_case_context(
+    unit_of_work,
+    business_id: str,
+    case_id: str,
+    profile,
+    objections,
+) -> SalesCaseContextResponse:
+    dna_version = unit_of_work.business_dna.get_active(business_id)
+    dna = {} if dna_version is None else dna_version.configuration
+    approved_knowledge_available = bool(unit_of_work.sales_knowledge.list_approved(business_id))
     preview = SalesPolicyEngine().decide(
         profile,
         SalesTurnAnalysis(
@@ -153,8 +326,10 @@ def get_case_sales_context(
             requested_callback_at=profile.preferred_contact_at,
         ),
         approved_knowledge_available=approved_knowledge_available,
+        business_facts_available=bool(combined_business_facts(dna, None, profile)),
         booking_available=False,
     )
+    pending = pending_business_fact_request(profile)
     return SalesCaseContextResponse(
         case_id=case_id,
         stage=profile.stage,
@@ -172,18 +347,12 @@ def get_case_sales_context(
         human_review_reason=preview.reason_code if preview.requires_human else None,
         version=profile.version,
         objections=tuple(SalesObjectionRecordSchema.from_domain(value) for value in objections),
+        pending_business_fact_request=(
+            None if pending is None
+            else PendingBusinessFactRequestSchema(
+                needed_for=pending["needed_for"],
+                reason_code=pending["reason_code"],
+                requested_at=pending["requested_at"],
+            )
+        ),
     )
-
-
-@router.get("/cases/{case_id}/turns", response_model=SalesTurnListResponse)
-def list_case_sales_turns(
-    business_id: BusinessIdPath,
-    case_id: str,
-    user: Annotated[StaffUser, Depends(require_own_business)],
-    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
-) -> SalesTurnListResponse:
-    with unit_of_work_factory() as unit_of_work:
-        if unit_of_work.cases.get(business_id, case_id) is None:
-            raise ResourceNotFoundError("case_not_found", "Case was not found")
-        turns = unit_of_work.sales_turns.list_for_case(business_id, case_id)
-    return SalesTurnListResponse(turns=tuple(SalesTurnSchema.from_domain(value) for value in turns))

@@ -42,7 +42,13 @@ from typing import Mapping, Protocol
 from src.domain.events import EventType
 from src.domain.models import ProcessCase
 from src.domain.qualification import CustomerResponse, MissingInformationResult
+from src.domain.sales import FollowUpReason
 from src.domain.states import ProcessState
+
+SALES_OWNED_FOLLOW_UP_REASONS = frozenset({
+    FollowUpReason.CALLBACK_REQUESTED.value,
+    FollowUpReason.OBJECTION_DEFERRED.value,
+})
 
 STALLED_STATES = frozenset({ProcessState.NEW_LEAD, ProcessState.CONTACTED, ProcessState.QUALIFYING})
 
@@ -67,6 +73,8 @@ def decide_follow_up(
         return FollowUpDecision(False, reason="no_phone")
     if case.current_state not in STALLED_STATES:
         return FollowUpDecision(False, reason="case_not_in_stalled_state")
+    if case.metadata.get("sales_follow_up_reason") in SALES_OWNED_FOLLOW_UP_REASONS:
+        return FollowUpDecision(False, reason="sales_contextual_follow_up_owns_case")
 
     config = _follow_up_config(business_dna)
     if config is None:

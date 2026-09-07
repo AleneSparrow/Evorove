@@ -48,6 +48,6 @@ The first policy implementation is intentionally small. It establishes precedenc
 - Database table layout and retention policy.
 - Tenant-specific playbook overrides.
 - Knowledge-card retrieval and ranking implementation.
-- Voice calling; the MVP callback is a scheduled staff task.
+- Voice calling remains out of MVP. A customer request to be contacted later is the engine's own in-channel follow-up, not a staff callback task.
 - Fine-tuning, which is explicitly outside the MVP.
 

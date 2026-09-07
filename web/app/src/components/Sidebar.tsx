@@ -221,15 +221,22 @@ function MobileNav({
                 </div>
               </nav>
             </div>
-            <button
-              onClick={() => {
-                setOpen(false);
-                onLogout();
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-mute"
-          >
-              <LogOut size={16} strokeWidth={2} /> Sign out
-            </button>
+            <div>
+              <div className="px-3 mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-clay">
+                <NavLink to="/privacy" onClick={() => setOpen(false)} className="hover:text-ink">Privacy</NavLink>
+                <NavLink to="/terms" onClick={() => setOpen(false)} className="hover:text-ink">Terms</NavLink>
+                <NavLink to="/dpa" onClick={() => setOpen(false)} className="hover:text-ink">DPA</NavLink>
+              </div>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  onLogout();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-mute"
+            >
+                <LogOut size={16} strokeWidth={2} /> Sign out
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -334,6 +341,11 @@ export function Sidebar() {
           </button>
           <div className="px-2 mt-3 text-[11px] text-clay leading-relaxed">
             Every step your engine takes — logged, reversible, never silent.
+          </div>
+          <div className="px-2 mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-clay">
+            <NavLink to="/privacy" className="hover:text-ink">Privacy</NavLink>
+            <NavLink to="/terms" className="hover:text-ink">Terms</NavLink>
+            <NavLink to="/dpa" className="hover:text-ink">DPA</NavLink>
           </div>
         </div>
       </aside>
