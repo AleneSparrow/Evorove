@@ -479,7 +479,7 @@ export function ConversationSalesPanel({
                     .then((sales) => {
                       setContext(sales);
                       setFactText("");
-                      setFactNotice("Fact saved. The engine will use it on the next customer message.");
+                      setFactNotice("Fact saved. The engine is continuing this conversation.");
                     })
                     .catch((err: unknown) => {
                       setFactError(describeError(err));

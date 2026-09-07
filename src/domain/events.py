@@ -45,3 +45,6 @@ class EventType(StrEnum):
     # Engine asked the business owner for a missing fact. The customer
     # conversation stays with the engine. Not NEEDS_HUMAN and not a CRM task.
     BUSINESS_FACT_REQUESTED = "BUSINESS_FACT_REQUESTED"
+    # Owner supplied the missing fact; the engine continued in-channel.
+    # Does not change ProcessState and is not a human takeover.
+    BUSINESS_FACT_RESUMED = "BUSINESS_FACT_RESUMED"

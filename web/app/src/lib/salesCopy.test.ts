@@ -564,7 +564,7 @@ test("unknown conversation returns null", () => {
 test("reasonCodeLabel uses a known phrase, not a raw guarantee", () => {
   assert.equal(
     reasonCodeLabel("objection_answer_grounding_missing"),
-    "There is no business fact or approved knowledge to answer this objection.",
+    "Ask the business for the missing fact so we can answer this. The customer stays with the engine.",
   );
   assert.equal(reasonCodeLabel("custom_code"), "custom code");
 });

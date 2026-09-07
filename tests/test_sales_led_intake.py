@@ -185,8 +185,9 @@ def _strip_claimable_facts(configuration: dict) -> dict:
     services = []
     for service in configuration.get("services") or []:
         item = dict(service)
-        item["name"] = ""
-        item["description"] = ""
+        if item.get("id") == "diagnostic-visit":
+            item["name"] = ""
+            item["description"] = ""
         services.append(item)
     return {**configuration, "business": business, "services": services}
 

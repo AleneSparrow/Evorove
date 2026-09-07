@@ -15,10 +15,15 @@ from src.engine.sales_owner_facts import (
 from src.engine.sales_policy import SalesPolicyEngine
 from src.persistence.errors import StaleSalesProfileError
 from src.persistence.sales_knowledge_import_service import SalesKnowledgeImportService
+from src.persistence.sales_live_turn import SalesLiveTurnService
+from src.persistence.sms_service import SmsService
 
 from ..dependencies import (
+    ApplicationContainer,
     BusinessIdPath,
     UnitOfWorkFactory,
+    get_container,
+    get_sms_service,
     get_unit_of_work_factory,
     require_own_business,
 )
@@ -204,6 +209,8 @@ def supply_case_business_fact(
     body: SupplyBusinessFactRequest,
     user: Annotated[StaffUser, Depends(require_own_business)],
     unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+    sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> SalesCaseContextResponse:
     """Record a fact from the owner so the engine can keep talking to the customer."""
 
@@ -214,10 +221,20 @@ def supply_case_business_fact(
         profile = unit_of_work.sales_profiles.get(business_id, case_id, for_update=True)
         if profile is None:
             raise ResourceNotFoundError("sales_profile_not_found", "Sales profile was not found")
+        pending = pending_business_fact_request(profile)
         try:
             now = utc_now()
             updated = append_owner_business_fact(profile, body.text, now=now)
             saved = unit_of_work.sales_profiles.save(updated, profile.version, now=now)
+            if pending is not None:
+                dna_version = unit_of_work.business_dna.get_active(business_id)
+                dna = {} if dna_version is None else dna_version.configuration
+                SalesLiveTurnService(
+                    response_generator=container.sales_response_generator,
+                ).resume_after_owner_fact(
+                    unit_of_work, case, dna, occurred_at=now, sms_service=sms_service,
+                )
+                saved = unit_of_work.sales_profiles.get(business_id, case_id) or saved
         except ValueError as exc:
             raise RequestDataError(str(exc)) from exc
         except StaleSalesProfileError as exc:

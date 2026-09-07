@@ -54,6 +54,9 @@ from src.engine.sales_response_validator import (
 from src.persistence.errors import StaleCaseError
 from src.persistence.repositories import UnitOfWork
 
+from .commercial_service import CommercialWorkflowService
+
+
 class _SmsSender(Protocol):
     def send_outbound(self, business_id: str, *, to_number: str, body: str) -> str | None: ...
 
@@ -233,6 +236,115 @@ class SalesLiveTurnService:
             )),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
+        )
+        return SalesLiveTurnResult(
+            message_text, decision.reason_code, case.current_state, decision.move, False,
+        )
+
+    def resume_after_owner_fact(
+        self,
+        uow: UnitOfWork,
+        case: ProcessCase,
+        dna: Mapping[str, Any],
+        *,
+        occurred_at: datetime,
+        sms_service: _SmsSender | None = None,
+    ) -> SalesLiveTurnResult | None:
+        """Continue in the same channel after the owner supplies a missing fact.
+
+        Does not wait for the next inbound customer message. Does not take
+        over the conversation, change ProcessState, or invent a customer turn.
+        """
+
+        conversation = _active_conversation(uow, case.business_id, case.case_id)
+        if conversation is None:
+            return None
+        profile = uow.sales_profiles.get(case.business_id, case.case_id, for_update=True)
+        if profile is None:
+            return None
+        owner_facts = owner_listed_facts(profile)
+        if not owner_facts:
+            return None
+        owner_fact_id, _owner_fact_text = owner_facts[-1]
+        source_message_id = f"owner-fact-resume:{owner_fact_id}"
+        existing = uow.events.list_for_case(case.business_id, case.case_id)
+        already_recorded = any(
+            event.event_type == EventType.BUSINESS_FACT_RESUMED
+            and event.payload.get("source_message_id") == source_message_id
+            for event in existing
+        )
+        if already_recorded:
+            return None
+
+        analysis = SalesTurnAnalysis(
+            observed_stage=profile.stage,
+            confidence=1.0,
+            objections=(() if profile.active_objection is None else (profile.active_objection,)),
+            commitment_level=profile.commitment_level,
+            requested_callback_at=profile.preferred_contact_at,
+            metadata={"owner_fact_resume": True, "business_fact_id": owner_fact_id},
+        )
+        knowledge = uow.sales_knowledge.list_approved(case.business_id)
+        active_objection = analysis.objections[0] if analysis.objections else profile.active_objection
+        objection_knowledge = matching_knowledge(knowledge, active_objection)
+        qualification = _qualification_for_resume(case)
+        decision = self._policy.decide(
+            profile,
+            analysis,
+            approved_knowledge_available=bool(objection_knowledge),
+            business_facts_available=bool(
+                combined_business_facts(dna, qualification.service_id, profile)
+            ),
+            booking_available=False,
+            operational_intake_incomplete=False,
+        )
+        if decision.move not in _OWNER_RESUME_MOVES or decision.requires_human:
+            return None
+
+        handoff_text = self._handoff_text(dna)
+        turn_knowledge = objection_knowledge if decision.knowledge_required else knowledge
+        message_text, validation = self._phrase_and_validate(
+            decision, analysis, turn_knowledge, "", conversation, case,
+            handoff_text, profile, qualification, dna,
+        )
+        persisted = replace(
+            profile,
+            stage=decision.target_stage,
+            last_move=decision.move,
+            active_objection=mark_addressed(profile.active_objection, decision.move),
+        )
+        self._persist_turn(
+            uow, conversation, case, profile, persisted, analysis, decision,
+            knowledge_ids=tuple(card.knowledge_id for card in turn_knowledge),
+            business_fact_ids=tuple(
+                fact_id for fact_id, _text in combined_business_facts(
+                    dna, qualification.service_id, persisted,
+                )
+            ),
+            validation=validation, occurred_at=occurred_at,
+            source_message_id=source_message_id,
+        )
+        uow.events.add(
+            case.business_id,
+            case.case_id,
+            ProcessEvent(
+                EventType.BUSINESS_FACT_RESUMED,
+                occurred_at=occurred_at,
+                source="sales_live_turn",
+                payload={
+                    "reason": decision.reason_code,
+                    "move": decision.move.value,
+                    "source_message_id": source_message_id,
+                    "conversation_id": conversation.conversation_id,
+                    "business_fact_id": owner_fact_id,
+                },
+            ),
+        )
+        _deliver_resume(
+            uow, conversation, case, message_text,
+            source_message_id=source_message_id,
+            occurred_at=occurred_at,
+            sms_service=sms_service,
         )
         return SalesLiveTurnResult(
             message_text, decision.reason_code, case.current_state, decision.move, False,
@@ -586,3 +698,79 @@ class SalesLiveTurnService:
         if isinstance(message, str) and message.strip():
             return message.strip()
         return "A team member will follow up with you."
+
+
+def _active_conversation(uow: UnitOfWork, business_id: str, case_id: str) -> Conversation | None:
+    candidates = [
+        conversation for conversation in uow.conversations.list_for_case(business_id, case_id)
+        if conversation.status is ConversationStatus.AI_ACTIVE
+        and conversation.status not in _HUMAN_OWNED
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item.last_activity_at)
+
+
+def _qualification_for_resume(case: ProcessCase) -> QualificationResult:
+    service_id = case.lead.attributes.get("service_requested")
+    if not isinstance(service_id, str) or not service_id.strip():
+        service_id = None
+    return QualificationResult(
+        qualified=True,
+        reasons=("Owner supplied a missing business fact",),
+        reason_codes=(QualificationReasonCode.QUALIFIED,),
+        missing_fields=(),
+        unanswered_questions=(),
+        confidence=1.0,
+        recommended_next_state=ProcessState.QUALIFIED,
+        requires_human=False,
+        booking_allowed=False,
+        service_id=service_id,
+    )
+
+
+def _deliver_resume(
+    uow: UnitOfWork,
+    conversation: Conversation,
+    case: ProcessCase,
+    message_text: str,
+    *,
+    source_message_id: str,
+    occurred_at: datetime,
+    sms_service: _SmsSender | None,
+) -> bool:
+    delivered = conversation.channel.casefold() != "sms"
+    if conversation.channel.casefold() == "sms" and sms_service is not None:
+        phone = case.lead.phone
+        if phone and case.lead.sms_consent:
+            delivered = sms_service.send_outbound(
+                conversation.business_id, to_number=phone, body=message_text,
+            ) is not None
+        else:
+            delivered = False
+    fingerprint = hashlib.sha256(message_text.encode("utf-8")).hexdigest()
+    sequence = uow.conversation_messages.next_sequence(
+        conversation.business_id, conversation.conversation_id,
+    )
+    uow.conversation_messages.add(
+        ConversationMessage(
+            message_id=str(uuid4()),
+            business_id=conversation.business_id,
+            conversation_id=conversation.conversation_id,
+            sequence_number=sequence,
+            direction=MessageDirection.OUTBOUND,
+            role=MessageRole.ASSISTANT,
+            text=message_text,
+            created_at=occurred_at,
+            external_message_id=source_message_id,
+            content_fingerprint=fingerprint,
+            metadata={"owner_fact_resume": True, "delivered": delivered},
+        )
+    )
+    try:
+        expected = conversation.version
+        conversation.touch(occurred_at)
+        uow.conversations.save(conversation, expected)
+    except StaleCaseError:
+        return delivered
+    return delivered
