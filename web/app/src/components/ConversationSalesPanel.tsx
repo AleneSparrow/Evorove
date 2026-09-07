@@ -272,6 +272,10 @@ export function ConversationSalesPanel({
   const [evaluationNotice, setEvaluationNotice] = useState<string | null>(null);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
   const [submittedIds, setSubmittedIds] = useState<Record<string, true>>({});
+  const [factText, setFactText] = useState("");
+  const [factSubmitting, setFactSubmitting] = useState(false);
+  const [factError, setFactError] = useState<string | null>(null);
+  const [factNotice, setFactNotice] = useState<string | null>(null);
 
   const refreshShadowResults = async () => {
     if (!caseId) return;
@@ -292,6 +296,9 @@ export function ConversationSalesPanel({
     setEvaluationError(null);
     setEvaluationChoice({});
     setSubmittedIds({});
+    setFactText("");
+    setFactError(null);
+    setFactNotice(null);
     if (!caseId) {
       setEmpty(true);
       setLoading(false);
@@ -443,6 +450,78 @@ export function ConversationSalesPanel({
                   })
                 : "Requested — we'll follow up at this time"}
             </Field>
+          )}
+          {context.pending_business_fact_request && (
+            <div
+              className="px-3 py-2 rounded-lg min-w-0"
+              style={{ backgroundColor: "#FFF8EE", color: "#8A561B" }}
+            >
+              <div className="text-[11px] font-semibold">Fact needed from you</div>
+              <p className="text-xs mt-0.5 break-words [overflow-wrap:anywhere]">
+                {reasonCodeLabel(context.pending_business_fact_request.reason_code)} The customer
+                stays in this conversation — this is not a handoff.
+              </p>
+              <form
+                className="mt-2 flex flex-col gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (!caseId || factSubmitting) return;
+                  const text = factText.trim();
+                  if (!text) {
+                    setFactError("Enter the missing fact.");
+                    return;
+                  }
+                  setFactSubmitting(true);
+                  setFactError(null);
+                  setFactNotice(null);
+                  api
+                    .supplyCaseBusinessFact(token, businessId, caseId, text)
+                    .then((sales) => {
+                      setContext(sales);
+                      setFactText("");
+                      setFactNotice("Fact saved. The engine will use it on the next customer message.");
+                    })
+                    .catch((err: unknown) => {
+                      setFactError(describeError(err));
+                    })
+                    .finally(() => {
+                      setFactSubmitting(false);
+                    });
+                }}
+              >
+                <label className="text-[11px] font-medium" htmlFor="owner-business-fact">
+                  Fact the engine may use
+                </label>
+                <textarea
+                  id="owner-business-fact"
+                  value={factText}
+                  onChange={(event) => setFactText(event.target.value)}
+                  maxLength={500}
+                  rows={3}
+                  className={`w-full text-xs rounded-lg border border-line px-2 py-1.5 bg-white text-ink ${FOCUS_RING}`}
+                  placeholder="A real business fact. Not a discount, guarantee, or invented price."
+                />
+                {factError && (
+                  <p className="text-xs" role="alert" style={{ color: "#8A3225" }}>
+                    {factError}
+                  </p>
+                )}
+                {factNotice && (
+                  <p className="text-xs" role="status">
+                    {factNotice}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={factSubmitting}
+                  aria-busy={factSubmitting}
+                  className={`text-xs font-medium text-white px-3 py-2 rounded-lg disabled:opacity-50 ${FOCUS_RING}`}
+                  style={{ backgroundColor: "#0B0B0D" }}
+                >
+                  {factSubmitting ? "Saving…" : "Save fact for the engine"}
+                </button>
+              </form>
+            </div>
           )}
           <div className="min-w-0">
             <div className="text-[11px] font-medium text-clay mb-0.5">Next approved action</div>

@@ -95,7 +95,9 @@ def test_diagnosed_objection_is_answered_from_business_facts_without_cards() -> 
     with_knowledge = SalesPolicyEngine().decide(
         _profile(), analysis, approved_knowledge_available=True,
     )
-    assert without_grounding.move is SalesMove.HANDOFF_TO_HUMAN
+    assert without_grounding.move is SalesMove.REQUEST_BUSINESS_FACT
+    assert without_grounding.target_stage is SalesStage.FOLLOW_UP
+    assert not without_grounding.requires_human
     assert with_facts.move is SalesMove.ANSWER_OBJECTION
     assert not with_facts.knowledge_required
     assert with_knowledge.move is SalesMove.ANSWER_OBJECTION
@@ -268,4 +270,40 @@ def test_deferred_objection_still_books_on_explicit_ready() -> None:
     )
     assert decision.move is SalesMove.OFFER_BOOKING_SLOTS
     assert decision.target_stage is SalesStage.BOOKING
+
+
+def test_confirmed_need_without_facts_asks_the_business_not_a_person() -> None:
+    decision = SalesPolicyEngine().decide(
+        _profile(
+            stage=SalesStage.NEEDS_CONFIRMED,
+            current_problem="AC stopped cooling",
+            desired_outcome="it working this week",
+        ),
+        _analysis(),
+    )
+    assert decision.move is SalesMove.REQUEST_BUSINESS_FACT
+    assert decision.target_stage is SalesStage.FOLLOW_UP
+    assert not decision.requires_human
+
+
+def test_pending_owner_fact_keeps_requesting_until_the_fact_arrives() -> None:
+    decision = SalesPolicyEngine().decide(
+        _profile(
+            stage=SalesStage.FOLLOW_UP,
+            current_problem="AC stopped cooling",
+            desired_outcome="it working this week",
+            last_move=SalesMove.REQUEST_BUSINESS_FACT,
+            metadata={
+                "pending_business_fact_request": {
+                    "needed_for": "presentation",
+                    "reason_code": "approved_presentation_knowledge_missing",
+                    "requested_at": "2026-09-07T12:00:00+00:00",
+                    "resume_stage": "NEEDS_CONFIRMED",
+                }
+            },
+        ),
+        _analysis(observed_stage=SalesStage.FOLLOW_UP),
+    )
+    assert decision.move is SalesMove.REQUEST_BUSINESS_FACT
+    assert not decision.requires_human
 

@@ -349,6 +349,7 @@ export type SalesMove =
   | "SCHEDULE_CALLBACK"
   | "SEND_CONTEXTUAL_FOLLOW_UP"
   | "NURTURE_WITHOUT_PRESSURE"
+  | "REQUEST_BUSINESS_FACT"
   | "HANDOFF_TO_HUMAN"
   | "END_CONTACT";
 
@@ -401,6 +402,12 @@ export interface SalesObjectionRecord {
   version: number;
 }
 
+export interface PendingBusinessFactRequest {
+  needed_for: string;
+  reason_code: string;
+  requested_at: string | null;
+}
+
 export interface SalesCaseContext {
   case_id: string;
   stage: SalesStage;
@@ -418,6 +425,7 @@ export interface SalesCaseContext {
   human_review_reason: string | null;
   version: number;
   objections: SalesObjectionRecord[];
+  pending_business_fact_request: PendingBusinessFactRequest | null;
 }
 
 export interface SalesEvidence {
@@ -889,6 +897,13 @@ export const api = {
     request<SalesCaseContext>(
       `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}`,
       { method: "GET" },
+      token,
+    ),
+
+  supplyCaseBusinessFact: (token: string, businessId: string, caseId: string, text: string) =>
+    request<SalesCaseContext>(
+      `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}/business-facts`,
+      { method: "POST", body: JSON.stringify({ text }) },
       token,
     ),
 

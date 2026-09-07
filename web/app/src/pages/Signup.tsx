@@ -45,7 +45,7 @@ export default function Signup() {
     <AuthShell>
       <div className="bg-white rounded-2xl border border-line p-7">
         <h1 className="ev-display text-5xl mb-2">Create your account</h1>
-        <p className="text-sm text-mute mb-6">Sets up your login. You'll build your Business DNA next.</p>
+        <p className="text-sm text-mute mb-6">Sets up your login. Next you describe the business — the sales agent is already trained.</p>
         <form onSubmit={handleSubmit}>
           <Field label="Work email">
             <input type="email" required autoFocus className={inputCls} placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} />

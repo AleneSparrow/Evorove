@@ -425,3 +425,11 @@ def test_need_to_think_clearer_next_step_is_still_answered() -> None:
     )
     decision = SalesPolicyEngine().decide(profile, analysis, business_facts_available=True)
     assert decision.move is SalesMove.ANSWER_OBJECTION
+
+
+def test_request_business_fact_phrase_does_not_hand_the_customer_to_a_person() -> None:
+    text = phrase_approved_move(SalesMove.REQUEST_BUSINESS_FACT, safe_fallback="A person will call you.")
+    folded = text.casefold()
+    assert "confirm one detail with the business" in folded
+    assert "call" not in folded
+    assert "team member" not in folded

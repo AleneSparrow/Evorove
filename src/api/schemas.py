@@ -1167,6 +1167,24 @@ class SalesObjectionRecordSchema(ApiModel):
         )
 
 
+class PendingBusinessFactRequestSchema(ApiModel):
+    needed_for: str
+    reason_code: str
+    requested_at: str | None = None
+
+
+class SupplyBusinessFactRequest(ApiModel):
+    text: Annotated[str, Field(min_length=1, max_length=500)]
+
+    @field_validator("text")
+    @classmethod
+    def strip_fact_text(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("business fact text is required")
+        return cleaned
+
+
 class SalesCaseContextResponse(ApiModel):
     case_id: str
     stage: SalesStage
@@ -1184,6 +1202,7 @@ class SalesCaseContextResponse(ApiModel):
     human_review_reason: str | None
     version: int
     objections: tuple[SalesObjectionRecordSchema, ...]
+    pending_business_fact_request: PendingBusinessFactRequestSchema | None = None
 
 
 class SalesEvidenceSchema(ApiModel):

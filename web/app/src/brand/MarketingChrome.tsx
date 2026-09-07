@@ -11,8 +11,7 @@ export function MarketingHeader({
   ctaLabel,
   links = [
     { href: "/#how", label: "Cycle" },
-    { href: "/#features", label: "Engine" },
-    { href: "/#trust", label: "Audit" },
+    { href: "/#features", label: "How it sells" },
     { href: "/faq", label: "FAQ" },
   ],
 }: {
@@ -24,7 +23,7 @@ export function MarketingHeader({
   const navigate = useNavigate();
   const { user } = useAuth();
   const primaryCtaTarget = user ? (user.business_ids.length > 0 ? "/app" : "/onboarding") : "/signup";
-  const label = ctaLabel ?? (user ? "Go to dashboard" : "Get started");
+  const label = ctaLabel ?? (user ? "Go to dashboard" : "Start free trial");
 
   return (
     <header className="sticky top-0 z-30 backdrop-blur-md" style={{ background: "rgba(247,241,228,0.88)", borderBottom: `1px solid ${brand.line}` }}>

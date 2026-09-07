@@ -1,5 +1,6 @@
 """Staff Sales API contracts, review transitions, and tenant isolation."""
 
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -307,3 +308,57 @@ def test_shadow_results_are_listed_evaluated_once_and_tenant_scoped(sales_api_en
     ).status_code == 404
     assert client.post(evaluate_path, headers=other, json={"evaluation": "UNSAFE"}).status_code == 403
     assert client.post(evaluate_path, json={"evaluation": "APPROVED"}).status_code == 401
+
+
+def test_owner_supplies_missing_business_fact_without_taking_over_the_customer(
+    sales_api_environment,
+) -> None:
+    client, factory = sales_api_environment
+    token, user_id = _signup(client, "fact-owner@example.com")
+    _seed(factory, business_id="biz-1", user_id=user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    with factory() as uow:
+        profile = uow.sales_profiles.get("biz-1", "case-biz-1", for_update=True)
+        assert profile is not None
+        waiting = replace(
+            profile,
+            stage=SalesStage.FOLLOW_UP,
+            last_move=SalesMove.REQUEST_BUSINESS_FACT,
+            metadata={
+                "pending_business_fact_request": {
+                    "needed_for": "presentation",
+                    "reason_code": "approved_presentation_knowledge_missing",
+                    "requested_at": NOW.isoformat(),
+                    "resume_stage": SalesStage.NEEDS_CONFIRMED.value,
+                }
+            },
+        )
+        uow.sales_profiles.save(waiting, profile.version, now=NOW)
+        uow.commit()
+
+    pending = client.get("/api/v1/businesses/biz-1/sales/cases/case-biz-1", headers=headers)
+    assert pending.status_code == 200
+    body = pending.json()
+    assert body["next_approved_action"] == "REQUEST_BUSINESS_FACT"
+    assert body["requires_human"] is False
+    assert body["pending_business_fact_request"]["needed_for"] == "presentation"
+
+    blank = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "   "},
+    )
+    assert blank.status_code == 422
+
+    supplied = client.post(
+        "/api/v1/businesses/biz-1/sales/cases/case-biz-1/business-facts",
+        headers=headers,
+        json={"text": "We handle AC diagnostics for homes in this area."},
+    )
+    assert supplied.status_code == 200
+    saved = supplied.json()
+    assert saved["pending_business_fact_request"] is None
+    assert saved["stage"] == "NEEDS_CONFIRMED"
+    assert saved["next_approved_action"] == "PRESENT_RELEVANT_VALUE"
+    assert saved["requires_human"] is False
+

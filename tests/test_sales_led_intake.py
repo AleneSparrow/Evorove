@@ -4,10 +4,13 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.domain.events import EventType
 from src.domain.qualification import IncomingMessage, IntentResult
+from src.domain.sales import SalesMove
 from src.domain.states import ProcessState
 from src.domain.tenancy import Business
 from src.engine.intent_extractor import DeterministicIntentExtractor
+from src.engine.sales_owner_facts import append_owner_business_fact, pending_business_fact_request
 from src.engine.question_generator import DeterministicQuestionGenerator
 from src.persistence.lead_intake import PersistentLeadIntakeService
 from src.persistence.sqlalchemy_models import Base
@@ -171,5 +174,78 @@ def test_sales_led_duplicate_replay_keeps_sales_reply(tmp_path) -> None:
         assert duplicate.response is not None
         assert first.response is not None
         assert duplicate.response.message_text == first.response.message_text
+    finally:
+        engine.dispose()
+
+
+def _strip_claimable_facts(configuration: dict) -> dict:
+    business = dict(configuration.get("business") or {})
+    business["name"] = ""
+    business["description"] = ""
+    services = []
+    for service in configuration.get("services") or []:
+        item = dict(service)
+        item["name"] = ""
+        item["description"] = ""
+        services.append(item)
+    return {**configuration, "business": business, "services": services}
+
+
+def test_sales_led_requests_owner_fact_instead_of_handing_off(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    with factory() as uow:
+        current = uow.business_dna.get_active("acme-home-services")
+        assert current is not None
+        uow.business_dna.add_version("acme-home-services", _strip_claimable_facts(current.configuration))
+        uow.commit()
+    intake = _intake(factory)
+    phone = "+1 312 555 0190"
+    try:
+        first = intake.receive(
+            _message("fact-1", phone=phone),
+            sales_led_conversation=True,
+        )
+        confirmed = intake.receive(
+            _message("fact-2", "That's the issue", phone=phone, case_id=first.case_id),
+            sales_led_conversation=True,
+        )
+        requested = intake.receive(
+            _message("fact-3", "Yes", phone=phone, case_id=first.case_id),
+            sales_led_conversation=True,
+        )
+        assert confirmed.current_state is ProcessState.QUALIFYING
+        assert requested.current_state is ProcessState.QUALIFYING
+        assert requested.response is not None
+        folded = requested.response.message_text.casefold()
+        assert "confirm one detail with the business" in folded
+        assert "team member" not in folded
+        with factory() as uow:
+            profile = uow.sales_profiles.get("acme-home-services", first.case_id)
+            assert profile is not None
+            assert profile.last_move is SalesMove.REQUEST_BUSINESS_FACT
+            assert pending_business_fact_request(profile) is not None
+            case = uow.cases.get("acme-home-services", first.case_id)
+            assert case is not None
+            assert case.current_state is ProcessState.QUALIFYING
+            events = uow.events.list_for_case("acme-home-services", first.case_id)
+            assert any(event.event_type == EventType.BUSINESS_FACT_REQUESTED for event in events)
+            supplied = append_owner_business_fact(
+                profile, "We handle AC diagnostics for homes in this area.", now=NOW,
+            )
+            uow.sales_profiles.save(supplied, profile.version, now=NOW)
+            uow.commit()
+
+        presented = intake.receive(
+            _message("fact-4", "Sounds good", phone=phone, case_id=first.case_id),
+            sales_led_conversation=True,
+        )
+        assert presented.current_state is ProcessState.QUALIFYING
+        assert presented.response is not None
+        assert "set up to handle" in presented.response.message_text.casefold()
+        with factory() as uow:
+            profile = uow.sales_profiles.get("acme-home-services", first.case_id)
+            assert profile is not None
+            assert profile.last_move is SalesMove.PRESENT_RELEVANT_VALUE
+            assert pending_business_fact_request(profile) is None
     finally:
         engine.dispose()

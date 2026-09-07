@@ -29,6 +29,7 @@ from src.engine.sales_objections import (
     looks_like_resolution,
     stated_concern_excerpt,
 )
+from src.engine.sales_owner_facts import owner_listed_facts
 
 
 _SAFE_DISCOVERY_FALLBACK = (
@@ -56,6 +57,10 @@ _MOVE_PHRASES: dict[SalesMove, str] = {
     ),
     SalesMove.NURTURE_WITHOUT_PRESSURE: (
         "No rush. I can follow up when the timing is better."
+    ),
+    SalesMove.REQUEST_BUSINESS_FACT: (
+        "I need to confirm one detail with the business before I can answer "
+        "that honestly. I'll follow up here as soon as I have it."
     ),
     SalesMove.SEND_CONTEXTUAL_FOLLOW_UP: (
         "I can follow up with the next step when you are ready."
@@ -375,8 +380,23 @@ def listed_business_facts(
     return tuple(facts)
 
 
-def business_facts_available(dna: Mapping[str, Any], service_id: str | None) -> bool:
-    return bool(listed_business_facts(dna, service_id))
+def combined_business_facts(
+    dna: Mapping[str, Any],
+    service_id: str | None,
+    profile: CustomerSalesProfile | None = None,
+) -> tuple[tuple[str, str], ...]:
+    facts = listed_business_facts(dna, service_id)
+    if profile is None:
+        return facts
+    return facts + owner_listed_facts(profile)
+
+
+def business_facts_available(
+    dna: Mapping[str, Any],
+    service_id: str | None,
+    profile: CustomerSalesProfile | None = None,
+) -> bool:
+    return bool(combined_business_facts(dna, service_id, profile))
 
 
 def phrase_approved_move(move: SalesMove, *, safe_fallback: str) -> str:

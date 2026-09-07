@@ -1,6 +1,8 @@
-# Outreach\-материалы: Волна 1
+# Outreach-материалы: Волна 1 (черновик, superseded)
 
-Соло\-практики, семейное право / general practice · Калифорния и Нью\-Йорк · черновик для вашей правки
+**Не использовать для рассылки.** Живые тексты — `docs/marketing/flywheel-wave1-outreach-ad-materials.md` и страницы `/` и `/lawyers`. Ниже — исторический черновик Atelier / intake assistant.
+
+Соло-практики, семейное право / general practice · Калифорния и Нью-Йорк
 
 Всё ниже — на английском, потому что аудитория американская. Структура и логика — по стратегии из `gtm-legal-vertical.md`\: ведём только на Starter, комплаенс — главный аргумент, не цена.
 
@@ -58,11 +60,11 @@
 
 ### Hero
 
-**H1:** The AI intake assistant that legally can't overstep.
+**H1:** Every inquiry. All the way to a booked consult.
 
-**Subhead:** Atelier answers and qualifies every lead for your practice, 24/7 — built so the AI can only follow the script you approve. Not a policy. An architecture.
+**Subhead:** Evorove is an automated sales process for the inquiries you already get. A trained agent qualifies, handles objections, follows up, and books the consult — with hard limits so it cannot give legal advice.
 
-**CTA:** Start your 7\-day free trial — $199/mo, no setup call.
+**CTA:** Start your 7-day free trial — $199/mo, no prompts to write.
 
 ### The problem
 

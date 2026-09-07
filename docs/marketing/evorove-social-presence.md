@@ -37,10 +37,10 @@ Priority for a US tech SaaS: **LinkedIn company (done) → X `@evorove_ai` (done
 **Name:** Evorove
 
 **Headline / bio (short):**
-Inquiry to booked job. Deterministic AI engine — not another chat window.
+From inquiry to a deal. Automated sales process — not a CRM, not a chatbot you prompt.
 
 **About (LinkedIn / YouTube):**
-Evorove carries an inbound inquiry through qualification, follow-up, and a booked job or accepted quote. The model rewrites a script the business already approved. The engine decides the next step. Building in public. Unfinished. End-customer payment collection is not connected yet.
+Evorove is a ready-made sales cycle. A trained agent takes an inbound inquiry through qualification, objections, follow-up, and a booked job or accepted quote. You do not write prompts or update a pipeline. Building in public. Unfinished. End-customer payment collection is not connected yet.
 
 Do not use “cold lead”, CRM, chatbot, or intake assistant in bios.
 

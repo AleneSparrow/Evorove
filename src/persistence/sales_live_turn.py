@@ -25,9 +25,8 @@ from src.engine.process_engine import ProcessEngine
 from src.engine.sales_live_turn import (
     DeterministicSalesTurnAnalyzer,
     booking_available_for_live_turn,
-    business_facts_available,
+    combined_business_facts,
     discovery_prompt,
-    listed_business_facts,
     merge_profile_from_analysis,
     operationally_qualified_for_commitment,
     phrase_approved_move,
@@ -38,6 +37,7 @@ from src.engine.sales_objections import (
     mark_addressed,
     matching_knowledge,
 )
+from src.engine.sales_owner_facts import PENDING_KEY, with_pending_business_fact_request
 from src.engine.sales_policy import SalesPolicyEngine
 from src.engine.sales_response_validator import (
     SalesPolicyValidator,
@@ -121,11 +121,12 @@ class SalesLiveTurnService:
         active_objection = analysis.objections[0] if analysis.objections else merged.active_objection
         objection_knowledge = matching_knowledge(knowledge, active_objection)
         booking_available = booking_available_for_live_turn(qualification, merged, analysis)
+        facts = combined_business_facts(dna, qualification.service_id, merged)
         decision = self._policy.decide(
             merged,
             analysis,
             approved_knowledge_available=bool(objection_knowledge),
-            business_facts_available=business_facts_available(dna, qualification.service_id),
+            business_facts_available=bool(facts),
             booking_available=booking_available,
             operational_intake_incomplete=not operationally_qualified_for_commitment(
                 qualification
@@ -179,6 +180,11 @@ class SalesLiveTurnService:
             self._stamp_sales_follow_up_reason(
                 uow, case, FollowUpReason.CALLBACK_REQUESTED, occurred_at,
             )
+        elif decision.move is SalesMove.REQUEST_BUSINESS_FACT:
+            merged = self._execute_business_fact_request(
+                uow, conversation, case, merged, decision,
+                occurred_at=occurred_at, source_message_id=source_message_id,
+            )
         elif decision.move is SalesMove.NURTURE_WITHOUT_PRESSURE:
             self._stamp_sales_follow_up_reason(
                 uow, case, FollowUpReason.OBJECTION_DEFERRED, occurred_at,
@@ -201,6 +207,9 @@ class SalesLiveTurnService:
         self._persist_turn(
             uow, conversation, case, profile, persisted, analysis, decision,
             knowledge_ids=tuple(card.knowledge_id for card in turn_knowledge),
+            business_fact_ids=tuple(fact_id for fact_id, _ in combined_business_facts(
+                dna, qualification.service_id, persisted,
+            )),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
         )
@@ -314,7 +323,9 @@ class SalesLiveTurnService:
                     ],
                     business_facts=[
                         {"business_fact_id": fact_id, "text": text}
-                        for fact_id, text in listed_business_facts(dna, qualification.service_id)
+                        for fact_id, text in combined_business_facts(
+                            dna, qualification.service_id, profile
+                        )
                     ],
                     customer_evidence=[
                         {"evidence_id": key, "text": value} for key, value in evidence_map.items()
@@ -329,7 +340,7 @@ class SalesLiveTurnService:
                 candidate = SalesResponseCandidate(
                     message_text=fallback, move=decision.move, used_safe_fallback=True,
                 )
-        fact_map = dict(listed_business_facts(dna, qualification.service_id))
+        fact_map = dict(combined_business_facts(dna, qualification.service_id, profile))
         context = SalesResponseValidationContext(
             approved_move=decision.move,
             approved_knowledge=frozenset(knowledge_map),
@@ -363,6 +374,7 @@ class SalesLiveTurnService:
         validation: Mapping[str, Any],
         occurred_at: datetime,
         source_message_id: str,
+        business_fact_ids: tuple[str, ...] = (),
     ) -> None:
         current = uow.sales_profiles.get(conversation.business_id, case.case_id, for_update=True)
         if current is None:
@@ -400,7 +412,7 @@ class SalesLiveTurnService:
             move=decision.move,
             reason_code=decision.reason_code,
             knowledge_ids=knowledge_ids,
-            business_fact_ids=(),
+            business_fact_ids=business_fact_ids,
             customer_evidence=evidence,
             analysis={
                 "confidence": analysis.confidence,
@@ -423,6 +435,48 @@ class SalesLiveTurnService:
         case.metadata["sales_follow_up_reason"] = reason.value
         case.updated_at = occurred_at
         uow.cases.save(case, expected)
+
+    def _execute_business_fact_request(
+        self,
+        uow: UnitOfWork,
+        conversation: Conversation,
+        case: ProcessCase,
+        profile: CustomerSalesProfile,
+        decision: SalesMoveDecision,
+        *,
+        occurred_at: datetime,
+        source_message_id: str,
+    ) -> CustomerSalesProfile:
+        """Ask the owner for a missing fact. The customer stays with the engine."""
+
+        updated = with_pending_business_fact_request(
+            profile, reason_code=decision.reason_code, requested_at=occurred_at,
+        )
+        existing = uow.events.list_for_case(conversation.business_id, case.case_id)
+        already_recorded = any(
+            event.event_type == EventType.BUSINESS_FACT_REQUESTED
+            and event.payload.get("source_message_id") == source_message_id
+            for event in existing
+        )
+        pending = updated.metadata.get(PENDING_KEY)
+        needed_for = pending.get("needed_for") if isinstance(pending, Mapping) else None
+        if not already_recorded:
+            uow.events.add(
+                conversation.business_id,
+                case.case_id,
+                ProcessEvent(
+                    EventType.BUSINESS_FACT_REQUESTED,
+                    occurred_at=occurred_at,
+                    source="sales_live_turn",
+                    payload={
+                        "reason": decision.reason_code,
+                        "needed_for": needed_for,
+                        "source_message_id": source_message_id,
+                        "conversation_id": conversation.conversation_id,
+                    },
+                ),
+            )
+        return updated
 
     def _execute_callback(
         self,

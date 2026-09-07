@@ -1,6 +1,6 @@
 # Evorove social kit
 
-Pulse system. Tokens match `web/app/src/brand/theme.ts`: cream `#F7F1E4`, ink `#0B0B0D`, coral `#FF5A36`, lime `#C6FF00`. Mark is the torus (not the five-spoke wheel). Wordmark Bebas Neue, body Inter. Line: **Every lead. No dead air.**
+Pulse system. Tokens match `web/app/src/brand/theme.ts`: cream `#F7F1E4`, ink `#0B0B0D`, coral `#FF5A36`, lime `#C6FF00`. Mark is the torus (not the five-spoke wheel). Wordmark Bebas Neue, body Inter. Line: **From inquiry to a deal.**
 
 **Brand book:** `docs/brand/evorove-pulse-brandbook.html`  
 **Source boards:** `boards.html` (re-render with `NODE_PATH=… node capture.mjs`)

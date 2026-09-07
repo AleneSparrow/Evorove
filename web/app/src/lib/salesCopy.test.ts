@@ -50,6 +50,11 @@ test("sales moves describe policy actions, not AI commercial control", () => {
   assert.equal(salesMoveLabel("ANSWER_OBJECTION"), "Answer with approved knowledge");
   assert.equal(salesMoveLabel("HANDOFF_TO_HUMAN"), "Hand off to you");
   assert.equal(salesMoveLabel("SCHEDULE_CALLBACK"), "Schedule our follow-up");
+  assert.equal(salesMoveLabel("REQUEST_BUSINESS_FACT"), "Ask the business for a missing fact");
+  assert.match(
+    reasonCodeLabel("objection_answer_grounding_missing"),
+    /Ask the business for the missing fact/,
+  );
 });
 
 test("classifySalesError maps API codes to UI states", () => {

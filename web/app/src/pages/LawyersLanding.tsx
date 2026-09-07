@@ -19,8 +19,9 @@ import { MarketingFooter, MarketingHeader } from "../brand/MarketingChrome";
  *   here -- multi-attorney routing isn't built yet (P1), and the GTM doc is
  *   explicit that selling Pro to a solo practice today creates disappointed
  *   early customers, not revenue.
- * - Compliance/architecture is the lead argument, not price. SetSmart is
- *   cheaper ($99) and not deterministic; that contrast is the whole pitch.
+ * - Full-cycle sale is the lead argument (inquiry to booked consult). Compliance
+ *   is the reason it is safe to put in front of a client, not the reason to buy.
+ * - Do not call this an intake assistant. Intake is the category competitors occupy.
  * - The FAQ answers honestly that bar rules vary by state and this isn't
  *   legal advice about compliance -- matches the brand voice's "no
  *   superlatives" rule and avoids overclaiming into UPL-adjacent territory
@@ -76,14 +77,15 @@ export default function LawyersLanding() {
       {/* ============ HERO ============ */}
       <section className="max-w-4xl mx-auto px-6 pt-16 md:pt-24 pb-14 text-center">
         <div className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full mb-6" style={{ backgroundColor: "#FFE8E1", color: "#FF5A36" }}>
-          <Scale size={12} /> Built for solo & small practices — California &amp; New York
+          <Scale size={12} /> Solo & small practices — CA &amp; NY first. Same sales engine as any service business.
         </div>
         <h1 className="ev-display text-6xl md:text-7xl leading-[0.9] mb-5">
-          The AI intake assistant that legally can't overstep.
+          Every inquiry. All the way to a booked consult.
         </h1>
         <p className="text-base md:text-lg text-mute leading-relaxed mb-8 max-w-2xl mx-auto">
-          Evorove answers and qualifies every lead for your practice, 24/7 — built so the AI can only
-          follow the script you approve. Not a policy. An architecture.
+          Evorove is an automated sales process for the inquiries you already get. A trained agent
+          qualifies, handles objections, follows up, and books the consult — with hard limits so it
+          cannot give legal advice or promise an outcome.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
@@ -130,22 +132,21 @@ export default function LawyersLanding() {
         <div className="max-w-4xl mx-auto px-6 py-16 md:py-20">
           <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "#FF5A36" }}>How Evorove is different</span>
           <h2 className="ev-display text-4xl md:text-5xl mt-2 mb-6">
-            An architecture, not a prompt.
+            A trained sales process, not a chatbot you prompt.
           </h2>
           <p className="text-base text-mute leading-relaxed mb-6 max-w-2xl">
-            Most AI intake tools are a chatbot wrapped around a general-purpose language model, steered
-            by a prompt. Prompts can be argued with, jailbroken, or simply drift over a long conversation
-            — and for a law firm, that's not a UX risk, it's a bar-complaint risk.
+            Most tools sold to firms stop at intake: they take a name and a number and drop the rest
+            on you. Evorove runs the sale — qualification, objections, follow-up, and a booked consult —
+            without you writing prompts or dragging cards in a CRM.
           </p>
           <p className="text-base text-mute leading-relaxed mb-8 max-w-2xl">
-            Evorove works differently. The AI never decides what to tell your client — it only rewrites
-            the wording of a script you control (your "Business DNA"). Case qualification, escalation
-            rules, and what the assistant is and isn't allowed to say all live in the underlying engine,
-            not in a prompt the AI could talk itself out of.
+            That is safe to put in front of a client because the AI never decides what to tell them.
+            It only phrases a move the process already chose. Case qualification, escalation, and what
+            the agent is not allowed to say live in the engine, not in a prompt it could talk itself out of.
           </p>
           <div className="grid sm:grid-cols-2 gap-4 mb-8">
             <div className="rounded-xl border border-line bg-cream p-6">
-              <div className="text-xs font-semibold uppercase tracking-wide text-mute mb-4">A chatbot on a prompt</div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-mute mb-4">Intake chatbot on a prompt</div>
               <ul className="flex flex-col gap-3 text-sm text-mute">
                 <li className="pt-3 border-t border-line first:pt-0 first:border-0">The AI decides what to say, guided by instructions</li>
                 <li className="pt-3 border-t border-line">Can be talked into estimating a case or promising an outcome</li>
@@ -156,7 +157,7 @@ export default function LawyersLanding() {
             <div className="rounded-xl p-6" style={{ backgroundColor: "#0B0B0D" }}>
               <div className="text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: "#C6FF00" }}>Evorove</div>
               <ul className="flex flex-col gap-3 text-sm" style={{ color: "#E7E2D5" }}>
-                <li className="pt-3 border-t first:pt-0 first:border-0" style={{ borderColor: "#33302B" }}>The AI only rewrites the wording of a script you approve</li>
+                <li className="pt-3 border-t first:pt-0 first:border-0" style={{ borderColor: "#33302B" }}>Runs the sale through a booked consult — you do not prompt it</li>
                 <li className="pt-3 border-t" style={{ borderColor: "#33302B" }}>Has no path to invent legal analysis or promise a result</li>
                 <li className="pt-3 border-t" style={{ borderColor: "#33302B" }}>Compliance is a hard limit in the message pipeline, not a prompt</li>
                 <li className="pt-3 border-t" style={{ borderColor: "#33302B" }}>Identifies itself as AI from the first message, every time</li>
@@ -186,16 +187,16 @@ export default function LawyersLanding() {
       {/* ============ WHAT IT DOES ============ */}
       <section className="max-w-4xl mx-auto px-6 py-16 md:py-20">
         <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "#FF5A36" }}>What it does</span>
-        <h2 className="ev-display text-4xl md:text-5xl mt-2 mb-7">
-          One script, applied the same way every time.
-        </h2>
-        <ul className="flex flex-col gap-3.5 max-w-lg">
-          <DoesItem text="Answers inbound leads on your website, day or night" />
-          <DoesItem text="Qualifies the case against the criteria you set — practice area, urgency, location" />
-          <DoesItem text="Books a consultation on Evorove's calendar so you can take the meeting prepared" />
-          <DoesItem text="Escalates to you exactly when your rules say to" />
-          <DoesItem text="Never estimates case outcomes, gives legal advice, or promises a result — by design, not by request" />
-        </ul>
+          <h2 className="ev-display text-4xl md:text-5xl mt-2 mb-7">
+            The sale runs until there is an outcome.
+          </h2>
+          <ul className="flex flex-col gap-3.5 max-w-lg">
+            <DoesItem text="Answers inbound inquiries on your website, day or night" />
+            <DoesItem text="Qualifies the matter, handles cost and fit objections, and follows up if they go quiet" />
+            <DoesItem text="Books a consultation so you take the meeting prepared — not another message to return" />
+            <DoesItem text="Escalates to you exactly when your rules say to" />
+            <DoesItem text="Never estimates case outcomes, gives legal advice, or promises a result — by design, not by request" />
+          </ul>
       </section>
 
       {/* ============ BUILT FOR SOLO PRACTICES ============ */}
@@ -204,8 +205,8 @@ export default function LawyersLanding() {
           <div>
             <h2 className="ev-display text-3xl mb-2">Built for solo practices</h2>
             <p className="text-sm text-mute leading-relaxed max-w-lg">
-              Evorove Starter is built for exactly one attorney, one jurisdiction — set up in about
-              20 minutes, no developer or IT help needed.
+              Evorove Starter is built for exactly one attorney, one jurisdiction — describe the
+              practice once, no developer or prompt engineering.
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm font-medium shrink-0 px-4 py-2.5 rounded-lg" style={{ backgroundColor: "#FFE8E1", color: "#FF5A36" }}>
@@ -227,8 +228,8 @@ export default function LawyersLanding() {
           </div>
           <p className="text-sm text-mute mb-6">7-day free trial. Card required at signup, no charge until the trial ends. Cancel anytime.</p>
           <ul className="flex flex-col gap-2.5 mb-7">
-            <DoesItem text="One attorney, one jurisdiction — full deterministic compliance architecture" />
-            <DoesItem text="24/7 web chat intake, qualification, and booking" />
+            <DoesItem text="One attorney, one jurisdiction — the sales cycle plus hard compliance limits" />
+            <DoesItem text="24/7 qualification, objections, follow-up, and booking" />
             <DoesItem text="Complete audit trail on every conversation" />
             <DoesItem text="AI disclosure badge and compliance disclaimer, built in" />
           </ul>
@@ -257,7 +258,7 @@ export default function LawyersLanding() {
             />
             <FaqItem
               q="Can the AI give legal advice by accident?"
-              a="No — and that's the point. The AI only rewrites wording inside the script you approve. It has no path to invent legal analysis, estimate outcomes, or promise results, because that capability isn't built into the message pipeline at all."
+              a="No — and that's the point. The agent phrases an approved sales move. It has no path to invent legal analysis, estimate outcomes, or promise results, because that capability isn't built into the message pipeline at all."
             />
             <FaqItem q="How long does setup take?" a="About 20 minutes for a single-attorney practice. No developer needed." />
             <FaqItem
@@ -274,7 +275,7 @@ export default function LawyersLanding() {
         <h2 className="ev-display text-5xl md:text-6xl mb-4">
           Someone is calling your firm right now.
         </h2>
-        <p className="text-mute mb-8 max-w-md mx-auto">7-day free trial, live in about 20 minutes, no setup call required.</p>
+        <p className="text-mute mb-8 max-w-md mx-auto">7-day free trial. Ready-made sales process. No prompt to write.</p>
         <button
           onClick={() => navigate(primaryCtaTarget)}
           className="text-sm font-bold uppercase tracking-wide px-6 py-3.5 rounded-full inline-flex items-center gap-2"
@@ -284,7 +285,7 @@ export default function LawyersLanding() {
         </button>
       </section>
 
-      <MarketingFooter extra={<span>Deterministic by design</span>} />
+      <MarketingFooter extra={<span>Automated sales cycle</span>} />
     </div>
   );
 }

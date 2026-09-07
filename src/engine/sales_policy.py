@@ -13,6 +13,7 @@ from src.domain.sales import (
     SalesStage,
     SalesTurnAnalysis,
 )
+from src.engine.sales_owner_facts import pending_business_fact_request
 
 
 class InvalidSalesStageTransition(ValueError):
@@ -21,14 +22,14 @@ class InvalidSalesStageTransition(ValueError):
 
 SALES_STAGE_TRANSITIONS: dict[SalesStage, frozenset[SalesStage]] = {
     SalesStage.GREETING: frozenset({SalesStage.DISCOVERY, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.DISCOVERY: frozenset({SalesStage.NEEDS_CONFIRMED, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.DISCOVERY: frozenset({SalesStage.NEEDS_CONFIRMED, SalesStage.NURTURE, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.NEEDS_CONFIRMED: frozenset({SalesStage.PRESENTATION, SalesStage.DISCOVERY, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.PRESENTATION: frozenset({SalesStage.OBJECTION_HANDLING, SalesStage.COMMITMENT, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.OBJECTION_HANDLING: frozenset({SalesStage.PRESENTATION, SalesStage.COMMITMENT, SalesStage.BOOKING, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.COMMITMENT: frozenset({SalesStage.BOOKING, SalesStage.OBJECTION_HANDLING, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.PRESENTATION: frozenset({SalesStage.OBJECTION_HANDLING, SalesStage.COMMITMENT, SalesStage.NURTURE, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.OBJECTION_HANDLING: frozenset({SalesStage.PRESENTATION, SalesStage.COMMITMENT, SalesStage.BOOKING, SalesStage.NURTURE, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.COMMITMENT: frozenset({SalesStage.BOOKING, SalesStage.OBJECTION_HANDLING, SalesStage.NURTURE, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.BOOKING: frozenset({SalesStage.WON, SalesStage.OBJECTION_HANDLING, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.NURTURE: frozenset({SalesStage.FOLLOW_UP, SalesStage.DISCOVERY, SalesStage.PRESENTATION, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.FOLLOW_UP: frozenset({SalesStage.DISCOVERY, SalesStage.PRESENTATION, SalesStage.OBJECTION_HANDLING, SalesStage.COMMITMENT, SalesStage.BOOKING, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.FOLLOW_UP: frozenset({SalesStage.DISCOVERY, SalesStage.PRESENTATION, SalesStage.OBJECTION_HANDLING, SalesStage.COMMITMENT, SalesStage.BOOKING, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.WON: frozenset(),
     SalesStage.LOST: frozenset({SalesStage.DISCOVERY}),
     SalesStage.HUMAN_REVIEW: frozenset(),
@@ -140,6 +141,14 @@ class SalesPolicyEngine:
             return SalesMoveDecision(
                 SalesMove.NURTURE_WITHOUT_PRESSURE,
                 "objection_deferred_without_pressure",
+                SalesStage.FOLLOW_UP,
+            )
+
+        pending = pending_business_fact_request(profile)
+        if pending is not None and not approved_knowledge_available and not business_facts_available:
+            return SalesMoveDecision(
+                SalesMove.REQUEST_BUSINESS_FACT,
+                pending["reason_code"],
                 SalesStage.FOLLOW_UP,
             )
 
