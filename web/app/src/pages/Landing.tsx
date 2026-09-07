@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -7,6 +7,19 @@ import { MarketingFooter, MarketingHeader } from "../brand/MarketingChrome";
 import { brand } from "../brand/theme";
 
 const OrbitScene = lazy(() => import("../brand/OrbitScene").then((mod) => ({ default: mod.OrbitScene })));
+
+function useDesktopHero() {
+  const [desktop, setDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setDesktop(mq.matches);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return desktop;
+}
 
 function Block({ n, title, body, tone }: { n: string; title: string; body: string; tone: "ink" | "coral" | "lime" }) {
   const bg = tone === "ink" ? brand.ink : tone === "coral" ? brand.coral : brand.lime;
@@ -22,6 +35,7 @@ function Block({ n, title, body, tone }: { n: string; title: string; body: strin
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const desktopHero = useDesktopHero();
   const primaryCtaTarget = user ? (user.business_ids.length > 0 ? "/app" : "/onboarding") : "/signup";
 
   return (
@@ -29,11 +43,13 @@ export default function Landing() {
       <MarketingHeader />
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
-        <div className="absolute inset-y-0 right-[-8%] w-[58%] pointer-events-none hidden md:block">
-          <Suspense fallback={null}>
-            <OrbitScene variant="hero" />
-          </Suspense>
-        </div>
+        {desktopHero ? (
+          <div className="absolute inset-y-0 right-[-8%] w-[58%] pointer-events-none ev-orbit-frame ev-orbit-hero" aria-hidden="true">
+            <Suspense fallback={null}>
+              <OrbitScene variant="hero" />
+            </Suspense>
+          </div>
+        ) : null}
         <div className="relative z-10 max-w-xl">
           <div className="inline-block mb-5 text-[11px] font-extrabold uppercase tracking-[0.16em] px-3 py-1.5 -rotate-2" style={{ background: "#C6FF00", color: "#0B0B0D" }}>
             Ready-made sales cycle · not a CRM
@@ -41,6 +57,16 @@ export default function Landing() {
           <h1 className="ev-display text-[72px] md:text-[112px] text-ink">
             FROM INQUIRY<br />TO A DEAL.
           </h1>
+          {!desktopHero ? (
+            <div className="relative h-[250px] w-[250px] max-w-full mx-auto my-6 ev-orbit-frame ev-orbit-mobile" aria-hidden="true">
+              <img
+                src="/brand/evorove-still-torus-square.png"
+                alt=""
+                draggable={false}
+                className="w-full h-full object-contain select-none pointer-events-none"
+              />
+            </div>
+          ) : null}
           <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">
             Evorove is an automated sales process. A trained AI agent takes the inquiry you already have,
             qualifies it, handles objections, follows up, and closes — without you writing prompts or
@@ -72,11 +98,6 @@ export default function Landing() {
               <div className="text-xs uppercase tracking-[0.16em] text-clay">Prompts to write</div>
             </div>
           </div>
-        </div>
-        <div className="md:hidden h-[280px] -mx-6 mt-8">
-          <Suspense fallback={null}>
-            <OrbitScene variant="hero" />
-          </Suspense>
         </div>
       </section>
 

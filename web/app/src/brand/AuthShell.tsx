@@ -8,7 +8,7 @@ const OrbitScene = lazy(() => import("./OrbitScene").then((mod) => ({ default: m
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="ev-page relative min-h-screen overflow-x-hidden overflow-y-auto flex items-center justify-center px-6 py-10">
-      <div className="absolute inset-0 pointer-events-none opacity-80">
+      <div className="absolute inset-0 pointer-events-none opacity-80 ev-orbit-frame" aria-hidden="true">
         <Suspense fallback={null}>
           <OrbitScene variant="ambient" />
         </Suspense>
