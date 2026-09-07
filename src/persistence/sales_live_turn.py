@@ -1,15 +1,22 @@
 """Synchronous live sales turn: analyze, decide one move, phrase, validate, persist."""
 
+import hashlib
 from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import Any, Mapping, Protocol
 from uuid import uuid4
 
 from src.ai.errors import AIInvalidOutputError, AIProviderError
-from src.domain.conversations import Conversation, ConversationMessage, MessageRole
+from src.domain.conversations import (
+    Conversation,
+    ConversationMessage,
+    ConversationStatus,
+    MessageDirection,
+    MessageRole,
+)
 from src.domain.events import EventType
 from src.domain.models import DecisionType, ProcessCase, ProcessEvent
-from src.domain.qualification import QualificationResult
+from src.domain.qualification import QualificationReasonCode, QualificationResult
 from src.domain.sales import (
     CustomerSalesProfile,
     FollowUpReason,
@@ -37,16 +44,30 @@ from src.engine.sales_objections import (
     mark_addressed,
     matching_knowledge,
 )
-from src.engine.sales_owner_facts import PENDING_KEY, with_pending_business_fact_request
+from src.engine.sales_owner_facts import PENDING_KEY, owner_listed_facts, with_pending_business_fact_request
 from src.engine.sales_policy import SalesPolicyEngine
 from src.engine.sales_response_validator import (
     SalesPolicyValidator,
     SalesResponseCandidate,
     SalesResponseValidationContext,
 )
+from src.persistence.errors import StaleCaseError
 from src.persistence.repositories import UnitOfWork
 
-from .commercial_service import CommercialWorkflowService
+class _SmsSender(Protocol):
+    def send_outbound(self, business_id: str, *, to_number: str, body: str) -> str | None: ...
+
+
+_OWNER_RESUME_MOVES = frozenset({
+    SalesMove.PRESENT_RELEVANT_VALUE,
+    SalesMove.ANSWER_OBJECTION,
+    SalesMove.ASK_FOR_COMMITMENT,
+    SalesMove.CHECK_OBJECTION_RESOLUTION,
+})
+_HUMAN_OWNED = frozenset({
+    ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
+    ConversationStatus.HUMAN_TAKEOVER_ACTIVE,
+})
 
 
 class _SalesAnalyzer(Protocol):
