@@ -58,13 +58,10 @@ export default function Landing() {
             FROM INQUIRY<br />TO A DEAL.
           </h1>
           {!desktopHero ? (
-            <div className="relative h-[250px] w-[250px] max-w-full mx-auto my-6 ev-orbit-frame ev-orbit-mobile" aria-hidden="true">
-              <img
-                src="/brand/evorove-still-torus-square.png"
-                alt=""
-                draggable={false}
-                className="w-full h-full object-contain select-none pointer-events-none"
-              />
+            <div className="relative h-[280px] w-[280px] max-w-full mx-auto my-6 ev-orbit-frame ev-orbit-mobile" aria-hidden="true">
+              <Suspense fallback={null}>
+                <OrbitScene variant="hero" />
+              </Suspense>
             </div>
           ) : null}
           <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">

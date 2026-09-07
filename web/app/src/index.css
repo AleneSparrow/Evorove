@@ -64,13 +64,19 @@ body {
 
 .ev-orbit-mobile {
   overflow: hidden;
-  -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 46%, transparent 68%);
-  mask-image: radial-gradient(circle at 50% 45%, #000 46%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 50%, transparent 72%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 50%, transparent 72%);
 }
 
-.ev-orbit-mobile img {
-  transform: scale(1.18);
-  transform-origin: 50% 44%;
+.ev-orbit-mobile::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 14%;
+  height: 30%;
+  background: radial-gradient(ellipse at center, rgba(11, 11, 13, 0.14) 0%, rgba(11, 11, 13, 0.04) 42%, transparent 72%);
+  pointer-events: none;
 }
 
 @keyframes evSpin {

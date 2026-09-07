@@ -94,10 +94,12 @@ function TorusEngine({
   intensity,
   followPointer,
   sparkCount,
+  compact,
 }: {
   intensity: number;
   followPointer: boolean;
   sparkCount: number;
+  compact: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
@@ -127,26 +129,36 @@ function TorusEngine({
   });
 
   return (
-    <group ref={group} rotation={[0.2, 0.55, 0]}>
+    <group ref={group} rotation={[0.2, 0.55, 0]} scale={compact ? 0.72 : 1}>
       <mesh rotation={[Math.PI / 2.35, 0, 0]}>
-        <torusGeometry args={[1.12, 0.38, 64, 180]} />
-        <meshPhysicalMaterial
-          color="#FF5A36"
-          metalness={0.16}
-          roughness={0.14}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          sheen={0.35}
-          sheenColor="#FFB199"
-          emissive="#7A180C"
-          emissiveIntensity={0.14}
-        />
+        <torusGeometry args={compact ? [1.12, 0.38, 32, 96] : [1.12, 0.38, 64, 180]} />
+        {compact ? (
+          <meshStandardMaterial
+            color="#FF5A36"
+            metalness={0.18}
+            roughness={0.2}
+            emissive="#7A180C"
+            emissiveIntensity={0.12}
+          />
+        ) : (
+          <meshPhysicalMaterial
+            color="#FF5A36"
+            metalness={0.16}
+            roughness={0.14}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            sheen={0.35}
+            sheenColor="#FFB199"
+            emissive="#7A180C"
+            emissiveIntensity={0.14}
+          />
+        )}
       </mesh>
       <mesh ref={ring} rotation={[Math.PI / 2.2, 0.35, 0.2]}>
-        <torusGeometry args={[1.58, 0.028, 12, 140]} />
+        <torusGeometry args={compact ? [1.58, 0.028, 8, 80] : [1.58, 0.028, 12, 140]} />
         <meshBasicMaterial color="#C6FF00" transparent opacity={0.92} />
       </mesh>
-      {sparkCount > 0 ? <SparkOrbit count={sparkCount} radius={1.85} /> : null}
+      {sparkCount > 0 ? <SparkOrbit count={sparkCount} radius={compact ? 1.68 : 1.85} /> : null}
     </group>
   );
 }
@@ -158,14 +170,17 @@ export function OrbitScene({ variant = "hero" }: { variant?: Variant }) {
   const finePointer = useMedia("(hover: hover) and (pointer: fine)");
 
   const intensity = reduced ? 0 : hero ? 1 : 0.35;
-  const sparkCount = reduced ? 0 : compact ? 36 : hero ? 90 : 48;
+  const sparkCount = reduced ? 0 : compact ? 24 : hero ? 90 : 48;
 
   return (
     <Canvas
-      camera={{ position: hero ? [0.12, 0.22, 4.6] : [1.4, 0.28, 5.6], fov: 34 }}
-      dpr={compact ? [1, 1.15] : [1, 1.5]}
+      camera={{
+        position: hero ? (compact ? [0, 0.06, 5.6] : [0.12, 0.22, 4.6]) : [1.4, 0.28, 5.6],
+        fov: compact ? 30 : 34,
+      }}
+      dpr={compact ? [1, 1.25] : [1, 1.5]}
       gl={{
-        antialias: !compact,
+        antialias: true,
         alpha: true,
         premultipliedAlpha: true,
         powerPreference: compact ? "low-power" : "high-performance",
@@ -174,18 +189,20 @@ export function OrbitScene({ variant = "hero" }: { variant?: Variant }) {
       style={{ width: "100%", height: "100%", display: "block", background: "transparent" }}
       onCreated={({ gl }) => {
         gl.setClearColor(CREAM, 0);
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMapping = compact ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.04;
+        gl.outputColorSpace = THREE.SRGBColorSpace;
       }}
     >
       <ambientLight intensity={0.82} />
       <hemisphereLight args={["#FFF8EC", "#C4B49A", 0.55]} />
-      <spotLight position={[3.2, 5.2, 4]} intensity={52} angle={0.44} penumbra={0.92} color="#fff6ea" />
-      <pointLight position={[-2.2, 1.1, 2.6]} intensity={7} color="#FF8A70" />
+      <spotLight position={[3.2, 5.2, 4]} intensity={compact ? 36 : 52} angle={0.44} penumbra={0.92} color="#fff6ea" />
+      <pointLight position={[-2.2, 1.1, 2.6]} intensity={compact ? 5 : 7} color="#FF8A70" />
       <TorusEngine
         intensity={intensity}
         followPointer={hero && finePointer && !reduced}
         sparkCount={sparkCount}
+        compact={compact}
       />
     </Canvas>
   );
