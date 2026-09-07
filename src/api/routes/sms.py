@@ -12,7 +12,8 @@ Reuses `PersistentLeadIntakeService` -- the same channel-agnostic engine
 entry point `/api/v1/businesses/{business_id}/messages` uses -- rather than
 the anonymous web-chat conversation flow, since a text message already
 carries a stable identity (the sender's phone number) and has no browser
-token to manage.
+token to manage. Both channels are sales-led: completeness does not
+qualify the case.
 """
 
 from typing import Annotated
@@ -156,7 +157,7 @@ async def receive_inbound_sms(
         timestamp=utc_now(),
         phone=from_number,
     )
-    result = intake_service.receive(message)
+    result = intake_service.receive(message, sales_led_conversation=True)
     sms_threads.sync_from_intake(
         business_id,
         from_number,

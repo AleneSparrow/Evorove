@@ -57,12 +57,13 @@
   #app-icon { width: 1024px; height: 1024px; align-items: center; justify-content: center; background: var(--coral); color: var(--ink); }
 
   /* --- banners --- */
-  #linkedin { width: 1584px; height: 396px; align-items: center; padding: 0 0 0 80px; position: relative; background: #F7F1E4 url("./evorove-still-torus-banner.png") 82% 48% / auto 260% no-repeat; }
-  #linkedin::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #F7F1E4 0%, #F7F1E4 36%, rgba(247,241,228,.62) 50%, transparent 68%); pointer-events: none; }
+  /* Left 360px stays empty: LinkedIn company/profile photo sits on that circle. */
+  #linkedin { width: 1584px; height: 396px; align-items: center; padding: 0 36px 0 430px; position: relative; background: #F7F1E4 url("./evorove-still-torus-banner.png") 94% 48% / auto 260% no-repeat; }
+  #linkedin::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #F7F1E4 0%, #F7F1E4 52%, rgba(247,241,228,.5) 66%, transparent 80%); pointer-events: none; }
   #linkedin .copy { position: relative; z-index: 1; }
   #linkedin .sticker { font-size: 13px; padding: 6px 12px; margin-bottom: 14px; }
-  #linkedin .name { font-size: 118px; color: var(--ink); line-height: 0.82; }
-  #linkedin .sub { margin-top: 12px; font-size: 20px; color: var(--mute); max-width: 620px; line-height: 1.35; font-family: Inter, sans-serif; }
+  #linkedin .name { font-size: 110px; color: var(--ink); line-height: 0.82; }
+  #linkedin .sub { margin-top: 12px; font-size: 18px; color: var(--mute); max-width: 560px; line-height: 1.35; font-family: Inter, sans-serif; }
 
   #xheader { width: 1500px; height: 500px; background: var(--ink); color: var(--cream); align-items: center; justify-content: space-between; padding: 0 80px; }
   #xheader .sticker { font-size: 12px; padding: 6px 12px; margin-bottom: 16px; }

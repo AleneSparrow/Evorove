@@ -1,0 +1,116 @@
+{
+  "cards": [
+    {
+      "knowledge_id": "objection-price-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#PRICE"
+      },
+      "principle": "A price objection is not a request for a discount. Diagnose whether the concern is budget, value, or timing, then answer with the already-stated customer need and the real next step. Never invent a lower price, a waiver, a guarantee, or ROI.",
+      "applicable_when": ["objection_type=PRICE"],
+      "prohibited_when": ["no diagnosed cause yet", "customer asked for a discount or guarantee the business has not authorized"],
+      "required_sequence": ["acknowledge_without_arguing", "confirm_the_diagnosed_cause", "return_to_the_stated_need", "offer_the_real_next_step"],
+      "forbidden_actions": ["invent_discount", "invent_guarantee", "claim_roi", "argue_that_the_customer_is_wrong"],
+      "approved_examples": [
+        "I hear that cost is the sticking point. The next step is to look at the actual option for what you said you need — not to add extras or change the price here."
+      ]
+    },
+    {
+      "knowledge_id": "objection-trust-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#TRUST"
+      },
+      "principle": "A trust objection needs a diagnostic question about what would make the next step feel safe. Answer only with approved business facts. Do not invent reviews, credentials, case studies, or guarantees.",
+      "applicable_when": ["objection_type=TRUST"],
+      "prohibited_when": ["no diagnosed cause yet", "no approved proof exists and the answer would require one"],
+      "required_sequence": ["acknowledge_the_caution", "ask_what_proof_would_help", "cite_only_approved_facts", "offer_a_small_next_step"],
+      "forbidden_actions": ["invent_testimonial", "invent_credential", "invent_guarantee", "pressure_past_the_doubt"],
+      "approved_examples": [
+        "That is a fair question. I can only speak to what this business actually offers. The next step is a real conversation about your situation, and you can stop if it does not feel right."
+      ]
+    },
+    {
+      "knowledge_id": "objection-timing-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#TIMING"
+      },
+      "principle": "A timing objection is not a no. Diagnose whether the delay is a real constraint or uncertainty. Offer a later step or a hold without fabricating urgency or scarcity.",
+      "applicable_when": ["objection_type=TIMING"],
+      "prohibited_when": ["no diagnosed cause yet", "no verifiable deadline exists in business facts"],
+      "required_sequence": ["acknowledge_the_timing", "ask_what_makes_now_difficult", "offer_a_later_or_smaller_step"],
+      "forbidden_actions": ["invent_deadline", "invent_scarcity", "shame_the_delay"],
+      "approved_examples": [
+        "Understood — timing matters. If now is not right, we can set the next step for when it is, without locking you into anything extra today."
+      ]
+    },
+    {
+      "knowledge_id": "objection-fit-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#FIT"
+      },
+      "principle": "A fit objection must be diagnosed against the stated need and the services the business actually offers. If the request is outside what is offered, do not stretch the service. Route to a honest next step or a human.",
+      "applicable_when": ["objection_type=FIT"],
+      "prohibited_when": ["the requested work is not an offered service"],
+      "required_sequence": ["restate_the_stated_need", "ask_what_feels_like_a_mismatch", "confirm_only_offered_services"],
+      "forbidden_actions": ["invent_a_service", "claim_a_fit_the_catalog_does_not_support"],
+      "approved_examples": [
+        "I want to make sure this is actually the right help. Which part feels like a mismatch with what you need?"
+      ]
+    },
+    {
+      "knowledge_id": "objection-authority-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#AUTHORITY"
+      },
+      "principle": "If someone else must decide, do not force a commitment. Diagnose who else is involved and offer a shareable next step or a callback. Do not pretend the current speaker can bind the other person.",
+      "applicable_when": ["objection_type=AUTHORITY"],
+      "prohibited_when": ["the speaker has already given an unhedged personal yes"],
+      "required_sequence": ["acknowledge_the_other_decision_maker", "ask_who_needs_to_be_involved", "offer_a_shareable_or_callback_step"],
+      "forbidden_actions": ["pressure_a_decision_the_speaker_cannot_make", "invent_a_joint-decision_discount"],
+      "approved_examples": [
+        "If someone else needs to be part of this, we can set a time that works for both of you, or I can share the next step for you to pass along."
+      ]
+    },
+    {
+      "knowledge_id": "objection-competitor-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#COMPETITOR"
+      },
+      "principle": "A competitor mention is a comparison request, not an attack. Diagnose what they are comparing. Answer with the customer's stated need and this business's actual offer. Never disparage the other company or invent a unique advantage.",
+      "applicable_when": ["objection_type=COMPETITOR"],
+      "prohibited_when": ["no diagnosed comparison criterion yet"],
+      "required_sequence": ["acknowledge_they_are_comparing", "ask_what_matters_in_the_comparison", "return_to_the_stated_need"],
+      "forbidden_actions": ["disparage_competitor", "invent_unique_advantage", "invent_price_match"],
+      "approved_examples": [
+        "It makes sense to compare options. What matters most in that comparison for the problem you described?"
+      ]
+    },
+    {
+      "knowledge_id": "objection-need-to-think-001",
+      "version": 1,
+      "source": {
+        "title": "Evorove sales objection playbook",
+        "location": "config/sales-knowledge/objection-handling-v1.json#NEED_TO_THINK"
+      },
+      "principle": "Need-to-think is often an unnamed objection. Diagnose what would make the decision clearer. Do not force a close. Offer a small next step or a later follow-up without fake urgency.",
+      "applicable_when": ["objection_type=NEED_TO_THINK"],
+      "prohibited_when": ["the customer already declined contact"],
+      "required_sequence": ["acknowledge_the_pause", "ask_what_would_make_the_decision_clearer", "offer_a_small_or_later_step"],
+      "forbidden_actions": ["force_close", "invent_urgency", "ignore_the_pause"],
+      "approved_examples": [
+        "No rush. What would help you decide — a clearer next step now, or time to think with a follow-up later?"
+      ]
+    }
+  ]
+}

@@ -49,6 +49,7 @@ test("sales moves describe policy actions, not AI commercial control", () => {
   assert.equal(salesMoveLabel("OFFER_BOOKING_SLOTS"), "Offer booking slots");
   assert.equal(salesMoveLabel("ANSWER_OBJECTION"), "Answer with approved knowledge");
   assert.equal(salesMoveLabel("HANDOFF_TO_HUMAN"), "Hand off to you");
+  assert.equal(salesMoveLabel("SCHEDULE_CALLBACK"), "Schedule our follow-up");
 });
 
 test("classifySalesError maps API codes to UI states", () => {
@@ -557,8 +558,8 @@ test("unknown conversation returns null", () => {
 
 test("reasonCodeLabel uses a known phrase, not a raw guarantee", () => {
   assert.equal(
-    reasonCodeLabel("approved_objection_knowledge_missing"),
-    "No approved knowledge card is available for this objection.",
+    reasonCodeLabel("objection_answer_grounding_missing"),
+    "There is no business fact or approved knowledge to answer this objection.",
   );
   assert.equal(reasonCodeLabel("custom_code"), "custom code");
 });

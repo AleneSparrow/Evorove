@@ -12,7 +12,7 @@ from src.ai.sales_turn_analyzer import AISalesTurnAnalyzer
 from src.domain.conversations import ConversationStatus
 from src.domain.sales import (
     CustomerSalesProfile, SalesMove, SalesObjectionRecord, SalesShadowJob,
-    SalesShadowStatus, SalesStage, SalesTurn,
+    SalesShadowStatus, SalesTurn,
 )
 from src.engine.sales_policy import SalesPolicyEngine
 from src.engine.sales_response_validator import SalesResponseValidationContext
@@ -153,6 +153,7 @@ class SalesShadowWorker:
             customer_evidence=evidence_map, safe_fallback=safe_fallback,
             knowledge_required=decision.knowledge_required, booking_available=False,
             callback_at=analysis.requested_callback_at,
+            callback_recorded=decision.move is SalesMove.SCHEDULE_CALLBACK,
             human_takeover_active=decision.requires_human)
         generation = SalesResponseGenerationInput(
             approved_move=decision.move, sales_stage=decision.target_stage,
@@ -177,18 +178,8 @@ class SalesShadowWorker:
 
     @staticmethod
     def _merge(profile: CustomerSalesProfile, analysis: Any) -> CustomerSalesProfile:
-        values: dict[str, Any] = {}
-        criteria = list(profile.decision_criteria)
-        for signal in analysis.signals:
-            if signal.kind in {"customer_goal", "current_problem", "desired_outcome"}:
-                values[signal.kind] = signal.value
-            elif signal.kind == "decision_criteria" and signal.value not in criteria:
-                criteria.append(signal.value)
-        values["decision_criteria"] = tuple(criteria)
-        values["commitment_level"] = analysis.commitment_level
-        if analysis.objections:
-            values["active_objection"] = analysis.objections[0]
-        return replace(profile, **values)
+        from src.engine.sales_live_turn import merge_profile_from_analysis
+        return merge_profile_from_analysis(profile, analysis)
 
     def _record_terminal(self, job: SalesShadowJob, move: SalesMove,
                          delivered: str, category: str, now: datetime) -> None:

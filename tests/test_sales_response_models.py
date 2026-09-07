@@ -284,6 +284,17 @@ def test_knowledge_required_move_with_safe_fallback_and_no_knowledge_is_accepted
     )
 
 
+def test_answer_objection_may_use_business_facts_without_a_knowledge_card() -> None:
+    SalesResponseOutput.model_validate(
+        _output(
+            move="ANSWER_OBJECTION",
+            message_text="I hear that cost is the concern. We can look at the actual next step.",
+            knowledge_ids=[],
+            used_safe_fallback=False,
+        )
+    )
+
+
 def test_non_knowledge_required_move_needs_neither() -> None:
     SalesResponseOutput.model_validate(
         _output(

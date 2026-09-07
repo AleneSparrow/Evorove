@@ -434,6 +434,16 @@ export function ConversationSalesPanel({
             </p>
           )}
           <Field label="Last approved move">{context.last_move ? salesMoveLabel(context.last_move) : null}</Field>
+          {(context.preferred_contact_at || context.last_move === "SCHEDULE_CALLBACK") && (
+            <Field label="Requested callback">
+              {context.preferred_contact_at
+                ? new Date(context.preferred_contact_at).toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "Requested — we'll follow up at this time"}
+            </Field>
+          )}
           <div className="min-w-0">
             <div className="text-[11px] font-medium text-clay mb-0.5">Next approved action</div>
             <div className="text-sm font-medium break-words">{salesMoveLabel(context.next_approved_action)}</div>

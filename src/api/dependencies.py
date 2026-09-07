@@ -122,6 +122,8 @@ def get_intake_service(
         customer_response_generator=container.customer_response_generator,
         reassurance_response_generator=container.reassurance_response_generator,
         universal_reassurance_response_generator=container.universal_reassurance_response_generator,
+        sales_turn_analyzer=container.sales_turn_analyzer,
+        sales_response_generator=container.sales_response_generator,
     )
 
 
@@ -135,6 +137,8 @@ def get_conversation_service(
         container.customer_response_generator,
         reassurance_response_generator=container.reassurance_response_generator,
         universal_reassurance_response_generator=container.universal_reassurance_response_generator,
+        sales_turn_analyzer=container.sales_turn_analyzer,
+        sales_response_generator=container.sales_response_generator,
         token_ttl_hours=container.settings.public_conversation_token_ttl_hours,
     )
 

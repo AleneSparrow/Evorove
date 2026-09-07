@@ -69,7 +69,7 @@ from src.domain.sales import SalesMove
 #     never actually accepted. No validator change; this only makes the
 #     prompt stop asking for something the validator was always going to
 #     reject.
-SALES_RESPONSE_PROMPT_VERSION = "2026-09-06.v2"
+SALES_RESPONSE_PROMPT_VERSION = "2026-09-06.v4"
 
 
 # Server-controlled IDs only -- never a customer quote, never free text.
@@ -87,20 +87,10 @@ ServerId = Annotated[
     StringConstraints(strip_whitespace=False, min_length=1, max_length=64, pattern=_ID_PATTERN),
 ]
 
-# Moves for which SalesPolicyEngine (src/engine/sales_policy.py) sets
-# knowledge_required=True, plus PROVIDE_APPROVED_PROOF -- which the policy
-# engine does not yet emit at all, but which is, by its own name, never a
-# safe thing to improvise without an approved source. Listing it here is
-# strictly MORE conservative than the current engine, never less: this
-# schema will never accept an unfounded PROVIDE_APPROVED_PROOF/
-# PRESENT_RELEVANT_VALUE/ANSWER_OBJECTION response even on a day the engine's
-# own flag lags behind. Keeping this list here (rather than importing a
-# private constant from sales_policy.py, which this module must not modify
-# or depend on for its own validation) is a deliberate, reviewable duplication
-# of intent, not of code.
-KNOWLEDGE_REQUIRED_MOVES = frozenset(
-    {SalesMove.PRESENT_RELEVANT_VALUE, SalesMove.ANSWER_OBJECTION, SalesMove.PROVIDE_APPROVED_PROOF}
-)
+# PROVIDE_APPROVED_PROOF cannot be improvised. PRESENT_RELEVANT_VALUE and
+# ANSWER_OBJECTION may be phrased from listed business facts and customer
+# evidence; knowledge cards are optional extra methodology, not a gate.
+KNOWLEDGE_REQUIRED_MOVES = frozenset({SalesMove.PROVIDE_APPROVED_PROOF})
 
 # Substring match (case-insensitive) used only to keep END_CONTACT from
 # citing a knowledge/business-fact ID that exists to support a *continuing*

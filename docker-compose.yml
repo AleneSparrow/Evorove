@@ -25,6 +25,7 @@ services:
       AI_PROVIDER: ${AI_PROVIDER:?set AI_PROVIDER to deterministic, openai, or anthropic}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       # Never passed through before -- AI_PROVIDER=anthropic (task-cost-
       # reduction.md's live eval, and the anthropic runtime path generally)
       # had no way to actually reach the container via docker compose;

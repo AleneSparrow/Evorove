@@ -115,7 +115,7 @@ def test_concurrent_identical_http_requests_have_one_logical_effect(postgresql_u
     bodies = [response.json() for response in responses]
     assert len({body["case_id"] for body in bodies}) == 1
     assert len({body["lead_id"] for body in bodies}) == 1
-    assert {body["current_state"] for body in bodies} == {"QUALIFIED"}
+    assert {body["current_state"] for body in bodies} == {"QUALIFYING"}
     assert sum(body["duplicate"] for body in bodies) == 1
     assert provider.call_count == 1
 

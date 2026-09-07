@@ -97,7 +97,7 @@ class _FakeIntakeService:
     def __init__(self) -> None:
         self.received_ids: list[str] = []
 
-    def receive(self, message):
+    def receive(self, message, **_kwargs):
         self.received_ids.append(message.external_message_id)
         return SimpleNamespace(
             response=SimpleNamespace(message_text="Thanks — what service do you need?"),

@@ -12,9 +12,15 @@ from sqlalchemy import func, select, update
 
 from src.api.app import create_app
 from src.config import Settings
+from src.domain.events import EventType
+from src.domain.models import DecisionType, ProcessEvent
 from src.domain.qualification import IncomingMessage, IntentResult
+from src.domain.sales import SalesMove, SalesStage
+from src.domain.states import ProcessState
 from src.domain.tenancy import Business
+from src.engine.decision_router import DecisionRequest
 from src.engine.intent_extractor import DeterministicIntentExtractor
+from src.engine.process_engine import ProcessEngine
 from src.persistence.sqlalchemy_models import (
     Base,
     ConversationMessageRow,
@@ -121,6 +127,31 @@ def send(client: TestClient, token: str, message: str, external_id: str):
     )
 
 
+def force_case_qualified(factory, business_id: str = "tenant-a") -> None:
+    """Open the commercial contour without pretending intake completeness is a sale."""
+    with factory() as uow:
+        conversation = uow.session.scalar(
+            select(ConversationRow).where(ConversationRow.business_id == business_id)
+        )
+        assert conversation is not None and conversation.case_id is not None
+        case = uow.cases.get(business_id, conversation.case_id)
+        assert case is not None
+        expected = case.version
+        existing = len(case.event_history)
+        ProcessEngine().receive(
+            case,
+            ProcessEvent(
+                EventType.TRIGGER_RECEIVED,
+                source="test",
+                payload={"reason": "commercial contour fixture", "requested_target": "QUALIFIED"},
+            ),
+            DecisionRequest(DecisionType.RULE, ProcessState.QUALIFIED),
+        )
+        uow.cases.save(case, expected)
+        uow.events.add_many(business_id, case.case_id, case.event_history[existing:])
+        uow.commit()
+
+
 def test_create_public_conversation_without_internal_identifiers(conversation_environment) -> None:
     client, factory, _ = conversation_environment
     response = create_conversation(client)
@@ -161,9 +192,9 @@ def test_multi_turn_messages_reuse_conversation_lead_and_case(conversation_envir
     fourth = send(client, token, "Ada", "turn-4")
 
     assert second.status_code == third.status_code == fourth.status_code == 200
-    assert fourth.json()["current_state"] == "QUALIFIED"
+    assert fourth.json()["current_state"] == "QUALIFYING"
     assert fourth.json()["status"] == "ai_active"
-    assert "Choose an appointment time" in fourth.json()["messages"][-1]["text"]
+    assert "Choose an appointment time" not in fourth.json()["messages"][-1]["text"]
     assert len(fourth.json()["messages"]) == 8
     with factory() as uow:
         restored = uow.session.scalar(select(ConversationRow).where(
@@ -176,16 +207,235 @@ def test_multi_turn_messages_reuse_conversation_lead_and_case(conversation_envir
         assert uow.session.scalar(select(func.count()).select_from(ConversationMessageRow)) == 8
 
 
-def test_conversation_books_valid_proposed_slot_and_public_status_is_token_scoped(
+def test_complete_intake_fields_stay_in_discovery_and_do_not_open_slots(
     conversation_environment,
 ) -> None:
     client, _, _ = conversation_environment
-    qualified = create_conversation(
+    response = create_conversation(
+        client,
+        "AC diagnostic in 60601. My phone is +1 312 555 0101. My name is Ada",
+        "sales-live-complete",
+    )
+    token = response.json()["conversation_token"]
+    reply = response.json()["messages"][-1]["text"].casefold()
+
+    assert response.status_code == 200
+    assert response.json()["current_state"] == "QUALIFYING"
+    assert "Choose an appointment time" not in response.json()["messages"][-1]["text"]
+    assert "how many equipment units" not in reply
+    assert "hoping to get help" in reply or "problem" in reply or "outcome" in reply
+    commercial = client.get(
+        f"/api/v1/public/businesses/tenant-a/conversations/{token}/commercial"
+    ).json()
+    assert commercial["current_state"] == "QUALIFYING"
+    assert commercial["proposed_slots"] == []
+    assert commercial["quote"] is None
+    assert commercial["booking"] is None
+
+
+def test_sales_cycle_closes_to_booking_only_after_commitment(
+    conversation_environment,
+) -> None:
+    client, _, _ = conversation_environment
+    first = create_conversation(
+        client,
+        "My AC stopped cooling and I need it working this week. "
+        "AC diagnostic in 60601. My phone is +1 312 555 0190. My name is Ada",
+        "close-1",
+    )
+    token = first.json()["conversation_token"]
+    assert first.json()["current_state"] == "QUALIFYING"
+    assert "Choose an appointment time" not in first.json()["messages"][-1]["text"]
+
+    confirmed = send(client, token, "That's the issue", "close-2")
+    presented = send(client, token, "Yes", "close-3")
+    asked = send(client, token, "Sounds good", "close-4")
+    assert confirmed.json()["current_state"] == presented.json()["current_state"] == "QUALIFYING"
+    assert asked.json()["current_state"] == "QUALIFYING"
+    assert "Choose an appointment time" not in asked.json()["messages"][-1]["text"]
+    assert "next step" in asked.json()["messages"][-1]["text"].casefold()
+
+    offered = send(client, token, "Yes, book me", "close-5")
+    assert offered.status_code == 200
+    assert offered.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+
+    booked = send(client, token, "The second option works", "close-6")
+    assert booked.status_code == 200
+    assert booked.json()["current_state"] == "BOOKED"
+    assert "confirmed" in booked.json()["messages"][-1]["text"].casefold()
+
+
+def test_price_objection_is_answered_then_books_without_knowledge_cards(
+    conversation_environment,
+) -> None:
+    client, _, _ = conversation_environment
+    first = create_conversation(
+        client,
+        "My AC stopped cooling and I need it working this week. "
+        "AC diagnostic in 60601. My phone is +1 312 555 0190. My name is Ada",
+        "obj-1",
+    )
+    token = first.json()["conversation_token"]
+    send(client, token, "That's the issue", "obj-2")
+    presented = send(client, token, "Yes", "obj-3")
+    assert presented.json()["current_state"] == "QUALIFYING"
+
+    diagnosed = send(client, token, "That's way more than I expected to pay", "obj-4")
+    assert diagnosed.status_code == 200
+    assert diagnosed.json()["current_state"] == "QUALIFYING"
+    assert diagnosed.json()["requires_human"] is not True
+    assert "budget" in diagnosed.json()["messages"][-1]["text"].casefold()
+
+    answered = send(client, token, "It's whether it will be worth it", "obj-5")
+    assert answered.json()["current_state"] == "QUALIFYING"
+    assert answered.json()["requires_human"] is not True
+    assert "discount" not in answered.json()["messages"][-1]["text"].casefold()
+    assert "guarantee" not in answered.json()["messages"][-1]["text"].casefold()
+
+    offered = send(client, token, "Yes, book me", "obj-6")
+    assert offered.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+
+
+def test_other_objection_is_answered_then_books_without_knowledge_cards(
+    conversation_environment,
+) -> None:
+    client, _, _ = conversation_environment
+    first = create_conversation(
+        client,
+        "My AC stopped cooling and I need it working this week. "
+        "AC diagnostic in 60601. My phone is +1 312 555 0190. My name is Ada",
+        "other-obj-1",
+    )
+    token = first.json()["conversation_token"]
+    send(client, token, "That's the issue", "other-obj-2")
+    presented = send(client, token, "Yes", "other-obj-3")
+    assert presented.json()["current_state"] == "QUALIFYING"
+
+    diagnosed = send(client, token, "I'm just not comfortable with this", "other-obj-4")
+    assert diagnosed.status_code == 200
+    assert diagnosed.json()["current_state"] == "QUALIFYING"
+    assert diagnosed.json()["requires_human"] is not True
+    assert "in the way" in diagnosed.json()["messages"][-1]["text"].casefold()
+
+    answered = send(client, token, "The whole process feels messy", "other-obj-5")
+    assert answered.json()["current_state"] == "QUALIFYING"
+    assert answered.json()["requires_human"] is not True
+    text = answered.json()["messages"][-1]["text"].casefold()
+    assert "discount" not in text
+    assert "guarantee" not in text
+
+    offered = send(client, token, "Yes, book me", "other-obj-6")
+    assert offered.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+
+
+def test_callback_request_schedules_engine_follow_up_without_qualifying_or_booking(
+    conversation_environment,
+) -> None:
+    client, factory, _ = conversation_environment
+    first = create_conversation(
+        client,
+        "My AC stopped cooling and I need it working this week. "
+        "AC diagnostic in 60601. My phone is +1 312 555 0190. My name is Ada",
+        "cb-1",
+    )
+    token = first.json()["conversation_token"]
+    asked = send(client, token, "Can you call me tomorrow around 3pm?", "cb-2")
+    assert asked.status_code == 200
+    assert asked.json()["current_state"] == "QUALIFYING"
+    assert asked.json()["requires_human"] is not True
+    text = asked.json()["messages"][-1]["text"].casefold()
+    assert "choose an appointment time" not in text
+    assert "follow up" in text
+    assert "team member" not in text
+    assert "call you" not in text
+
+    with factory() as uow:
+        conversation = uow.session.scalar(
+            select(ConversationRow).where(ConversationRow.business_id == "tenant-a")
+        )
+        assert conversation is not None and conversation.case_id is not None
+        case = uow.cases.get("tenant-a", conversation.case_id)
+        assert case is not None
+        assert case.current_state is ProcessState.QUALIFYING
+        callback_events = [
+            event for event in uow.events.list_for_case("tenant-a", conversation.case_id)
+            if event.event_type == EventType.CALLBACK_REQUESTED
+        ]
+        assert len(callback_events) == 1
+        assert "call me" in str(callback_events[0].payload.get("requested_window", "")).casefold()
+        profile = uow.sales_profiles.get("tenant-a", conversation.case_id)
+        assert profile is not None
+        assert profile.last_move is SalesMove.SCHEDULE_CALLBACK
+        assert profile.stage is SalesStage.FOLLOW_UP
+        assert profile.metadata.get("callback_status") == "requested"
+        assert case.metadata.get("sales_follow_up_reason") == "CALLBACK_REQUESTED"
+
+    offered = send(client, token, "Yes, book me", "cb-3")
+    assert offered.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+
+
+def test_need_to_think_defers_without_pressing_then_still_books(
+    conversation_environment,
+) -> None:
+    client, factory, _ = conversation_environment
+    first = create_conversation(
+        client,
+        "My AC stopped cooling and I need it working this week. "
+        "AC diagnostic in 60601. My phone is +1 312 555 0190. My name is Ada",
+        "think-1",
+    )
+    token = first.json()["conversation_token"]
+    diagnosed = send(client, token, "Let me think about it and get back to you", "think-2")
+    assert diagnosed.json()["current_state"] == "QUALIFYING"
+    assert diagnosed.json()["requires_human"] is not True
+    assert "follow-up later" in diagnosed.json()["messages"][-1]["text"].casefold() or (
+        "later" in diagnosed.json()["messages"][-1]["text"].casefold()
+    )
+
+    deferred = send(client, token, "I just need some time", "think-3")
+    assert deferred.json()["current_state"] == "QUALIFYING"
+    assert deferred.json()["requires_human"] is not True
+    text = deferred.json()["messages"][-1]["text"].casefold()
+    assert "choose an appointment time" not in text
+    assert "no rush" in text
+    with factory() as uow:
+        conversation = uow.session.scalar(
+            select(ConversationRow).where(ConversationRow.business_id == "tenant-a")
+        )
+        assert conversation is not None and conversation.case_id is not None
+        profile = uow.sales_profiles.get("tenant-a", conversation.case_id)
+        assert profile is not None
+        assert profile.active_objection is not None
+        assert profile.active_objection.status.value == "DEFERRED"
+        assert profile.last_move is SalesMove.NURTURE_WITHOUT_PRESSURE
+        assert profile.stage is SalesStage.FOLLOW_UP
+        case = uow.cases.get("tenant-a", conversation.case_id)
+        assert case is not None
+        assert case.metadata.get("sales_follow_up_reason") == "OBJECTION_DEFERRED"
+
+    offered = send(client, token, "Yes, book me", "think-4")
+    assert offered.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+
+
+def test_conversation_books_valid_proposed_slot_and_public_status_is_token_scoped(
+    conversation_environment,
+) -> None:
+    client, factory, _ = conversation_environment
+    started = create_conversation(
         client,
         "AC diagnostic in 60601. My phone is +1 312 555 0101. My name is Ada",
         "commercial-booking-start",
     )
-    token = qualified.json()["conversation_token"]
+    token = started.json()["conversation_token"]
+    assert started.json()["current_state"] == "QUALIFYING"
+    force_case_qualified(factory)
+    qualified = send(client, token, "I am ready for times", "commercial-booking-open")
+    assert qualified.status_code == 200
     assert qualified.json()["current_state"] == "QUALIFIED"
     assert "Choose an appointment time" in qualified.json()["messages"][-1]["text"]
 
@@ -235,13 +485,16 @@ def test_conversation_books_valid_proposed_slot_and_public_status_is_token_scope
 def test_conversation_quote_flow_collects_fact_and_reaches_won(
     conversation_environment,
 ) -> None:
-    client, _, _ = conversation_environment
-    qualified = create_conversation(
+    client, factory, _ = conversation_environment
+    started = create_conversation(
         client,
         "Equipment replacement in 60601. My phone is +1 312 555 0102. My name is Grace",
         "commercial-quote-start",
     )
-    token = qualified.json()["conversation_token"]
+    token = started.json()["conversation_token"]
+    assert started.json()["current_state"] == "QUALIFYING"
+    force_case_qualified(factory)
+    qualified = send(client, token, "I am ready for a quote", "commercial-quote-open")
     assert qualified.json()["current_state"] == "QUALIFIED"
     assert "How many equipment units" in qualified.json()["messages"][-1]["text"]
 
@@ -283,7 +536,7 @@ def test_late_contact_owned_by_another_lead_escalates_without_overwrite(
     )
 
     assert first.status_code == second.status_code == conflicted.status_code == 200
-    assert first.json()["current_state"] == "QUALIFIED"
+    assert first.json()["current_state"] == "QUALIFYING"
     assert conflicted.json()["current_state"] == "NEEDS_HUMAN"
     assert conflicted.json()["status"] == "human_takeover_requested"
     assert conflicted.json()["requires_human"] is True
@@ -328,7 +581,7 @@ def test_same_named_contact_can_open_a_second_task_without_identity_escalation(
     )
 
     assert first.status_code == second.status_code == 200
-    assert first.json()["current_state"] == second.json()["current_state"] == "QUALIFIED"
+    assert first.json()["current_state"] == second.json()["current_state"] == "QUALIFYING"
     assert not first.json()["requires_human"]
     assert not second.json()["requires_human"]
     with factory() as uow:
@@ -373,7 +626,7 @@ def test_late_contact_on_first_of_two_tasks_keeps_its_conversation_link(
     )
 
     assert first.status_code == second.status_code == completed_first.status_code == 200
-    assert completed_first.json()["current_state"] == "QUALIFIED"
+    assert completed_first.json()["current_state"] == "QUALIFYING"
 
 
 def test_refresh_restores_ordered_safe_history(conversation_environment) -> None:
@@ -484,9 +737,9 @@ def test_service_question_is_remembered_and_not_reasked(conversation_environment
 
     assert first.status_code == second.status_code == 200
     prompt = "Is this for a residential property?"
-    assert first.json()["messages"][-1]["text"].count(prompt) == 1
+    assert prompt not in first.json()["messages"][-1]["text"]
     assert prompt not in second.json()["messages"][-1]["text"]
-    assert second.json()["current_state"] == "QUALIFIED"
+    assert second.json()["current_state"] == "QUALIFYING"
     with factory() as uow:
         conversation = uow.session.scalar(select(ConversationRow).where(
             ConversationRow.business_id == "tenant-question"
@@ -512,7 +765,7 @@ def test_duplicate_browser_retry_skips_ai_and_duplicate_messages(conversation_en
         ) == 2
         assert uow.session.scalar(
             select(func.count()).select_from(SalesShadowJobRow)
-        ) == 1
+        ) == 0
 
 
 def test_retried_initial_create_with_client_token_has_one_effect(conversation_environment) -> None:
@@ -576,7 +829,7 @@ def test_failed_conversation_create_rolls_back_and_can_retry(conversation_enviro
 
 def test_shadow_job_lease_prevents_second_worker_claim(conversation_environment) -> None:
     client, factory, _ = conversation_environment
-    assert create_conversation(client, "I need AC help", "lease-1").status_code == 200
+    assert create_conversation(client, "I need AC help, my zip is 90210", "lease-1").status_code == 200
     now = datetime.now(timezone.utc)
     with factory() as uow:
         first = uow.sales_shadow_jobs.claim_next(
@@ -591,7 +844,7 @@ def test_shadow_job_lease_prevents_second_worker_claim(conversation_environment)
 
 def test_shadow_job_failure_retries_then_exhausts(conversation_environment) -> None:
     client, factory, _ = conversation_environment
-    assert create_conversation(client, "I need AC help", "retry-job-1").status_code == 200
+    assert create_conversation(client, "I need AC help, my zip is 90210", "retry-job-1").status_code == 200
     now = datetime.now(timezone.utc)
     for attempt in range(3):
         with factory() as uow:

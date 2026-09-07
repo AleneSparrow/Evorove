@@ -168,7 +168,7 @@ def test_direct_lead_intake_rejects_staff_user_from_another_tenant(api_environme
 @pytest.mark.parametrize(
     ("external_id", "changes", "expected_state", "requires_human"),
     (
-        ("valid", {}, "QUALIFIED", False),
+        ("valid", {}, "QUALIFYING", False),
         ("missing-phone", {"phone": None}, "QUALIFYING", False),
         ("unsupported", {"message": "I need a roof replacement"}, "LOST", False),
         ("low-confidence", {"message": "I am not sure what I need"}, "QUALIFYING", False),
@@ -192,9 +192,14 @@ def test_lead_intake_outcomes(
     assert body["business_id"] == "tenant-a"
     assert body["current_state"] == expected_state
     assert body["requires_human"] is requires_human
+    assert body["customer_response"] is not None
+    if external_id == "valid":
+        assert body["qualification"]["qualified"] is True
+        assert body["qualification"]["recommended_next_state"] == "QUALIFIED"
+        assert "Choose an appointment time" not in body["customer_response"]["message_text"]
     if expected_state == "QUALIFYING" and external_id == "missing-phone":
         assert body["qualification"]["missing_fields"] == ["phone"]
-        assert "phone" in body["customer_response"]["message_text"].casefold()
+        assert "Choose an appointment time" not in body["customer_response"]["message_text"]
 
 
 def test_duplicate_replay_is_stable_and_does_not_duplicate_audit_events(api_environment) -> None:
@@ -220,7 +225,8 @@ def test_duplicate_replay_is_stable_and_does_not_duplicate_audit_events(api_envi
                 ProcessEventRow.case_id == first.json()["case_id"],
             )
         )
-        assert event_count == 12
+        # Completeness no longer adds QUALIFIED, so the first turn is 9 events.
+        assert event_count == 9
 
 
 def test_reused_message_identity_with_different_content_returns_409(api_environment) -> None:

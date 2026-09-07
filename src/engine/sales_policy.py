@@ -22,9 +22,9 @@ class InvalidSalesStageTransition(ValueError):
 SALES_STAGE_TRANSITIONS: dict[SalesStage, frozenset[SalesStage]] = {
     SalesStage.GREETING: frozenset({SalesStage.DISCOVERY, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.DISCOVERY: frozenset({SalesStage.NEEDS_CONFIRMED, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.NEEDS_CONFIRMED: frozenset({SalesStage.PRESENTATION, SalesStage.DISCOVERY, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.NEEDS_CONFIRMED: frozenset({SalesStage.PRESENTATION, SalesStage.DISCOVERY, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.PRESENTATION: frozenset({SalesStage.OBJECTION_HANDLING, SalesStage.COMMITMENT, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
-    SalesStage.OBJECTION_HANDLING: frozenset({SalesStage.PRESENTATION, SalesStage.COMMITMENT, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
+    SalesStage.OBJECTION_HANDLING: frozenset({SalesStage.PRESENTATION, SalesStage.COMMITMENT, SalesStage.BOOKING, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.COMMITMENT: frozenset({SalesStage.BOOKING, SalesStage.OBJECTION_HANDLING, SalesStage.NURTURE, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.BOOKING: frozenset({SalesStage.WON, SalesStage.OBJECTION_HANDLING, SalesStage.FOLLOW_UP, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
     SalesStage.NURTURE: frozenset({SalesStage.FOLLOW_UP, SalesStage.DISCOVERY, SalesStage.PRESENTATION, SalesStage.HUMAN_REVIEW, SalesStage.LOST}),
@@ -74,7 +74,9 @@ class SalesPolicyEngine:
         analysis: SalesTurnAnalysis,
         *,
         approved_knowledge_available: bool = False,
+        business_facts_available: bool = False,
         booking_available: bool = False,
+        operational_intake_incomplete: bool = False,
     ) -> SalesMoveDecision:
         if analysis.requires_human:
             return SalesMoveDecision(
@@ -105,18 +107,17 @@ class SalesPolicyEngine:
                     SalesStage.OBJECTION_HANDLING,
                 )
             if objection.status in {ObjectionStatus.ACTIVE, ObjectionStatus.DIAGNOSED}:
-                if not approved_knowledge_available:
+                if not approved_knowledge_available and not business_facts_available:
                     return SalesMoveDecision(
-                        SalesMove.HANDOFF_TO_HUMAN,
-                        "approved_objection_knowledge_missing",
-                        SalesStage.HUMAN_REVIEW,
-                        requires_human=True,
+                        SalesMove.REQUEST_BUSINESS_FACT,
+                        "objection_answer_grounding_missing",
+                        SalesStage.FOLLOW_UP,
                     )
                 return SalesMoveDecision(
                     SalesMove.ANSWER_OBJECTION,
-                    "approved_objection_knowledge_available",
+                    "diagnosed_objection_can_be_answered",
                     SalesStage.OBJECTION_HANDLING,
-                    knowledge_required=True,
+                    knowledge_required=approved_knowledge_available,
                 )
             return SalesMoveDecision(
                 SalesMove.CHECK_OBJECTION_RESOLUTION,
@@ -124,10 +125,21 @@ class SalesPolicyEngine:
                 SalesStage.OBJECTION_HANDLING,
             )
 
-        if analysis.requested_callback_at is not None:
+        if _callback_requested(analysis):
             return SalesMoveDecision(
                 SalesMove.SCHEDULE_CALLBACK,
                 "customer_requested_callback",
+                SalesStage.FOLLOW_UP,
+            )
+
+        if (
+            objection is not None
+            and objection.status is ObjectionStatus.DEFERRED
+            and analysis.commitment_level is not CommitmentLevel.READY_FOR_NEXT_STEP
+        ):
+            return SalesMoveDecision(
+                SalesMove.NURTURE_WITHOUT_PRESSURE,
+                "objection_deferred_without_pressure",
                 SalesStage.FOLLOW_UP,
             )
 
@@ -145,26 +157,32 @@ class SalesPolicyEngine:
                 SalesStage.DISCOVERY,
             )
 
-        if profile.stage in {SalesStage.DISCOVERY, SalesStage.NEEDS_CONFIRMED}:
+        if operational_intake_incomplete:
+            return SalesMoveDecision(
+                SalesMove.ASK_DISCOVERY_QUESTION,
+                "operational_intake_incomplete",
+                profile.stage if profile.stage is not SalesStage.GREETING else SalesStage.DISCOVERY,
+            )
+
+        if profile.stage is SalesStage.DISCOVERY:
             return SalesMoveDecision(
                 SalesMove.CONFIRM_CUSTOMER_NEED,
                 "discovery_context_complete",
                 SalesStage.NEEDS_CONFIRMED,
             )
 
-        if profile.stage is SalesStage.PRESENTATION:
-            if not approved_knowledge_available:
+        if profile.stage is SalesStage.NEEDS_CONFIRMED:
+            if not approved_knowledge_available and not business_facts_available:
                 return SalesMoveDecision(
-                    SalesMove.HANDOFF_TO_HUMAN,
+                    SalesMove.REQUEST_BUSINESS_FACT,
                     "approved_presentation_knowledge_missing",
-                    SalesStage.HUMAN_REVIEW,
-                    requires_human=True,
+                    SalesStage.FOLLOW_UP,
                 )
             return SalesMoveDecision(
                 SalesMove.PRESENT_RELEVANT_VALUE,
                 "confirmed_need_has_approved_value",
                 SalesStage.PRESENTATION,
-                knowledge_required=True,
+                knowledge_required=approved_knowledge_available,
             )
 
         if analysis.commitment_level is CommitmentLevel.READY_FOR_NEXT_STEP:
@@ -180,6 +198,13 @@ class SalesPolicyEngine:
                 SalesStage.COMMITMENT,
             )
 
+        if profile.stage is SalesStage.PRESENTATION:
+            return SalesMoveDecision(
+                SalesMove.ASK_FOR_COMMITMENT,
+                "need_presented_without_active_objection",
+                SalesStage.COMMITMENT,
+            )
+
         if profile.stage in {SalesStage.NURTURE, SalesStage.FOLLOW_UP}:
             return SalesMoveDecision(
                 SalesMove.NURTURE_WITHOUT_PRESSURE,
@@ -192,4 +217,12 @@ class SalesPolicyEngine:
             "need_presented_without_active_objection",
             SalesStage.COMMITMENT,
         )
+
+
+def _callback_requested(analysis: SalesTurnAnalysis) -> bool:
+    """Evidence of a callback request authorizes the move; recommended_moves do not."""
+
+    if analysis.requested_callback_at is not None:
+        return True
+    return any(signal.kind == "preferred_contact_time" for signal in analysis.signals)
 

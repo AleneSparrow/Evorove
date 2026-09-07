@@ -26,13 +26,14 @@ from .adapters import (
 from .anthropic_provider import AnthropicProvider
 from .fallback import (
     FallbackIntentExtractor,
+    FallbackStructuredProvider,
     wrap_customer_response_generator,
     wrap_question_generator,
     wrap_reassurance_response_generator,
     wrap_universal_reassurance_response_generator,
 )
 from .openai_provider import OpenAIProvider
-from .provider import RetryingAIProvider
+from .provider import RetryingAIProvider, StructuredAIProvider
 from .sales_response_generator import AISalesResponseGenerator
 from .sales_turn_analyzer import AISalesTurnAnalyzer
 
@@ -91,6 +92,59 @@ def _with_deterministic_fallback(
     )
 
 
+def _openai_compatible_provider(settings: Settings) -> RetryingAIProvider:
+    if settings.openai_api_key is None or settings.openai_model is None:
+        raise RuntimeError("OpenAI runtime configuration is incomplete")
+    return RetryingAIProvider(
+        OpenAIProvider(
+            api_key=settings.openai_api_key,
+            model=settings.openai_model,
+            timeout_seconds=settings.ai_timeout_seconds,
+            base_url=settings.openai_base_url,
+        ),
+        max_retries=settings.ai_max_retries,
+    )
+
+
+def _with_openai_compatible_fallback(
+    primary: StructuredAIProvider,
+    settings: Settings,
+    *,
+    primary_name: str,
+) -> StructuredAIProvider:
+    """When Anthropic is primary, use a configured OpenAI-compatible API next.
+
+    Does not train a model. Same prompts, schemas, and policy constraints
+    continue on the second cloud. Deterministic fallback still sits after this.
+    """
+    if primary_name == "openai" or not settings.openai_compatible_configured:
+        return primary
+    return FallbackStructuredProvider(
+        primary,
+        _openai_compatible_provider(settings),
+        primary_name=primary_name,
+        secondary_name="openai",
+    )
+
+
+def _assembled_runtime(
+    provider: StructuredAIProvider,
+    provider_name: str,
+    model_name: str,
+) -> AIRuntimeComponents:
+    return _with_deterministic_fallback(
+        provider_name,
+        model_name,
+        AIIntentExtractor(provider),
+        AIQuestionGenerator(provider),
+        AICustomerResponseGenerator(provider),
+        AIReassuranceResponseGenerator(provider),
+        AIUniversalReassuranceResponseGenerator(provider),
+        AISalesResponseGenerator(provider),
+        AISalesTurnAnalyzer(provider),
+    )
+
+
 def build_ai_runtime(settings: Settings) -> AIRuntimeComponents:
     if settings.ai_provider == "deterministic":
         return AIRuntimeComponents(
@@ -107,45 +161,23 @@ def build_ai_runtime(settings: Settings) -> AIRuntimeComponents:
     if settings.ai_provider == "anthropic":
         if settings.anthropic_api_key is None or settings.anthropic_model is None:
             raise RuntimeError("Anthropic runtime configuration is incomplete")
-        provider = RetryingAIProvider(
-            AnthropicProvider(
-                api_key=settings.anthropic_api_key,
-                model=settings.anthropic_model,
-                timeout_seconds=settings.ai_timeout_seconds,
+        provider = _with_openai_compatible_fallback(
+            RetryingAIProvider(
+                AnthropicProvider(
+                    api_key=settings.anthropic_api_key,
+                    model=settings.anthropic_model,
+                    timeout_seconds=settings.ai_timeout_seconds,
+                ),
+                max_retries=settings.ai_max_retries,
             ),
-            max_retries=settings.ai_max_retries,
+            settings,
+            primary_name="anthropic",
         )
-        return _with_deterministic_fallback(
-            "anthropic",
-            settings.anthropic_model,
-            AIIntentExtractor(provider),
-            AIQuestionGenerator(provider),
-            AICustomerResponseGenerator(provider),
-            AIReassuranceResponseGenerator(provider),
-            AIUniversalReassuranceResponseGenerator(provider),
-            AISalesResponseGenerator(provider),
-            AISalesTurnAnalyzer(provider),
-        )
+        return _assembled_runtime(provider, "anthropic", settings.anthropic_model)
     if settings.ai_provider != "openai":
         raise RuntimeError(f"unsupported AI_PROVIDER: {settings.ai_provider}")
-    if settings.openai_api_key is None or settings.openai_model is None:
-        raise RuntimeError("OpenAI runtime configuration is incomplete")
-    provider = RetryingAIProvider(
-        OpenAIProvider(
-            api_key=settings.openai_api_key,
-            model=settings.openai_model,
-            timeout_seconds=settings.ai_timeout_seconds,
-        ),
-        max_retries=settings.ai_max_retries,
-    )
-    return _with_deterministic_fallback(
+    return _assembled_runtime(
+        _openai_compatible_provider(settings),
         "openai",
-        settings.openai_model,
-        AIIntentExtractor(provider),
-        AIQuestionGenerator(provider),
-        AICustomerResponseGenerator(provider),
-        AIReassuranceResponseGenerator(provider),
-        AIUniversalReassuranceResponseGenerator(provider),
-        AISalesResponseGenerator(provider),
-        AISalesTurnAnalyzer(provider),
+        settings.openai_model or "openai",
     )

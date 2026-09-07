@@ -123,7 +123,25 @@ def test_booking_and_callback_require_verified_capabilities() -> None:
         context(approved_move=SalesMove.SCHEDULE_CALLBACK, callback_at=None),
     )
     assert "booking_not_available" in booking.violations
-    assert "callback_time_missing" in callback.violations
+    assert "callback_not_recorded" in callback.violations
+
+
+def test_callback_phrasing_is_allowed_after_the_engine_records_follow_up() -> None:
+    result = SalesPolicyValidator().validate(
+        candidate(
+            message_text="I'll follow up with you at the time you asked for.",
+            move=SalesMove.SCHEDULE_CALLBACK,
+            knowledge_ids=(),
+            business_fact_ids=(),
+            customer_evidence_ids=(),
+        ),
+        context(
+            approved_move=SalesMove.SCHEDULE_CALLBACK,
+            callback_recorded=True,
+            callback_at=None,
+        ),
+    )
+    assert result.valid is True
 
 
 def test_callback_time_must_be_timezone_aware() -> None:

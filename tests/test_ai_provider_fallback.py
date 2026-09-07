@@ -15,7 +15,9 @@ from src.ai.errors import (
     AIRateLimitError,
     AITimeoutError,
 )
-from src.ai.fallback import FallbackGenerator, FallbackIntentExtractor
+from src.ai.fallback import FallbackGenerator, FallbackIntentExtractor, FallbackStructuredProvider
+from src.ai.runtime import build_ai_runtime
+from src.config import Settings
 from src.domain.qualification import IncomingMessage, IntentResult, Urgency
 from src.domain.models import utc_now
 
@@ -141,3 +143,106 @@ def test_our_own_bugs_are_not_masked():
     except Exception as exc:  # noqa: BLE001
         raise AssertionError(f"unexpected error: {exc!r}") from exc
     assert deterministic.calls == 1
+
+
+class _Structured:
+    def __init__(self, outcome: object) -> None:
+        self.outcome = outcome
+        self.calls = 0
+
+    def generate(self, request: object) -> object:
+        self.calls += 1
+        self.received = request
+        if isinstance(self.outcome, Exception):
+            raise self.outcome
+        return self.outcome
+
+
+def test_structured_provider_uses_secondary_on_credit_exhaustion():
+    primary = _Structured(AIProviderRequestError(CREDIT_EXHAUSTED))
+    secondary = _Structured("openai-compatible-result")
+    wrapper = FallbackStructuredProvider(
+        primary, secondary, primary_name="anthropic", secondary_name="openai"
+    )
+
+    assert wrapper.generate("same-constrained-request") == "openai-compatible-result"
+    assert primary.calls == 1
+    assert secondary.calls == 1
+    assert secondary.received == "same-constrained-request"
+
+
+def test_structured_provider_does_not_touch_secondary_when_primary_works():
+    primary = _Structured("anthropic-result")
+    secondary = _Structured("openai-compatible-result")
+    wrapper = FallbackStructuredProvider(
+        primary, secondary, primary_name="anthropic", secondary_name="openai"
+    )
+
+    assert wrapper.generate("request") == "anthropic-result"
+    assert secondary.calls == 0
+
+
+def test_structured_provider_does_not_mask_our_bugs():
+    primary = _Structured(TypeError("bug in our code"))
+    secondary = _Structured("openai-compatible-result")
+    wrapper = FallbackStructuredProvider(
+        primary, secondary, primary_name="anthropic", secondary_name="openai"
+    )
+    try:
+        wrapper.generate("request")
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("a non-provider error must not be swallowed")
+    assert secondary.calls == 0
+
+
+def test_anthropic_runtime_chains_openai_compatible_then_deterministic():
+    runtime = build_ai_runtime(
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/test",
+            ai_provider="anthropic",
+            anthropic_api_key="anthropic-test-key",
+            anthropic_model="claude-test",
+            openai_api_key="openai-test-key",
+            openai_model="gpt-test",
+            openai_base_url="https://example.invalid/v1",
+        )
+    )
+    chained = runtime.intent_extractor._primary.provider
+    assert isinstance(chained, FallbackStructuredProvider)
+    assert chained.primary_name == "anthropic"
+    assert chained.secondary_name == "openai"
+    assert runtime.sales_turn_analyzer is not None
+    assert runtime.sales_turn_analyzer._provider is chained
+    assert runtime.sales_response_generator is not None
+    assert runtime.sales_response_generator._provider is chained
+    assert chained.secondary.provider.base_url == "https://example.invalid/v1"
+
+
+def test_anthropic_runtime_skips_second_cloud_when_openai_unset():
+    runtime = build_ai_runtime(
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/test",
+            ai_provider="anthropic",
+            anthropic_api_key="anthropic-test-key",
+            anthropic_model="claude-test",
+        )
+    )
+    assert not isinstance(runtime.intent_extractor._primary.provider, FallbackStructuredProvider)
+
+
+def test_openai_runtime_uses_custom_base_url_as_primary():
+    runtime = build_ai_runtime(
+        Settings(
+            database_url="postgresql+psycopg://example.invalid/test",
+            ai_provider="openai",
+            openai_api_key="openai-test-key",
+            openai_model="llama-test",
+            openai_base_url="https://api.groq.com/openai/v1",
+        )
+    )
+    retrying = runtime.intent_extractor._primary.provider
+    assert not isinstance(retrying, FallbackStructuredProvider)
+    assert retrying.provider.base_url == "https://api.groq.com/openai/v1"
+    assert retrying.provider.model == "llama-test"

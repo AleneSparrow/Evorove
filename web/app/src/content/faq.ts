@@ -30,4 +30,8 @@ export const FAQ_ITEMS: { q: string; a: string }[] = [
     q: "Where does it work?",
     a: "The United States today. Other English-speaking markets follow once address handling is ready for them — we would rather say that plainly than sell you something that mishandles your postcodes.",
   },
+  {
+    q: "Do you train AI on my customers' conversations?",
+    a: "No. We do not use those conversations to train or fine-tune a foundation model. A model may rewrite a step the engine already chose. We keep logs and audits so the cycle is measurable. The Privacy Policy and DPA spell this out.",
+  },
 ];

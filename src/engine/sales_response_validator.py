@@ -42,6 +42,7 @@ class SalesResponseValidationContext:
     knowledge_required: bool = False
     booking_available: bool = False
     callback_at: datetime | None = None
+    callback_recorded: bool = False
     contact_allowed: bool = True
     human_takeover_active: bool = False
 
@@ -107,8 +108,8 @@ class SalesPolicyValidator:
                 violations.append("human_takeover_active")
         if candidate.move is SalesMove.OFFER_BOOKING_SLOTS and not context.booking_available:
             violations.append("booking_not_available")
-        if candidate.move is SalesMove.SCHEDULE_CALLBACK and context.callback_at is None:
-            violations.append("callback_time_missing")
+        if candidate.move is SalesMove.SCHEDULE_CALLBACK and not context.callback_recorded:
+            violations.append("callback_not_recorded")
         if _UNAUTHORIZED_EXECUTION.search(text):
             violations.append("unauthorized_commercial_execution")
 

@@ -30,9 +30,10 @@ router = APIRouter(prefix="/api/v1/businesses", tags=["lead intake"])
     summary="Receive and qualify a customer message (staff direct intake)",
     description=(
         "Staff-authenticated direct intake for a business owned by the bearer-token caller. "
-        "Creates or continues a tenant-scoped lead qualification case. Replaying the same "
-        "business, channel, external message ID, and content returns the stored logical result. "
-        "Anonymous website chat uses the separate opaque conversation-token routes."
+        "Creates or continues a tenant-scoped sales-led case: form completeness does not "
+        "advance ProcessState to QUALIFIED. The customer-facing reply is chosen by "
+        "SalesPolicyEngine. Anonymous website chat uses the separate opaque conversation-token "
+        "routes."
     ),
 )
 def receive_message(
@@ -58,7 +59,7 @@ def receive_message(
         raise RequestDataError() from exc
 
     try:
-        result = intake_service.receive(message)
+        result = intake_service.receive(message, sales_led_conversation=True)
     except KeyError as exc:
         raise ResourceNotFoundError("case_not_found", "Case was not found for this business") from exc
 
