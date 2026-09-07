@@ -37,6 +37,15 @@ class StaleSalesProfileError(PersistenceError):
     """A sales profile changed after it was loaded and cannot be overwritten safely."""
 
 
+class OutboundFirstTouchBlocked(PersistenceError):
+    """Outbound GREET must not send: missing consent, STOP, or a rejected found person."""
+
+    def __init__(self, code: str, public_message: str) -> None:
+        super().__init__(public_message)
+        self.code = code
+        self.public_message = public_message
+
+
 class StaleSalesObjectionError(PersistenceError):
     """A sales objection changed after it was loaded and cannot be overwritten safely."""
 

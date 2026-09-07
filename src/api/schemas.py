@@ -1185,6 +1185,28 @@ class SupplyBusinessFactRequest(ApiModel):
         return cleaned
 
 
+class OutboundFirstTouchRequest(ApiModel):
+    idempotency_key: Annotated[str, Field(min_length=8, max_length=128)]
+    reason: Annotated[str, Field(min_length=1, max_length=2_000)]
+    source: Annotated[str, Field(min_length=1, max_length=255)]
+    channel: Annotated[str, Field(min_length=1, max_length=16)]
+    consent_basis: Annotated[str | None, Field(max_length=64)] = None
+    name: Annotated[str | None, Field(min_length=1, max_length=255)] = None
+    phone: Annotated[str | None, Field(min_length=1, max_length=64)] = None
+    email: Annotated[str | None, Field(min_length=1, max_length=320)] = None
+
+
+class OutboundFirstTouchResponse(ApiModel):
+    case_id: str
+    conversation_id: str
+    lead_id: str
+    move: SalesMove
+    message_text: str
+    delivered: bool
+    process_state: ProcessState
+    duplicate: bool = False
+
+
 class SalesCaseContextResponse(ApiModel):
     case_id: str
     stage: SalesStage

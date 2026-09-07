@@ -69,7 +69,10 @@ from src.domain.sales import SalesMove
 #     never actually accepted. No validator change; this only makes the
 #     prompt stop asking for something the validator was always going to
 #     reject.
-SALES_RESPONSE_PROMPT_VERSION = "2026-09-06.v4"
+#   2026-09-06.v4 -- prior wording/contract tightening (pinned hash in tests).
+#   2026-09-07.r2 -- slice D step 10: empty CUSTOMER_CONTENT is a first outbound
+#     GREET; still forbid "thanks for reaching out" / "you reached out".
+SALES_RESPONSE_PROMPT_VERSION = "2026-09-07.r2"
 
 
 # Server-controlled IDs only -- never a customer quote, never free text.

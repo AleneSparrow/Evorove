@@ -223,9 +223,22 @@ def test_presentation_asks_for_commitment_instead_of_repeating_value() -> None:
     assert decision.target_stage is SalesStage.COMMITMENT
 
 
-def test_operational_gaps_are_asked_in_discovery_not_as_qualification_stage() -> None:
-    decision = SalesPolicyEngine().decide(
+def test_operational_gaps_do_not_hold_discovery_or_block_ready_to_book() -> None:
+    discovery = SalesPolicyEngine().decide(
         _profile(
+            current_problem="AC stopped cooling",
+            desired_outcome="it working this week",
+        ),
+        _analysis(),
+        business_facts_available=True,
+        operational_intake_incomplete=True,
+    )
+    assert discovery.move is SalesMove.CONFIRM_CUSTOMER_NEED
+    assert discovery.reason_code != "operational_intake_incomplete"
+
+    ready = SalesPolicyEngine().decide(
+        _profile(
+            stage=SalesStage.COMMITMENT,
             current_problem="AC stopped cooling",
             desired_outcome="it working this week",
         ),
@@ -234,8 +247,8 @@ def test_operational_gaps_are_asked_in_discovery_not_as_qualification_stage() ->
         booking_available=True,
         operational_intake_incomplete=True,
     )
-    assert decision.move is SalesMove.ASK_DISCOVERY_QUESTION
-    assert decision.target_stage is SalesStage.DISCOVERY
+    assert ready.move is SalesMove.OFFER_BOOKING_SLOTS
+    assert ready.target_stage is SalesStage.BOOKING
 
 
 def test_deferred_need_to_think_nurtures_instead_of_asking_commitment() -> None:
@@ -284,6 +297,16 @@ def test_confirmed_need_without_facts_asks_the_business_not_a_person() -> None:
     assert decision.move is SalesMove.REQUEST_BUSINESS_FACT
     assert decision.target_stage is SalesStage.FOLLOW_UP
     assert not decision.requires_human
+
+
+def test_greeting_stage_uses_greet_without_customer_signals() -> None:
+    decision = SalesPolicyEngine().decide(
+        _profile(stage=SalesStage.GREETING),
+        _analysis(observed_stage=SalesStage.GREETING, confidence=1.0),
+    )
+    assert decision.move is SalesMove.GREET_AND_SET_CONTEXT
+    assert decision.reason_code == "conversation_started"
+    assert decision.target_stage is SalesStage.DISCOVERY
 
 
 def test_pending_owner_fact_keeps_requesting_until_the_fact_arrives() -> None:

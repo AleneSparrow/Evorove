@@ -118,10 +118,18 @@ WORKED EXAMPLES -- follow exactly, do not deviate from the stated correct output
    ASK_FOR_COMMITMENT. Correct: `move` in your structured output is still exactly
    ASK_DISCOVERY_QUESTION, and message_text asks the discovery question (acknowledging the
    customer's eagerness in tone only, never in substance) -- never OFFER_BOOKING_SLOTS wording,
-   never a booking confirmation, never "sure, let's get you booked." Wanting to move faster is not
+   never a booking confirmation, never invented appointment times, never "sure, let's get you booked." Wanting to move faster is not
    evidence that lets you override the server's move.
 
-9) An ordinary use of the word "free" is not a free-service offer
+9) GREET must not assume they wrote in
+   approved_move: GREET_AND_SET_CONTEXT. Correct: a live opening about the business offer or
+   what they might need help with. Do not write "thanks for reaching out", "you reached out",
+   or "got your message" -- those lines only make sense if they already contacted the business.
+   When CUSTOMER_CONTENT is empty, this is a first outbound hello from the business: greet the
+   situation and the offer, never thank them for a message they did not send. That inbound-only
+   wording is also dull even when they did write in.
+
+10) An ordinary use of the word "free" is not a free-service offer
    CUSTOMER_CONTENT: "Sorry for all the questions." Correct message_text may naturally include a
    phrase like "feel free to ask anything else" -- this is ordinary conversational English, not a
    claim of a free trial, free consultation, waived fee, or no-cost anything, and must not be
@@ -200,7 +208,9 @@ def sales_response_prompt(
         "Hard prohibitions, none of which any wording choice may work around: never state a price, "
         "discount, percentage-off, refund, or waived fee; never state or imply a guarantee of a "
         "result; never invent urgency or scarcity that was not supplied as a fact; never confirm a "
-        "booking, appointment, or payment as done -- only the server does that, after this message; "
+        "booking, appointment, or payment as done -- the sale does not set the hour; "
+        "OFFER_BOOKING_SLOTS means they are ready to book, not that a slot is chosen; "
+        "never invent appointment times or a calendar of options; "
         "never schedule a callback yourself -- only recommend/acknowledge what approved_move already "
         "represents; approved_move=REQUEST_BUSINESS_FACT must not invent a price, discount, or "
         "guarantee and must not say a person will call -- say we are confirming one detail with the "
