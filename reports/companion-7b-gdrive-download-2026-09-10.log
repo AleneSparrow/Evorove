@@ -1,0 +1,555 @@
+start 2026-09-10T12:48:51+07:00
+=== .gitattributes ===
+
+2026/09/10 12:48:52 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.9sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.9sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.9sTransferred:   	    1.483 KiB / 1.483 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         3.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 0 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         3.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 0 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 1.482 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 1.482 KiB/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 1.482 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 1.482 KiB/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 759 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         5.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 759 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 759 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         5.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 759 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 506 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         6.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 506 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 506 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         6.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 506 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 379 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         7.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 379 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 379 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         7.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 379 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 303 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         8.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 303 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 303 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         8.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 303 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 253 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         9.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 253 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 253 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         9.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 253 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 216 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        10.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 216 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 216 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        10.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 216 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 189 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        11.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 189 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 189 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        11.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 189 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 168 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        12.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 168 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 168 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        12.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 168 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 151 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        13.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 151 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 151 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        13.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 151 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 138 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        14.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 138 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 138 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        14.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 138 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 126 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        15.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 126 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 126 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        15.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 126 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 116 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        16.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 116 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 116 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        16.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 116 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 108 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        17.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 108 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 108 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        17.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 108 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 101 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        18.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 101 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 101 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        18.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 101 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 94 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        19.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 94 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 94 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        19.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 94 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 88 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        20.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 88 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 88 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        20.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 88 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 83 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        21.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 83 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 83 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        21.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 83 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 78 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        22.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 78 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 78 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        22.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 78 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 73 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        23.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 73 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 73 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        23.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 73 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 68 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        24.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 68 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 68 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        24.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 68 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 64 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        25.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 64 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 64 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        25.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 64 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 60 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        26.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 60 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 60 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        26.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 60 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 56 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        27.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 56 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 56 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        27.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 56 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 53 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        28.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 53 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 53 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        28.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 53 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 49 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        29.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 49 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 49 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        29.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 49 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 46 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        30.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 46 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 46 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        30.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 46 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 43 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        31.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 43 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 43 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        31.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 43 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 41 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        32.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 41 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 41 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        32.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 41 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 38 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        33.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 38 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 38 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        33.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 38 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 36 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        34.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 36 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 36 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        34.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 36 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 33 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        35.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 33 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 33 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        35.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 33 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 31 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        36.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 31 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 31 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        36.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 31 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 29 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        37.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 29 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 29 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        37.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 29 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 27 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        38.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 27 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 27 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        38.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 27 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 26 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        39.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 26 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 26 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        39.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 26 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 24 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        40.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 24 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 24 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        40.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 24 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 22 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        41.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 22 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 22 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        41.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 22 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 21 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        42.4s
+Transferring:
+ *                                .gitattributes:  0% / off, 21 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 21 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:        42.9s
+Transferring:
+ *                                .gitattributes:  0% / off, 21 B/s, -Transferred:   	    1.483 KiB / 1.483 KiB, 100%, 21 B/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:        43.1s
+=== README.md ===
+
+2026/09/10 12:49:35 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.0sTransferred:   	          0 B / 732 B, 0%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.5s
+Transferring:
+ *                                     README.md:  0% / 732 B, 0 B/s, -Transferred:   	        732 B / 732 B, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.9s
+Transferring:
+ *                                     README.md:100% / 732 B, 0 B/s, -Transferred:   	        732 B / 732 B, 100%, 731 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.5s
+Transferring:
+ *                                     README.md:100% / 732 B, 731 B/s, 0sTransferred:   	        732 B / 732 B, 100%, 731 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.0s
+Transferring:
+ *                                     README.md:100% / 732 B, 731 B/s, 0sTransferred:   	        732 B / 732 B, 100%, 365 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.4s
+Transferring:
+ *                                     README.md:100% / 732 B, 365 B/s, 0sTransferred:   	        732 B / 732 B, 100%, 365 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         5.0s
+Transferring:
+ *                                     README.md:100% / 732 B, 365 B/s, 0sTransferred:   	        732 B / 732 B, 100%, 365 B/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:         5.0s
+=== added_tokens.json ===
+
+2026/09/10 12:49:40 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.9sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.9sTransferred:   	          0 B / 605 B, 0%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.4s
+Transferring:
+ *                             added_tokens.json:  0% / 605 B, 0 B/s, -Transferred:   	        605 B / 605 B, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.9s
+Transferring:
+ *                             added_tokens.json:100% / 605 B, 0 B/s, -Transferred:   	        605 B / 605 B, 100%, 604 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.4s
+Transferring:
+ *                             added_tokens.json:100% / 605 B, 604 B/s, 0sTransferred:   	        605 B / 605 B, 100%, 604 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.9s
+Transferring:
+ *                             added_tokens.json:100% / 605 B, 604 B/s, 0sTransferred:   	        605 B / 605 B, 100%, 604 B/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:         4.0s
+=== config.json ===
+
+2026/09/10 12:49:44 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.9sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.9sTransferred:   	        787 B / 787 B, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.4s
+Transferring:
+ *                                   config.json:100% / 787 B, 0 B/s, -Transferred:   	        787 B / 787 B, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.9s
+Transferring:
+ *                                   config.json:100% / 787 B, 0 B/s, -Transferred:   	        787 B / 787 B, 100%, 786 B/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.4s
+Transferring:
+ *                                   config.json:100% / 787 B, 786 B/s, 0sTransferred:   	        787 B / 787 B, 100%, 786 B/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:         3.9s
+=== merges.txt ===
+
+2026/09/10 12:49:48 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.0sTransferred:   	      100 KiB / 100 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.5s
+Transferring:
+ *                                    merges.txt:  0% / off, 0 B/s, -Transferred:   	      100 KiB / 100 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         3.0s
+Transferring:
+ *                                    merges.txt:  0% / off, 0 B/s, -Transferred:   	    1.594 MiB / 1.594 MiB, 100%, 99.998 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.4s
+Transferring:
+ *                                    merges.txt:  0% / off, 99.995 KiB/s, -Transferred:   	    1.594 MiB / 1.594 MiB, 100%, 99.998 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.0s
+Transferring:
+ *                                    merges.txt:  0% / off, 99.995 KiB/s, -Transferred:   	    1.594 MiB / 1.594 MiB, 100%, 816.319 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         4.5s
+Transferring:
+ *                                    merges.txt:  0% / off, 816.352 KiB/s, -Transferred:   	    1.594 MiB / 1.594 MiB, 100%, 816.319 KiB/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:         4.6s
+=== model.safetensors.index.json ===
+
+2026/09/10 12:49:53 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.9sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.9sTransferred:   	   50.499 KiB / 50.499 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.4s
+Transferring:
+ *                  model.safetensors.index.json:  0% / off, 0 B/s, -Transferred:   	   50.499 KiB / 50.499 KiB, 100%, 0 B/s, ETA -
+Transferred:            0 / 1, 0%
+Elapsed time:         2.9s
+Transferring:
+ *                  model.safetensors.index.json:  0% / off, 0 B/s, -Transferred:   	   50.499 KiB / 50.499 KiB, 100%, 50.482 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.4s
+Transferring:
+ *                  model.safetensors.index.json:  0% / off, 50.479 KiB/s, -Transferred:   	   50.499 KiB / 50.499 KiB, 100%, 50.482 KiB/s, ETA 0s
+Transferred:            0 / 1, 0%
+Elapsed time:         3.9s
+Transferring:
+ *                  model.safetensors.index.json:  0% / off, 50.479 KiB/s, -Transferred:   	   50.499 KiB / 50.499 KiB, 100%, 50.482 KiB/s, ETA 0s
+Transferred:            1 / 1, 100%
+Elapsed time:         4.0s
+=== special_tokens_map.json ===
+
+2026/09/10 12:49:57 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         3.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         3.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         4.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         4.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         5.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         5.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         6.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         6.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         7.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         7.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         8.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         8.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         9.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         9.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        10.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        10.4sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        11.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        11.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        12.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        12.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        13.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        13.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        14.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        14.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        15.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        15.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:        16.0s=== tokenizer.json ===
+
+2026/09/10 12:50:13 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+Transferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         0.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         1.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         2.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         3.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         3.5sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         4.0sTransferred:   	          0 B / 0 B, -, 0 B/s, ETA -
+Elapsed time:         4.4sresume quiet 2026-09-10T12:50:35+07:00
+START special_tokens_map.json
+2026/09/10 12:50:35 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+OK special_tokens_map.json
+START tokenizer.json
+2026/09/10 12:50:39 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+OK tokenizer.json
+START tokenizer_config.json
+2026/09/10 12:50:44 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+OK tokenizer_config.json
+START vocab.json
+2026/09/10 12:50:48 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+OK vocab.json
+START model.safetensors
+2026/09/10 12:50:53 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+OK model.safetensors
+ALL_DONE 2026-09-10T12:57:39+07:00
+2026/09/10 12:57:39 NOTICE: gdrive: This remote uses rclone's shared Google Drive client_id, which is being retired and will stop working during 2026. Create your own client_id to avoid interruption: https://rclone.org/drive/#making-your-own-client-id
+4284346255 model.safetensors
+  2776833 vocab.json
+     7280 tokenizer_config.json
+  7031673 tokenizer.json
+      613 special_tokens_map.json
+    51711 model.safetensors.index.json
+  1671853 merges.txt
+      787 config.json
+      605 added_tokens.json
+      732 README.md
+     1519 .gitattributes

@@ -116,7 +116,7 @@ def test_callback_without_datetime_uses_cadence_and_does_not_invent_time() -> No
 
 def test_callback_follow_up_does_not_promise_a_staff_call() -> None:
     text = phrase_contextual_follow_up(FollowUpReason.CALLBACK_REQUESTED).casefold()
-    assert "following up as you asked" in text
+    assert "callback" in text
     assert "team member" not in text
     assert "call you" not in text
 

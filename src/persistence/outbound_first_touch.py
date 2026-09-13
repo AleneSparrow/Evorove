@@ -15,6 +15,7 @@ from src.domain.models import Lead, ProcessCase, utc_now
 from src.domain.sales import SalesMove
 from src.domain.states import ProcessState
 from src.persistence.errors import OutboundFirstTouchBlocked
+from src.persistence.owner_materials import merge_active_owner_materials
 from src.persistence.repositories import ClaimStatus, UnitOfWork, UnitOfWorkFactory
 from src.persistence.sales_live_turn import SalesLiveTurnResult, SalesLiveTurnService
 
@@ -47,10 +48,12 @@ class OutboundFirstTouchService:
         unit_of_work_factory: UnitOfWorkFactory,
         *,
         sms_service: _OutboundSms | None = None,
+        whatsapp_mouth: _OutboundSms | None = None,
         sales_live: SalesLiveTurnService | None = None,
     ) -> None:
         self.unit_of_work_factory = unit_of_work_factory
         self.sms_service = sms_service
+        self.whatsapp_mouth = whatsapp_mouth
         self.sales_live = sales_live or SalesLiveTurnService()
 
     def start(
@@ -60,12 +63,17 @@ class OutboundFirstTouchService:
         idempotency_key: str,
         reason: str,
         source: str,
-        channel: str,
+        channel: str | None,
         consent_basis: str | None,
         name: str | None = None,
         phone: str | None = None,
         email: str | None = None,
         now: datetime | None = None,
+        person_id: str | None = None,
+        preferred_channel: str | None = None,
+        messenger_id: str | None = None,
+        gender: str | None = None,
+        region: str | None = None,
     ) -> OutboundFirstTouchResult:
         person = parse_found_person(
             idempotency_key=idempotency_key,
@@ -76,11 +84,22 @@ class OutboundFirstTouchService:
             name=name,
             phone=phone,
             email=email,
+            person_id=person_id,
+            preferred_channel=preferred_channel,
+            messenger_id=messenger_id,
+            gender=gender,
+            region=region,
         )
         occurred_at = now or utc_now()
         fingerprint = _fingerprint(person)
         external_id = f"outbound:{person.idempotency_key}"
-        session_id = f"outbound:{person.source}:{person.address}"
+        session_id = (
+            f"wa:{person.address}"
+            if person.channel == "whatsapp"
+            else person.address
+            if person.channel == "sms"
+            else f"outbound:{person.source}:{person.address}"
+        )
         with self.unit_of_work_factory() as uow:
             self._assert_send_allowed(uow, business_id, person)
             claim_status, claim = uow.idempotency.claim(
@@ -116,6 +135,7 @@ class OutboundFirstTouchService:
                 source_message_id=f"{external_id}:greet",
                 occurred_at=occurred_at,
                 sms_service=self.sms_service,
+                whatsapp_mouth=self.whatsapp_mouth,
             )
             if live.move is not SalesMove.GREET_AND_SET_CONTEXT:
                 raise RuntimeError("outbound first touch must reuse GREET_AND_SET_CONTEXT")
@@ -141,6 +161,26 @@ class OutboundFirstTouchService:
     def _assert_send_allowed(
         self, uow: UnitOfWork, business_id: str, person: FoundPerson,
     ) -> None:
+        if person.channel == "whatsapp":
+            dest = person.phone
+            if not dest:
+                raise OutboundFirstTouchBlocked(
+                    "found_person_not_addressable",
+                    "WhatsApp first touch requires a phone number",
+                )
+            mouth = self.whatsapp_mouth
+            if mouth is None or not getattr(mouth, "configured", True):
+                raise OutboundFirstTouchBlocked(
+                    "whatsapp_not_configured",
+                    "WhatsApp send is not configured on this Evorove deployment",
+                )
+            suppressed = mouth.is_suppressed(business_id, dest)
+            if suppressed:
+                raise OutboundFirstTouchBlocked(
+                    "sms_suppressed",
+                    "STOP is in effect for this number; outbound contact is blocked",
+                )
+            return
         if person.channel != "sms":
             return
         phone = person.phone
@@ -189,6 +229,7 @@ class OutboundFirstTouchService:
                     "found_source": person.source,
                     "outbound_consent_basis": person.consent_basis,
                     "outbound_channel": person.channel,
+                    **_found_card_attributes(person),
                 },
                 sms_consent=sms_consent,
             )
@@ -200,6 +241,7 @@ class OutboundFirstTouchService:
                 "found_source": person.source,
                 "outbound_consent_basis": person.consent_basis,
                 "outbound_channel": person.channel,
+                **_found_card_attributes(person),
             })
             lead = replace(
                 existing,
@@ -230,6 +272,7 @@ class OutboundFirstTouchService:
             metadata={
                 "outbound_first_touch": True,
                 "found_source": person.source,
+                **_found_card_attributes(person),
             },
         )
         uow.conversations.add(conversation)
@@ -244,7 +287,7 @@ def _active_dna(uow: UnitOfWork, business_id: str) -> Mapping[str, Any]:
     version = uow.business_dna.get_active(business_id)
     if version is None:
         return {}
-    return version.configuration
+    return merge_active_owner_materials(uow, business_id, dict(version.configuration))
 
 
 def _fingerprint(person: FoundPerson) -> str:
@@ -256,10 +299,28 @@ def _fingerprint(person: FoundPerson) -> str:
         "phone": person.phone,
         "email": person.email,
         "name": person.name,
+        "preferred_channel": person.preferred_channel,
+        "messenger_id": person.messenger_id,
+        "person_id": person.person_id,
     }
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
+
+
+def _found_card_attributes(person: FoundPerson) -> dict[str, str]:
+    extra: dict[str, str] = {}
+    if person.person_id:
+        extra["person_id"] = person.person_id
+    if person.preferred_channel:
+        extra["preferred_channel"] = person.preferred_channel
+    if person.messenger_id:
+        extra["messenger_id"] = person.messenger_id
+    if person.gender:
+        extra["gender"] = person.gender
+    if person.region:
+        extra["region"] = person.region
+    return extra
 
 
 def _fingerprint_text(value: str) -> str:

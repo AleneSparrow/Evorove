@@ -13,11 +13,10 @@ import { describeError } from "../auth/AuthContext";
 import { isoToUs, usToIso } from "../lib/usDate";
 import {
   CONVERSATION_STATUS_LABELS,
-  ESCALATION_ACTIONS,
-  ESCALATION_FEEDBACK_LABELS,
   ESCALATION_LABELS,
 } from "../lib/escalationCopy";
-import { STATE_META, mapProcessState, formatRelativeTime, type CaseState } from "./Shared";
+import { CRM_TAB_META, ENGAGEMENT_LABEL, engagementBand, mapCrmTab, type CrmTab, type EngagementBand } from "../lib/crmBoard";
+import { formatRelativeTime } from "./Shared";
 
 function UsDateField({ label, value, min, onChange }: {
   label: string;
@@ -93,7 +92,35 @@ function StatCard({ label, value, sub, tone, emphasis = false }: {
   );
 }
 
-type LeadSort = "date" | "name" | "state" | "category";
+function MetricBars({
+  leftLabel,
+  leftValue,
+  rightLabel,
+  rightValue,
+}: {
+  leftLabel: string;
+  leftValue: number;
+  rightLabel: string;
+  rightValue: number;
+}) {
+  const max = Math.max(leftValue, rightValue, 1);
+  return (
+    <div className="space-y-3">
+      {[{ label: leftLabel, value: leftValue }, { label: rightLabel, value: rightValue }].map((row) => (
+        <div key={row.label}>
+          <div className="flex justify-between text-xs text-mute mb-1">
+            <span>{row.label}</span>
+            <span className="ev-display text-lg text-ink leading-none">{row.value}</span>
+          </div>
+          <div className="h-3 rounded-full bg-[#F1F1EF] overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${Math.round((row.value / max) * 100)}%`, backgroundColor: "#FF5A36" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+type LeadSort = "date" | "name" | "region" | "gender" | "engagement";
 type ConversationSort = "date" | "name" | "status" | "channel";
 type SortDirection = "asc" | "desc";
 
@@ -157,10 +184,14 @@ export function StatisticsPanel({
   const [leadDirection, setLeadDirection] = useState<SortDirection>("desc");
   const [conversationSort, setConversationSort] = useState<ConversationSort>("date");
   const [conversationDirection, setConversationDirection] = useState<SortDirection>("desc");
-  const [reasonFilter, setReasonFilter] = useState<string | null>(null);
-  const [followUpOnly, setFollowUpOnly] = useState(false);
-  const [leadStateFilter, setLeadStateFilter] = useState<CaseState | "ALL">("ALL");
+  const [leadTabFilter, setLeadTabFilter] = useState<CrmTab | "ALL">("ALL");
+  const [genderFilter, setGenderFilter] = useState("ALL");
+  const [regionFilter, setRegionFilter] = useState("ALL");
+  const [engagementFilter, setEngagementFilter] = useState<EngagementBand | "ALL">("ALL");
   const [conversationStatusFilter, setConversationStatusFilter] = useState<string>("ALL");
+  const [showCharts, setShowCharts] = useState(false);
+  const [chartX, setChartX] = useState<"leads" | "cold" | "conversations">("leads");
+  const [chartY, setChartY] = useState<"done" | "in_progress" | "offer_made" | "engine">("done");
 
   useEffect(() => {
     let cancelled = false;
@@ -191,13 +222,29 @@ export function StatisticsPanel({
 
   const decoratedLeads = useMemo(
     () =>
-      (cases ?? []).map((c) => {
-        const { caseState } = mapProcessState(c.current_state);
-        const followUpDue = ["QUALIFYING", "FOLLOW_UP"].includes(c.current_state)
-          && Date.now() - new Date(c.updated_at).getTime() > 24 * 60 * 60 * 1000;
-        return { ...c, caseState, followUpDue };
-      }),
+      (cases ?? []).map((c) => ({
+        ...c,
+        crmTab: mapCrmTab(c.current_state),
+        engagement: engagementBand(c.event_count, c.updated_at),
+      })),
     [cases],
+  );
+
+  const tabCounts = useMemo(() => {
+    const next = { cold: 0, in_progress: 0, offer_made: 0, done: 0, lost: 0 };
+    decoratedLeads.forEach((item) => {
+      next[item.crmTab] += 1;
+    });
+    return next;
+  }, [decoratedLeads]);
+
+  const genders = useMemo(
+    () => Array.from(new Set(decoratedLeads.map((item) => item.lead.gender).filter((value): value is string => Boolean(value)))),
+    [decoratedLeads],
+  );
+  const regions = useMemo(
+    () => Array.from(new Set(decoratedLeads.map((item) => item.lead.region).filter((value): value is string => Boolean(value)))),
+    [decoratedLeads],
   );
 
   const periodConversations = useMemo(
@@ -213,10 +260,9 @@ export function StatisticsPanel({
   );
 
   const conversationCounts = useMemo(() => {
-    const counts = { total: 0, needsYou: 0, engine: 0, closed: 0, sms: 0, web: 0 };
+    const counts = { total: 0, engine: 0, closed: 0, sms: 0, web: 0 };
     periodConversations.forEach((conversation) => {
       counts.total += 1;
-      if (conversation.status === "human_takeover_requested" || conversation.status === "human_takeover_active") counts.needsYou += 1;
       if (conversation.status === "ai_active") counts.engine += 1;
       if (conversation.status === "closed") counts.closed += 1;
       if (conversation.channel === "sms") counts.sms += 1;
@@ -225,28 +271,24 @@ export function StatisticsPanel({
     return counts;
   }, [periodConversations]);
 
-  const attention = useMemo(() => {
-    const needsHuman = decoratedLeads.filter((c) => c.caseState === "NEEDS_HUMAN").length;
-    const followUpDue = decoratedLeads.filter((c) => c.followUpDue).length;
-    return { needsHuman, followUpDue };
-  }, [decoratedLeads]);
-
   const sortedLeads = useMemo(() => {
     const visible = decoratedLeads.filter((c) => {
-      if (followUpOnly && !c.followUpDue) return false;
-      if (reasonFilter !== null && c.escalation_reason !== reasonFilter) return false;
-      if (leadStateFilter !== "ALL" && c.caseState !== leadStateFilter) return false;
+      if (leadTabFilter !== "ALL" && c.crmTab !== leadTabFilter) return false;
+      if (genderFilter !== "ALL" && (c.lead.gender || "Unknown") !== genderFilter) return false;
+      if (regionFilter !== "ALL" && (c.lead.region || "Unknown") !== regionFilter) return false;
+      if (engagementFilter !== "ALL" && c.engagement !== engagementFilter) return false;
       return true;
     });
     return visible.sort((left, right) => {
       let comparison = 0;
       if (leadSort === "date") comparison = new Date(left.created_at).getTime() - new Date(right.created_at).getTime();
       else if (leadSort === "name") comparison = (left.lead.name || "").localeCompare(right.lead.name || "", undefined, { sensitivity: "base" });
-      else if (leadSort === "state") comparison = left.caseState.localeCompare(right.caseState);
-      else comparison = (left.category || "").localeCompare(right.category || "", undefined, { sensitivity: "base" });
+      else if (leadSort === "region") comparison = (left.lead.region || "").localeCompare(right.lead.region || "", undefined, { sensitivity: "base" });
+      else if (leadSort === "gender") comparison = (left.lead.gender || "").localeCompare(right.lead.gender || "", undefined, { sensitivity: "base" });
+      else comparison = left.event_count - right.event_count;
       return leadDirection === "asc" ? comparison : -comparison;
     });
-  }, [decoratedLeads, followUpOnly, reasonFilter, leadStateFilter, leadSort, leadDirection]);
+  }, [decoratedLeads, leadTabFilter, genderFilter, regionFilter, engagementFilter, leadSort, leadDirection]);
 
   const sortedConversations = useMemo(() => {
     const visible = periodConversations.filter((conversation) => (
@@ -266,7 +308,7 @@ export function StatisticsPanel({
     if (leadSort === next) setLeadDirection((current) => (current === "asc" ? "desc" : "asc"));
     else {
       setLeadSort(next);
-      setLeadDirection(next === "name" || next === "category" ? "asc" : "desc");
+      setLeadDirection(next === "date" || next === "engagement" ? "desc" : "asc");
     }
   };
 
@@ -363,24 +405,84 @@ export function StatisticsPanel({
       ) : (
         <>
           <div>
-            <h2 className="text-base font-semibold mb-3">Leads</h2>
+            <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
+              <div>
+                <h2 className="text-base font-semibold">Business metrics</h2>
+                <p className="text-sm text-mute">Counts and rates a bookkeeper can read. No conversion promise.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCharts((current) => !current)}
+                className="text-sm font-medium px-4 py-2 rounded-lg border border-line"
+              >
+                Visualization
+              </button>
+            </div>
             <div className="grid gap-2 grid-cols-2 md:grid-cols-3">
-              <StatCard label="Leads in period" value={analytics?.total_cases ?? decoratedLeads.length} sub="counted cases" />
-              <StatCard label="Qualifying now" value={decoratedLeads.filter((c) => c.caseState === "QUALIFYING").length} sub="active leads" tone="#FF5A36" />
-              <StatCard label="Booked" value={analytics?.booked_cases ?? 0} sub="ever booked" tone="#1E7B52" />
-              <StatCard label="Booking rate" value={analytics ? `${Math.round(analytics.booking_conversion_rate * 100)}%` : "—"} sub={analytics ? `${analytics.booked_cases}/${analytics.total_cases} leads` : undefined} tone="#1E7B52" />
-              <StatCard label="Lost rate" value={analytics ? `${Math.round(analytics.lost_rate * 100)}%` : "—"} sub={analytics ? `${analytics.lost_cases}/${analytics.total_cases} leads` : undefined} />
-              <StatCard label="Escalation rate" value={analytics ? `${Math.round(analytics.escalation_rate * 100)}%` : "—"} sub={analytics ? `${analytics.escalated_cases}/${analytics.total_cases} leads` : undefined} tone="#FF5A36" />
+              <StatCard label="Leads" value={analytics?.total_cases ?? decoratedLeads.length} sub="headcount in period" />
+              <StatCard label="Cold" value={tabCounts.cold} sub="not written yet" />
+              <StatCard label="In progress" value={tabCounts.in_progress} sub="engine on the thread" tone="#FF5A36" />
+              <StatCard label="Offer made" value={tabCounts.offer_made} sub="value named" tone="#FF5A36" />
+              <StatCard label="Done" value={tabCounts.done} sub="sale or booked hour" tone="#1E7B52" />
+              <StatCard
+                label="Human review"
+                value={analytics?.human_review_cases ?? 0}
+                sub="STOP, emergency, or policy — out of conversion"
+              />
+              <StatCard
+                label="Done rate"
+                value={
+                  analytics && analytics.conversion_eligible_cases
+                    ? `${Math.round(analytics.booking_conversion_rate * 100)}%`
+                    : "—"
+                }
+                sub={
+                  analytics
+                    ? `${analytics.booked_cases} booked / ${analytics.conversion_eligible_cases} eligible`
+                    : "human review excluded"
+                }
+              />
+              <StatCard label="Lost" value={analytics?.lost_cases ?? tabCounts.lost} sub={analytics ? `${Math.round(analytics.lost_rate * 100)}% of leads` : undefined} />
+              <StatCard label="Booked events" value={analytics?.booked_cases ?? 0} sub="hour set in history" tone="#1E7B52" />
             </div>
           </div>
+
+          {showCharts && (
+            <div className="rounded-2xl border p-5" style={{ borderColor: "#E4DCCB" }}>
+              <h2 className="text-base font-semibold mb-1">Build a chart</h2>
+              <p className="text-sm text-mute mb-4">Pick two series. Bars use the numbers already on this page.</p>
+              <div className="flex flex-wrap gap-3 mb-4">
+                <label className="text-xs text-mute">X
+                  <select className="ml-2 border border-line rounded-lg px-2 py-1.5 text-sm" value={chartX} onChange={(event) => setChartX(event.target.value as typeof chartX)}>
+                    <option value="leads">Leads</option>
+                    <option value="cold">Cold</option>
+                    <option value="conversations">Conversations</option>
+                  </select>
+                </label>
+                <label className="text-xs text-mute">Y
+                  <select className="ml-2 border border-line rounded-lg px-2 py-1.5 text-sm" value={chartY} onChange={(event) => setChartY(event.target.value as typeof chartY)}>
+                    <option value="done">Done</option>
+                    <option value="offer_made">Offer made</option>
+                    <option value="in_progress">In progress</option>
+                    <option value="engine">Engine threads</option>
+                  </select>
+                </label>
+              </div>
+              <MetricBars
+                leftLabel={chartX === "leads" ? "Leads" : chartX === "cold" ? "Cold" : "Conversations"}
+                leftValue={chartX === "leads" ? decoratedLeads.length : chartX === "cold" ? tabCounts.cold : conversationCounts.total}
+                rightLabel={chartY === "done" ? "Done" : chartY === "offer_made" ? "Offer made" : chartY === "in_progress" ? "In progress" : "Engine threads"}
+                rightValue={chartY === "done" ? tabCounts.done : chartY === "offer_made" ? tabCounts.offer_made : chartY === "in_progress" ? tabCounts.in_progress : conversationCounts.engine}
+              />
+            </div>
+          )}
 
           <div>
             <h2 className="text-base font-semibold mb-3">Conversations</h2>
             <div className="grid gap-2 grid-cols-2 md:grid-cols-3">
-              <StatCard label="Conversations in period" value={conversationCounts.total} sub="by last activity" />
-              <StatCard label="Engine handling" value={conversationCounts.engine} sub="AI still on the thread" />
-              <StatCard label="Needs you" value={conversationCounts.needsYou} sub="takeover requested or active" tone="#4A4A00" emphasis={conversationCounts.needsYou > 0} />
-              <StatCard label="Closed" value={conversationCounts.closed} />
+              <StatCard label="Conversations" value={conversationCounts.total} sub="by last activity" />
+              <StatCard label="Engine handling" value={conversationCounts.engine} sub="still on the thread" />
+              <StatCard label="Closed threads" value={conversationCounts.closed} />
               <StatCard label="Website" value={conversationCounts.web} sub="web chat" />
               <StatCard label="SMS" value={conversationCounts.sms} sub="text message" />
               <StatCard
@@ -392,79 +494,40 @@ export function StatisticsPanel({
             </div>
           </div>
 
-          <div className="rounded-2xl border p-5" style={{ borderColor: "#E4DCCB" }}>
-            <h2 className="text-base font-semibold">What to pay attention to</h2>
-            <p className="text-sm text-mute mt-1 mb-4">Open a row to act on it, or filter the tables below.</p>
-            <div className="grid gap-2 sm:grid-cols-2 mb-4">
-              <button type="button" onClick={() => { setLeadStateFilter("NEEDS_HUMAN"); setFollowUpOnly(false); setReasonFilter(null); }} className="text-left">
-                <StatCard label="Needs your attention" value={attention.needsHuman} sub="review queue" tone="#4A4A00" emphasis={attention.needsHuman > 0} />
-              </button>
-              <button type="button" onClick={() => { setLeadStateFilter("ALL"); setFollowUpOnly(true); setReasonFilter(null); }} className="text-left">
-                <StatCard label="Follow-up due" value={attention.followUpDue} sub="waiting 24h+" tone="#C73618" />
-              </button>
-            </div>
-            {analytics && Object.keys(analytics.escalation_reasons).length > 0 && (
-              <div className="mb-4">
-                <div className="text-xs font-medium text-clay mb-2">Why leads were escalated</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.entries(analytics.escalation_reasons)
-                    .sort(([, left], [, right]) => right - left)
-                    .map(([reason, count]) => (
-                      <button
-                        key={reason}
-                        type="button"
-                        onClick={() => {
-                          setFollowUpOnly(false);
-                          setLeadStateFilter("NEEDS_HUMAN");
-                          setReasonFilter(reasonFilter === reason ? null : reason);
-                        }}
-                        className="px-2.5 py-1 rounded-full text-[11px] font-medium border"
-                        style={{
-                          backgroundColor: reasonFilter === reason ? "#FFE8E1" : "#fff",
-                          borderColor: reasonFilter === reason ? "#FF5A36" : "#E4DCCB",
-                        }}
-                    >
-                        {ESCALATION_LABELS[reason] ?? "Human review"} {count}
-                      </button>
-                    ))}
-                </div>
-                {reasonFilter && (
-                  <p className="text-sm text-mute mt-3">
-                    Next safe action: {ESCALATION_ACTIONS[reasonFilter] ?? "Open the lead and choose the next safe step."}
-                  </p>
-                )}
-              </div>
-            )}
-            {analytics && Object.values(analytics.escalation_feedback).some((count) => count > 0) && (
-              <div>
-                <div className="text-xs font-medium text-clay mb-2">Staff feedback on escalations</div>
-                <ul className="text-sm text-mute space-y-1">
-                  {Object.entries(analytics.escalation_feedback)
-                    .filter(([, count]) => count > 0)
-                    .map(([key, count]) => (
-                      <li key={key}>{ESCALATION_FEEDBACK_LABELS[key] ?? key}: {count}</li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
           <div className="bg-white rounded-2xl border border-line overflow-hidden">
             <div className="px-5 py-3 border-b border-line flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">Leads in this period ({sortedLeads.length})</h2>
+              <h2 className="text-sm font-semibold">Leads ({sortedLeads.length})</h2>
               <div className="flex flex-wrap gap-1.5">
-                {(["ALL", "NEEDS_HUMAN", "QUALIFYING", "BOOKED", "LOST", "COMPLETED"] as const).map((state) => (
+                {(["ALL", "cold", "in_progress", "offer_made", "done", "lost"] as const).map((tab) => (
                   <button
-                    key={state}
+                    key={tab}
                     type="button"
-                    onClick={() => { setLeadStateFilter(state); setFollowUpOnly(false); if (state !== "NEEDS_HUMAN") setReasonFilter(null); }}
+                    onClick={() => setLeadTabFilter(tab)}
                     className="px-2.5 py-1 rounded-full text-[11px] font-medium"
-                    style={{ backgroundColor: leadStateFilter === state && !followUpOnly ? "#FFE8E1" : "transparent", color: leadStateFilter === state && !followUpOnly ? "#FF5A36" : "#6B6459" }}
-                >
-                    {state === "ALL" ? "All" : STATE_META[state].label}
+                    style={{ backgroundColor: leadTabFilter === tab ? "#FFE8E1" : "transparent", color: leadTabFilter === tab ? "#FF5A36" : "#6B6459" }}
+                  >
+                    {tab === "ALL" ? "All" : CRM_TAB_META[tab].label}
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="px-5 py-3 flex flex-wrap gap-2 border-b border-line">
+              <select aria-label="Filter by gender" className="border border-line rounded-lg px-2 py-1.5 text-xs" value={genderFilter} onChange={(event) => setGenderFilter(event.target.value)}>
+                <option value="ALL">Gender: all</option>
+                <option value="Unknown">Unknown</option>
+                {genders.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+              <select aria-label="Filter by region" className="border border-line rounded-lg px-2 py-1.5 text-xs" value={regionFilter} onChange={(event) => setRegionFilter(event.target.value)}>
+                <option value="ALL">Region: all</option>
+                <option value="Unknown">Unknown</option>
+                {regions.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+              <select aria-label="Filter by engagement" className="border border-line rounded-lg px-2 py-1.5 text-xs" value={engagementFilter} onChange={(event) => setEngagementFilter(event.target.value as EngagementBand | "ALL")}>
+                <option value="ALL">Engagement: all</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -472,24 +535,24 @@ export function StatisticsPanel({
                   <tr className="text-[11px] uppercase tracking-wide border-b border-line">
                     <th className="text-left px-5 py-2 font-medium"><SortButton label="Lead" active={leadSort === "name"} direction={leadDirection} onClick={() => toggleLeadSort("name")} /></th>
                     <th className="text-left px-3 py-2 font-medium"><SortButton label="Added" active={leadSort === "date"} direction={leadDirection} onClick={() => toggleLeadSort("date")} /></th>
-                    <th className="text-left px-3 py-2 font-medium"><SortButton label="State" active={leadSort === "state"} direction={leadDirection} onClick={() => toggleLeadSort("state")} /></th>
-                    <th className="text-left px-3 py-2 font-medium"><SortButton label="Service" active={leadSort === "category"} direction={leadDirection} onClick={() => toggleLeadSort("category")} /></th>
-                    <th className="text-left px-3 py-2 font-medium text-mute">Attention</th>
+                    <th className="text-left px-3 py-2 font-medium"><SortButton label="Gender" active={leadSort === "gender"} direction={leadDirection} onClick={() => toggleLeadSort("gender")} /></th>
+                    <th className="text-left px-3 py-2 font-medium"><SortButton label="Region" active={leadSort === "region"} direction={leadDirection} onClick={() => toggleLeadSort("region")} /></th>
+                    <th className="text-left px-3 py-2 font-medium"><SortButton label="Engagement" active={leadSort === "engagement"} direction={leadDirection} onClick={() => toggleLeadSort("engagement")} /></th>
+                    <th className="text-left px-3 py-2 font-medium text-mute">Tab</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedLeads.length === 0 && (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center text-mute">No leads in this period match the filters.</td></tr>
+                    <tr><td colSpan={6} className="px-5 py-8 text-center text-mute">No leads in this period match the filters. Gender and region appear only when they were recorded — they are never guessed.</td></tr>
                   )}
                   {sortedLeads.map((c) => (
-                    <tr key={c.case_id} className="border-b border-[#F0EFE9] last:border-0 cursor-pointer hover:bg-[#FAFAF7]" onClick={() => navigate(`/app/conversations?case=${c.case_id}`)}>
+                    <tr key={c.case_id} className="border-b border-[#F0EFE9] last:border-0 cursor-pointer hover:bg-[#FAFAF7]" onClick={() => navigate(`/app?view=board&lead=${encodeURIComponent(c.case_id)}`)}>
                       <td className="px-5 py-3 font-medium">{c.lead.name || "Unnamed lead"}</td>
                       <td className="px-3 py-3 text-mute">{formatRelativeTime(c.created_at)}</td>
-                      <td className="px-3 py-3">{STATE_META[c.caseState].label}</td>
-                      <td className="px-3 py-3 text-mute">{c.category || "Uncategorized"}</td>
-                      <td className="px-3 py-3 text-mute">
-                        {c.followUpDue ? "Follow-up overdue" : (ESCALATION_LABELS[c.escalation_reason ?? ""] ?? (c.escalation_reason ? "Needs review" : "—"))}
-                      </td>
+                      <td className="px-3 py-3 text-mute">{c.lead.gender || "Unknown"}</td>
+                      <td className="px-3 py-3 text-mute">{c.lead.region || "Unknown"}</td>
+                      <td className="px-3 py-3">{ENGAGEMENT_LABEL[c.engagement]}</td>
+                      <td className="px-3 py-3 text-mute">{CRM_TAB_META[c.crmTab].label}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -530,12 +593,26 @@ export function StatisticsPanel({
                     <tr><td colSpan={5} className="px-5 py-8 text-center text-mute">No conversations in this period match the filters.</td></tr>
                   )}
                   {sortedConversations.map((conversation) => (
-                    <tr key={conversation.conversation_id} className="border-b border-[#F0EFE9] last:border-0 cursor-pointer hover:bg-[#FAFAF7]" onClick={() => navigate(conversation.case_id ? `/app/conversations?case=${conversation.case_id}` : "/app/conversations")}>
+                    <tr
+                      key={conversation.conversation_id}
+                      className="border-b border-[#F0EFE9] last:border-0 cursor-pointer hover:bg-[#FAFAF7]"
+                      onClick={() => {
+                        if (!conversation.case_id) {
+                          navigate("/app/conversations");
+                          return;
+                        }
+                        if (conversation.status.startsWith("human")) {
+                          navigate(`/app/conversations?case=${encodeURIComponent(conversation.case_id)}`);
+                          return;
+                        }
+                        navigate(`/app?view=board&lead=${encodeURIComponent(conversation.case_id)}`);
+                      }}
+                    >
                       <td className="px-5 py-3 font-medium">{conversation.lead_name || "Unnamed lead"}</td>
                       <td className="px-3 py-3 text-mute">{formatRelativeTime(conversation.last_activity_at)}</td>
                       <td className="px-3 py-3">{CONVERSATION_STATUS_LABELS[conversation.status]}</td>
                       <td className="px-3 py-3 text-mute">{conversation.channel}</td>
-                      <td className="px-3 py-3 text-mute">{ESCALATION_LABELS[conversation.escalation_reason ?? ""] ?? (conversation.status.startsWith("human") ? "Needs you" : "—")}</td>
+                      <td className="px-3 py-3 text-mute">{ESCALATION_LABELS[conversation.escalation_reason ?? ""] ?? (conversation.status.startsWith("human") ? "Safety stop" : "—")}</td>
                     </tr>
                   ))}
                 </tbody>

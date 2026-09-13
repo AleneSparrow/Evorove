@@ -40,6 +40,26 @@ class FakeSms:
         return "SM_out"
 
 
+class FakeWhatsApp:
+    def __init__(
+        self, *, suppressed: frozenset[str] = frozenset(), configured: bool = True,
+    ) -> None:
+        self.sent: list[tuple[str, str]] = []
+        self.suppressed = set(suppressed)
+        self.configured = configured
+
+    def is_suppressed(self, business_id: str, phone_number: str) -> bool:
+        del business_id
+        return phone_number in self.suppressed
+
+    def send_outbound(self, business_id: str, *, to_number: str, body: str) -> str | None:
+        del business_id
+        if not self.configured or to_number in self.suppressed:
+            return None
+        self.sent.append((to_number, body))
+        return "WA_out"
+
+
 def _dna(business_id: str) -> dict:
     with (ROOT / "config" / "business_dna.example.json").open(encoding="utf-8") as file:
         configuration = json.load(file)
@@ -58,7 +78,7 @@ def _factory(tmp_path):
     return factory, engine
 
 
-def _start(factory, sms: FakeSms | None = None, **overrides: object):
+def _start(factory, sms: FakeSms | None = None, whatsapp: FakeWhatsApp | None = None, **overrides: object):
     values: dict[str, object] = {
         "idempotency_key": "found-ada-ac-001",
         "reason": REASON,
@@ -70,7 +90,11 @@ def _start(factory, sms: FakeSms | None = None, **overrides: object):
         "now": NOW,
     }
     values.update(overrides)
-    return OutboundFirstTouchService(factory, sms_service=sms or FakeSms()).start(
+    return OutboundFirstTouchService(
+        factory,
+        sms_service=sms or FakeSms(),
+        whatsapp_mouth=whatsapp,
+    ).start(
         BUSINESS_ID, **values  # type: ignore[arg-type]
     )
 
@@ -99,7 +123,7 @@ def test_outbound_greet_starts_without_inbound_and_reuses_greet(tmp_path) -> Non
         assert "thanks for reaching out" not in lowered
         assert "you reached out" not in lowered
         assert "got your message" not in lowered
-        assert "acme" in lowered or "plumbing" in lowered or "help" in lowered
+        assert "evorove for acme home services" in lowered
         assert sms.sent and sms.sent[0][0] == "+15551234567"
         with factory() as uow:
             messages = uow.conversation_messages.list_for_conversation(
@@ -114,6 +138,8 @@ def test_outbound_greet_starts_without_inbound_and_reuses_greet(tmp_path) -> Non
             lead = uow.leads.get(BUSINESS_ID, result.lead_id)
             assert lead is not None
             assert lead.sms_consent is True
+            assert lead.attributes.get("gender") is None
+            assert lead.attributes.get("region") is None
             inbound = [
                 item for item in messages if item.direction is MessageDirection.INBOUND
             ]
@@ -179,5 +205,116 @@ def test_outbound_first_touch_is_idempotent(tmp_path) -> None:
         assert second.case_id == first.case_id
         assert second.message_text == first.message_text
         assert len(sms.sent) == 1
+    finally:
+        engine.dispose()
+
+
+def test_whatsapp_preferred_is_kept_without_whatsapp_send(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    sms = FakeSms()
+    try:
+        result = _start(
+            factory,
+            sms,
+            preferred_channel="whatsapp",
+            messenger_id="wa:15551234567",
+            person_id="crm-found-ada-001",
+        )
+        assert result.delivered is True
+        assert sms.sent and sms.sent[0][0] == "+15551234567"
+        assert "evorove for acme home services" in result.message_text.casefold()
+        with factory() as uow:
+            lead = uow.leads.get(BUSINESS_ID, result.lead_id)
+            assert lead is not None
+            assert lead.attributes["preferred_channel"] == "whatsapp"
+            assert lead.attributes["messenger_id"] == "wa:15551234567"
+            assert lead.attributes["person_id"] == "crm-found-ada-001"
+            assert lead.attributes["outbound_channel"] == "sms"
+            assert "gender" not in lead.attributes
+            assert "region" not in lead.attributes
+            profile = uow.sales_profiles.get(BUSINESS_ID, result.case_id)
+            assert profile is not None
+            assert profile.preferred_channel == "whatsapp"
+    finally:
+        engine.dispose()
+
+
+def test_stated_gender_and_region_are_stored_on_the_lead(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    try:
+        result = _start(factory, gender="Woman", region="Illinois")
+        with factory() as uow:
+            lead = uow.leads.get(BUSINESS_ID, result.lead_id)
+            assert lead is not None
+            assert lead.attributes["gender"] == "Woman"
+            assert lead.attributes["region"] == "Illinois"
+    finally:
+        engine.dispose()
+
+
+def test_whatsapp_as_send_channel_uses_evorove_mouth(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    sms = FakeSms()
+    whatsapp = FakeWhatsApp()
+    try:
+        result = _start(
+            factory,
+            sms,
+            whatsapp,
+            channel="whatsapp",
+            consent_basis="whatsapp_opt_in",
+        )
+        assert result.delivered is True
+        assert sms.sent == []
+        assert whatsapp.sent and whatsapp.sent[0][0] == "+15551234567"
+        assert "evorove for acme home services" in result.message_text.casefold()
+        with factory() as uow:
+            conversation = uow.conversations.get(BUSINESS_ID, result.conversation_id)
+            assert conversation is not None
+            assert conversation.channel == "whatsapp"
+            assert conversation.external_session_id == "wa:+15551234567"
+            lead = uow.leads.get(BUSINESS_ID, result.lead_id)
+            assert lead is not None
+            assert lead.sms_consent is False
+            assert lead.attributes["outbound_channel"] == "whatsapp"
+            assert lead.attributes["outbound_consent_basis"] == "whatsapp_opt_in"
+    finally:
+        engine.dispose()
+
+
+def test_whatsapp_stop_blocks_first_touch(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    sms = FakeSms()
+    whatsapp = FakeWhatsApp(suppressed=frozenset({"+15551234567"}))
+    try:
+        with pytest.raises(OutboundFirstTouchBlocked) as caught:
+            _start(
+                factory,
+                sms,
+                whatsapp,
+                channel="whatsapp",
+                consent_basis="whatsapp_opt_in",
+            )
+        assert caught.value.code == "sms_suppressed"
+        assert sms.sent == []
+        assert whatsapp.sent == []
+    finally:
+        engine.dispose()
+
+
+def test_whatsapp_send_requires_evorove_mouth(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    sms = FakeSms()
+    try:
+        with pytest.raises(OutboundFirstTouchBlocked) as caught:
+            _start(
+                factory,
+                sms,
+                FakeWhatsApp(configured=False),
+                channel="whatsapp",
+                consent_basis="whatsapp_opt_in",
+            )
+        assert caught.value.code == "whatsapp_not_configured"
+        assert sms.sent == []
     finally:
         engine.dispose()

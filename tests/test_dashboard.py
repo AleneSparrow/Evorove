@@ -147,6 +147,38 @@ def test_case_summary_exposes_human_readable_service_category() -> None:
     assert summary.category == "Drain cleaning"
 
 
+def test_case_summary_exposes_stated_gender_and_region_only() -> None:
+    case = ProcessCase(
+        "case-attrs",
+        "biz-1",
+        Lead(
+            "lead-attrs",
+            name="Ada",
+            attributes={"gender": "Woman", "region": "Illinois", "secret": "ignore"},
+        ),
+        ProcessState.NEW_LEAD,
+        NOW,
+        NOW,
+    )
+    summary = DashboardCaseSummarySchema.from_domain(case)
+    assert summary.lead.gender == "Woman"
+    assert summary.lead.region == "Illinois"
+
+
+def test_case_summary_does_not_invent_gender_or_region() -> None:
+    case = ProcessCase(
+        "case-plain",
+        "biz-1",
+        Lead("lead-plain", name="Ada"),
+        ProcessState.NEW_LEAD,
+        NOW,
+        NOW,
+    )
+    summary = DashboardCaseSummarySchema.from_domain(case)
+    assert summary.lead.gender is None
+    assert summary.lead.region is None
+
+
 def test_case_summary_exposes_latest_non_sensitive_escalation_reason() -> None:
     case = ProcessCase(
         "case-escalation",
@@ -327,7 +359,9 @@ def test_dashboard_analytics_uses_audit_events_and_median_first_response(dashboa
         "booked_cases": 1,
         "escalated_cases": 1,
         "lost_cases": 0,
-        "booking_conversion_rate": 1.0,
+        "human_review_cases": 1,
+        "conversion_eligible_cases": 0,
+        "booking_conversion_rate": 0.0,
         "escalation_rate": 1.0,
         "lost_rate": 0.0,
         "median_first_response_seconds": 5.0,

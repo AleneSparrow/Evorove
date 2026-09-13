@@ -27,14 +27,17 @@ from src.domain.sales import (
     SalesTurn,
     SalesTurnAnalysis,
 )
+from src.domain.hot_lead_handoff import try_build_hot_lead_handoff_payload
 from src.domain.states import ProcessState
 from src.engine.decision_router import DecisionRequest
 from src.engine.process_engine import ProcessEngine
+from src.engine.owner_material_pick import pick_activated_owner_material
 from src.engine.sales_live_turn import (
     DeterministicSalesTurnAnalyzer,
     booking_available_for_live_turn,
     combined_business_facts,
     discovery_prompt,
+    ensure_evorove_acting_for,
     merge_profile_from_analysis,
     phrase_approved_move,
     phrase_outbound_greet,
@@ -56,6 +59,7 @@ from src.persistence.errors import StaleCaseError
 from src.persistence.repositories import UnitOfWork
 
 from .commercial_service import CommercialWorkflowService
+from .crm_touch_publisher import publisher_from_env, touch_payloads_for_turn
 
 
 class _SmsSender(Protocol):
@@ -67,6 +71,10 @@ _OWNER_RESUME_MOVES = frozenset({
     SalesMove.ANSWER_OBJECTION,
     SalesMove.ASK_FOR_COMMITMENT,
     SalesMove.CHECK_OBJECTION_RESOLUTION,
+})
+_MATERIAL_MOVES = frozenset({
+    SalesMove.PRESENT_RELEVANT_VALUE,
+    SalesMove.ANSWER_OBJECTION,
 })
 _HUMAN_OWNED = frozenset({
     ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
@@ -111,6 +119,7 @@ class SalesLiveTurnService:
         process_engine: ProcessEngine | None = None,
         policy: SalesPolicyEngine | None = None,
         validator: SalesPolicyValidator | None = None,
+        crm_touch_publisher=None,
     ) -> None:
         self._analyzer = analyzer or DeterministicSalesTurnAnalyzer()
         self._generator = response_generator
@@ -119,6 +128,24 @@ class SalesLiveTurnService:
         self._policy = policy or SalesPolicyEngine()
         self._validator = validator or SalesPolicyValidator()
         self._fallback_analyzer = DeterministicSalesTurnAnalyzer()
+        self._crm_touch = crm_touch_publisher if crm_touch_publisher is not None else publisher_from_env()
+
+    def _facts_for(
+        self,
+        uow: UnitOfWork,
+        business_id: str,
+        dna: Mapping[str, Any],
+        qualification: QualificationResult,
+        profile: CustomerSalesProfile,
+        *,
+        move: SalesMove | None,
+    ) -> tuple[tuple[str, str], ...]:
+        extra: tuple[tuple[str, str], ...] = ()
+        if move is None or move in _MATERIAL_MOVES:
+            picked = pick_activated_owner_material(uow, business_id, profile)
+            if picked is not None:
+                extra = (picked,)
+        return combined_business_facts(dna, qualification.service_id, profile, extra=extra)
 
     def run(
         self,
@@ -147,7 +174,9 @@ class SalesLiveTurnService:
         active_objection = analysis.objections[0] if analysis.objections else merged.active_objection
         objection_knowledge = matching_knowledge(knowledge, active_objection)
         booking_available = booking_available_for_live_turn(qualification, merged, analysis)
-        facts = combined_business_facts(dna, qualification.service_id, merged)
+        facts = self._facts_for(
+            uow, conversation.business_id, dna, qualification, merged, move=None,
+        )
         decision = self._policy.decide(
             merged,
             analysis,
@@ -174,6 +203,15 @@ class SalesLiveTurnService:
 
         if decision.move is SalesMove.OFFER_BOOKING_SLOTS:
             case.metadata["sales_ready_to_book"] = True
+            _stamp_hot_lead_handoff(
+                case,
+                conversation=conversation,
+                qualification=qualification,
+                evidence_excerpt=customer_text,
+                last_move=decision.move.value,
+                sales_stage=decision.target_stage.value,
+                publisher=self._crm_touch,
+            )
             self._transition_process(
                 uow, case, ProcessState.QUALIFIED, occurred_at, decision.reason_code,
             )
@@ -201,7 +239,7 @@ class SalesLiveTurnService:
         turn_knowledge = objection_knowledge if decision.knowledge_required else knowledge
         message_text, validation = self._phrase_and_validate(
             decision, analysis, turn_knowledge, customer_text, conversation, case,
-            handoff_text, merged, qualification, dna,
+            handoff_text, merged, qualification, dna, uow,
             callback_recorded=callback_recorded,
             booking_available=decision.move is SalesMove.OFFER_BOOKING_SLOTS,
         )
@@ -218,8 +256,8 @@ class SalesLiveTurnService:
         self._persist_turn(
             uow, conversation, case, profile, persisted, analysis, decision,
             knowledge_ids=tuple(card.knowledge_id for card in turn_knowledge),
-            business_fact_ids=tuple(fact_id for fact_id, _ in combined_business_facts(
-                dna, qualification.service_id, persisted,
+            business_fact_ids=tuple(fact_id for fact_id, _ in self._facts_for(
+                uow, conversation.business_id, dna, qualification, persisted, move=decision.move,
             )),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
@@ -236,6 +274,7 @@ class SalesLiveTurnService:
         *,
         occurred_at: datetime,
         sms_service: _SmsSender | None = None,
+        whatsapp_mouth: _SmsSender | None = None,
     ) -> SalesLiveTurnResult | None:
         """Continue in the same channel after the owner supplies a missing fact.
 
@@ -280,7 +319,7 @@ class SalesLiveTurnService:
             analysis,
             approved_knowledge_available=bool(objection_knowledge),
             business_facts_available=bool(
-                combined_business_facts(dna, qualification.service_id, profile)
+                self._facts_for(uow, case.business_id, dna, qualification, profile, move=None)
             ),
             booking_available=False,
             operational_intake_incomplete=False,
@@ -292,7 +331,7 @@ class SalesLiveTurnService:
         turn_knowledge = objection_knowledge if decision.knowledge_required else knowledge
         message_text, validation = self._phrase_and_validate(
             decision, analysis, turn_knowledge, "", conversation, case,
-            handoff_text, profile, qualification, dna,
+            handoff_text, profile, qualification, dna, uow,
         )
         persisted = replace(
             profile,
@@ -304,8 +343,8 @@ class SalesLiveTurnService:
             uow, conversation, case, profile, persisted, analysis, decision,
             knowledge_ids=tuple(card.knowledge_id for card in turn_knowledge),
             business_fact_ids=tuple(
-                fact_id for fact_id, _text in combined_business_facts(
-                    dna, qualification.service_id, persisted,
+                fact_id for fact_id, _text in self._facts_for(
+                    uow, conversation.business_id, dna, qualification, persisted, move=decision.move,
                 )
             ),
             validation=validation, occurred_at=occurred_at,
@@ -332,6 +371,7 @@ class SalesLiveTurnService:
             source_message_id=source_message_id,
             occurred_at=occurred_at,
             sms_service=sms_service,
+            whatsapp_mouth=whatsapp_mouth,
             metadata={"owner_fact_resume": True},
         )
         return SalesLiveTurnResult(
@@ -348,6 +388,7 @@ class SalesLiveTurnService:
         source_message_id: str,
         occurred_at: datetime,
         sms_service: _SmsSender | None = None,
+        whatsapp_mouth: _SmsSender | None = None,
     ) -> SalesLiveTurnResult:
         """First customer-facing line with no inbound message. Policy still GREET."""
 
@@ -366,7 +407,9 @@ class SalesLiveTurnService:
             analysis,
             approved_knowledge_available=False,
             business_facts_available=bool(
-                combined_business_facts(dna, qualification.service_id, profile)
+                self._facts_for(
+                    uow, conversation.business_id, dna, qualification, profile, move=None,
+                )
             ),
             booking_available=False,
             operational_intake_incomplete=False,
@@ -378,13 +421,14 @@ class SalesLiveTurnService:
                 uow, case, ProcessState.CONTACTED, occurred_at, decision.reason_code,
             )
         handoff_text = self._handoff_text(dna)
+        business_name = _business_name(dna)
         outbound_fallback = phrase_outbound_greet(
-            business_name=_business_name(dna),
+            business_name=business_name,
             offer=_business_offer(dna),
         )
         message_text, validation = self._phrase_and_validate(
             decision, analysis, knowledge, "", conversation, case,
-            handoff_text, profile, qualification, dna,
+            handoff_text, profile, qualification, dna, uow,
             fallback_override=outbound_fallback,
         )
         lowered = message_text.casefold()
@@ -399,19 +443,28 @@ class SalesLiveTurnService:
         ):
             message_text = outbound_fallback
             validation = {**validation, "outbound_inbound_phrasing_replaced": True}
+        stamped = ensure_evorove_acting_for(message_text, business_name=business_name)
+        if stamped != message_text:
+            message_text = stamped
+            validation = {**validation, "outbound_evorove_attribution_added": True}
+        card_preferred = None
+        if isinstance(conversation.metadata, dict):
+            raw_preferred = conversation.metadata.get("preferred_channel")
+            if isinstance(raw_preferred, str) and raw_preferred.strip():
+                card_preferred = raw_preferred.strip().casefold()
         persisted = replace(
             profile,
             stage=decision.target_stage,
             last_move=decision.move,
-            preferred_channel=conversation.channel,
+            preferred_channel=card_preferred or conversation.channel,
             metadata={**dict(profile.metadata), "outbound_first_touch": True},
         )
         self._persist_turn(
             uow, conversation, case, profile, persisted, analysis, decision,
             knowledge_ids=(),
             business_fact_ids=tuple(
-                fact_id for fact_id, _text in combined_business_facts(
-                    dna, qualification.service_id, persisted,
+                fact_id for fact_id, _text in self._facts_for(
+                    uow, conversation.business_id, dna, qualification, persisted, move=decision.move,
                 )
             ),
             validation=validation, occurred_at=occurred_at,
@@ -422,6 +475,7 @@ class SalesLiveTurnService:
             source_message_id=source_message_id,
             occurred_at=occurred_at,
             sms_service=sms_service,
+            whatsapp_mouth=whatsapp_mouth,
             metadata={"outbound_first_touch": True},
         )
         return SalesLiveTurnResult(
@@ -492,6 +546,7 @@ class SalesLiveTurnService:
         profile: CustomerSalesProfile,
         qualification: QualificationResult,
         dna: Mapping[str, Any],
+        uow: UnitOfWork,
         *,
         callback_recorded: bool = False,
         booking_available: bool = False,
@@ -511,6 +566,9 @@ class SalesLiveTurnService:
             else answer_prompt(knowledge, phrase_approved_move(decision.move, safe_fallback=handoff_text))
             if decision.move is SalesMove.ANSWER_OBJECTION
             else phrase_approved_move(decision.move, safe_fallback=handoff_text)
+        )
+        turn_facts = self._facts_for(
+            uow, conversation.business_id, dna, qualification, profile, move=decision.move,
         )
         candidate = SalesResponseCandidate(
             message_text=fallback,
@@ -537,9 +595,7 @@ class SalesLiveTurnService:
                     ],
                     business_facts=[
                         {"business_fact_id": fact_id, "text": text}
-                        for fact_id, text in combined_business_facts(
-                            dna, qualification.service_id, profile
-                        )
+                        for fact_id, text in turn_facts
                     ],
                     customer_evidence=[
                         {"evidence_id": key, "text": value} for key, value in evidence_map.items()
@@ -554,7 +610,7 @@ class SalesLiveTurnService:
                 candidate = SalesResponseCandidate(
                     message_text=fallback, move=decision.move, used_safe_fallback=True,
                 )
-        fact_map = dict(combined_business_facts(dna, qualification.service_id, profile))
+        fact_map = dict(turn_facts)
         context = SalesResponseValidationContext(
             approved_move=decision.move,
             approved_knowledge=frozenset(knowledge_map),
@@ -635,6 +691,14 @@ class SalesLiveTurnService:
             validation=dict(validation),
             created_at=occurred_at,
         ))
+        for payload in touch_payloads_for_turn(
+            case=case,
+            previous=previous,
+            decision=decision,
+            source_message_id=source_message_id,
+            summary=decision.reason_code.replace("_", " ").title(),
+        ):
+            self._crm_touch.publish(conversation.business_id, payload)
 
     def _stamp_sales_follow_up_reason(
         self,
@@ -827,6 +891,53 @@ def _business_offer(dna: Mapping[str, Any]) -> str | None:
     return name.strip() if isinstance(name, str) and name.strip() else None
 
 
+def _stamp_hot_lead_handoff(
+    case: ProcessCase,
+    *,
+    conversation: Conversation,
+    qualification: QualificationResult,
+    evidence_excerpt: str,
+    last_move: str,
+    sales_stage: str,
+    publisher=None,
+) -> None:
+    """Store the 2→3 payload and enqueue POST /hot-leads. Does not book a slot."""
+
+    if isinstance(case.metadata.get("hot_lead_handoff"), dict):
+        return
+    service_id = qualification.service_id
+    if not isinstance(service_id, str) or not service_id.strip():
+        requested = case.lead.attributes.get("service_requested")
+        service_id = requested if isinstance(requested, str) else None
+    location = None
+    for source in (case.metadata, case.lead.attributes):
+        value = source.get("customer_location") or source.get("location")
+        if isinstance(value, str) and value.strip():
+            location = value.strip()
+            break
+    excerpt = evidence_excerpt.strip()
+    if len(excerpt) > 500:
+        excerpt = excerpt[:500]
+    payload = try_build_hot_lead_handoff_payload(
+        handoff_id=case.case_id,
+        channel=conversation.channel,
+        service_id=service_id,
+        evidence_excerpt=excerpt,
+        name=case.lead.name,
+        phone=case.lead.phone,
+        email=case.lead.email,
+        sales_profile_snapshot={"stage": sales_stage, "last_move": last_move},
+        customer_location=location,
+    )
+    if payload is None:
+        case.metadata["hot_lead_handoff_blocked"] = True
+        return
+    case.metadata["hot_lead_handoff"] = payload
+    case.metadata.pop("hot_lead_handoff_blocked", None)
+    if publisher is not None:
+        publisher.publish_hot_lead(conversation.business_id, payload)
+
+
 def _qualification_for_resume(case: ProcessCase) -> QualificationResult:
     service_id = case.lead.attributes.get("service_requested")
     if not isinstance(service_id, str) or not service_id.strip():
@@ -855,12 +966,25 @@ def _deliver_outbound(
     occurred_at: datetime,
     sms_service: _SmsSender | None,
     metadata: Mapping[str, Any],
+    whatsapp_mouth: _SmsSender | None = None,
 ) -> bool:
-    delivered = conversation.channel.casefold() != "sms"
-    if conversation.channel.casefold() == "sms":
+    channel = conversation.channel.casefold()
+    delivered = channel not in {"sms", "whatsapp"}
+    if channel == "sms":
         phone = case.lead.phone
         if phone and case.lead.sms_consent and sms_service is not None:
             delivered = sms_service.send_outbound(
+                conversation.business_id, to_number=phone, body=message_text,
+            ) is not None
+        else:
+            delivered = False
+    elif channel == "whatsapp":
+        phone = case.lead.phone
+        attrs = case.lead.attributes if isinstance(case.lead.attributes, Mapping) else {}
+        raw_basis = attrs.get("outbound_consent_basis")
+        basis = raw_basis.strip() if isinstance(raw_basis, str) else ""
+        if phone and basis == "whatsapp_opt_in" and whatsapp_mouth is not None:
+            delivered = whatsapp_mouth.send_outbound(
                 conversation.business_id, to_number=phone, body=message_text,
             ) is not None
         else:

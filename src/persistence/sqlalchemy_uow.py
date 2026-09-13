@@ -31,6 +31,7 @@ from .sqlalchemy_repositories import (
     SQLAlchemyStaffSessionRepository,
     SQLAlchemyStaffSecurityRepository,
     SQLAlchemyStaffUserRepository,
+    SQLAlchemyMarketingMaterialsRepository,
 )
 
 
@@ -88,6 +89,7 @@ class SQLAlchemyUnitOfWork:
         self.sales_knowledge = SQLAlchemySalesKnowledgeRepository(self.session)
         self.sales_playbooks = SQLAlchemySalesPlaybookRepository(self.session)
         self.sales_objections = SQLAlchemySalesObjectionRepository(self.session)
+        self.marketing_materials = SQLAlchemyMarketingMaterialsRepository(self.session)
         return self
 
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:

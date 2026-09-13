@@ -39,6 +39,7 @@ _INBOUND_ONLY_GREET = re.compile(
     r"thanks for reaching out|thank you for reaching out|you reached out|got your message",
     re.IGNORECASE,
 )
+_EVOROVE_FOR = re.compile(r"evorove\s+for\s+", re.IGNORECASE)
 _MOVE_PHRASES: dict[SalesMove, str] = {
     SalesMove.GREET_AND_SET_CONTEXT: (
         "Hey — what's the thing you want help with?"
@@ -383,11 +384,12 @@ def combined_business_facts(
     dna: Mapping[str, Any],
     service_id: str | None,
     profile: CustomerSalesProfile | None = None,
+    extra: tuple[tuple[str, str], ...] = (),
 ) -> tuple[tuple[str, str], ...]:
     facts = listed_business_facts(dna, service_id)
-    if profile is None:
-        return facts
-    return facts + owner_listed_facts(profile)
+    if profile is not None:
+        facts = facts + owner_listed_facts(profile)
+    return facts + extra
 
 
 def business_facts_available(
@@ -404,23 +406,42 @@ def phrase_approved_move(move: SalesMove, *, safe_fallback: str) -> str:
     return _MOVE_PHRASES.get(move, _SAFE_DISCOVERY_FALLBACK)
 
 
-def phrase_outbound_greet(*, business_name: str | None, offer: str | None) -> str:
-    """First hello from the business. Must not assume they already wrote in."""
+def evorove_acting_for(business_name: str | None) -> str:
+    """Customer-facing mouth: Evorove writing for the named business, not the salon account."""
 
     name = (business_name or "").strip() or "this business"
+    return f"Evorove for {name}"
+
+
+def ensure_evorove_acting_for(text: str, *, business_name: str | None) -> str:
+    """Stamp first-touch copy so the lead can see who is writing."""
+
+    if _EVOROVE_FOR.search(text or "") is not None:
+        return text
+    actor = evorove_acting_for(business_name)
+    body = (text or "").strip()
+    if not body:
+        return f"Hey — this is {actor}. What's the thing you want help with?"
+    return f"{body} — {actor}."
+
+
+def phrase_outbound_greet(*, business_name: str | None, offer: str | None) -> str:
+    """First hello from Evorove acting for the business. Must not assume they already wrote in."""
+
+    actor = evorove_acting_for(business_name)
     offer_text = (offer or "").strip()
     if offer_text:
         text = (
-            f"Hey — this is {name}. We help with {offer_text}. "
+            f"Hey — this is {actor}. We help with {offer_text}. "
             "Does that match what you're up against?"
         )
     else:
         text = (
-            f"Hey — this is {name}. We might be able to help with "
+            f"Hey — this is {actor}. We might be able to help with "
             "what you're dealing with. What's going on?"
         )
     if _INBOUND_ONLY_GREET.search(text) is not None:
-        text = f"Hey — this is {name}. What's the thing you want help with?"
+        text = f"Hey — this is {actor}. What's the thing you want help with?"
     return text
 
 

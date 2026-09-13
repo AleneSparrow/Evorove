@@ -1,4 +1,4 @@
-# Deploying Flywheel to production
+# Deploying Evorove to production
 
 This is a precise, minimal path to get the real app (not `localhost`) live on
 the internet. The backend already has everything it needs (`Dockerfile`,
@@ -205,6 +205,18 @@ yet; nothing else in the deploy depends on it.
 
    curl -X POST https://your-backend.up.railway.app/api/v1/internal/commercial/expire \
      -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>"
+   ```
+   CRM journal Found cards are ingested (cycle 2 writes GREET) with the same
+   secret; contract: `docs/cycle-2-found-ingest-contract.md`.
+   Set `CRM_BASE_URL` to the CRM origin so live sales turns enqueue journal
+   touches (`opened` / `in_play` / `hot`) on `lead-touches` and POST a ready
+   person to `hot-leads`. Cycle 2 does not send a calendar hour. Use the same
+   `INTERNAL_TASK_SECRET` as CRM.
+   ```
+   curl -X POST https://your-backend.up.railway.app/api/v1/internal/businesses/<business_id>/found \
+     -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>" \
+     -H "Content-Type: application/json" \
+     -d '{"person_id":"ppl_example","reason":"Asked neighbors this week for help with a broken AC","source":"open-web","channel":"sms","consent_basis":"prior_express_written","identity":{"phone":"+15551234567"}}'
    ```
    `integrations/deliver` retries CRM webhook outbox rows and conversational
    SMS replies. `commercial/expire`

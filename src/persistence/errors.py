@@ -76,6 +76,19 @@ class ConversationClosedError(PersistenceError):
     """A staff action was requested on a conversation that is already closed."""
 
 
+class StaffSaleTakeoverForbidden(PersistenceError):
+    """Owner may not hop into a normal sale. Reply only after a risk handoff."""
+
+    def __init__(self, public_message: str | None = None) -> None:
+        text = public_message or (
+            "The engine is selling this thread. A person replies only after "
+            "STOP, emergency, or policy handoff."
+        )
+        super().__init__(text)
+        self.code = "sale_takeover_forbidden"
+        self.public_message = text
+
+
 class BillingNotConfiguredError(PersistenceError):
     """Lemon Squeezy isn't configured (no LEMONSQUEEZY_API_KEY) -- billing
     endpoints are reachable but can't do anything yet. Distinct from a 500:

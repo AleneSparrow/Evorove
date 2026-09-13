@@ -45,6 +45,7 @@ from src.engine.follow_up import (
 )
 
 from .errors import StaleCaseError
+from .owner_materials import merge_active_owner_materials
 from .repositories import DeliveryStatus, UnitOfWorkFactory
 from .sms_service import SmsService
 
@@ -66,6 +67,14 @@ _HUMAN_OWNED = frozenset(
 def _human_owns_case(uow: Any, business_id: str, case_id: str) -> bool:
     return any(
         conversation.status in _HUMAN_OWNED
+        for conversation in uow.conversations.list_for_case(business_id, case_id)
+    )
+
+
+def _open_whatsapp_thread(uow: Any, business_id: str, case_id: str) -> bool:
+    return any(
+        conversation.status is not ConversationStatus.CLOSED
+        and conversation.channel.casefold() == "whatsapp"
         for conversation in uow.conversations.list_for_case(business_id, case_id)
     )
 
@@ -175,7 +184,7 @@ class PersistentFollowUpRunner:
             dna_version = uow.business_dna.get_active(business_id)
             if dna_version is None:
                 return 0, 0, 0
-            business_dna = dna_version.configuration
+            business_dna = merge_active_owner_materials(uow, business_id, dna_version.configuration)
             # No provisioned number -- nothing here can ever be sent, so
             # skip scanning this business's cases entirely rather than
             # deciding "due" on every sweep and never actually delivering.
@@ -239,7 +248,7 @@ class PersistentFollowUpRunner:
             dna_version = uow.business_dna.get_active(business_id)
             if dna_version is None:
                 return "gone"
-            business_dna = dna_version.configuration
+            business_dna = merge_active_owner_materials(uow, business_id, dna_version.configuration)
             decision = decide_follow_up(case, business_dna, now)
             if not decision.due:
                 return "no_longer_due"
@@ -247,6 +256,8 @@ class PersistentFollowUpRunner:
             if not phone:
                 return "no_longer_due"
             if _human_owns_case(uow, business_id, case_id):
+                return "no_longer_due"
+            if _open_whatsapp_thread(uow, business_id, case_id):
                 return "no_longer_due"
 
             missing = missing_information_from_case(case)
@@ -326,10 +337,16 @@ class PersistentFollowUpRunner:
             dna_version = uow.business_dna.get_active(business_id)
             if dna_version is None:
                 return None
-            decision = decide_follow_up(case, dna_version.configuration, now)
+            decision = decide_follow_up(
+                case,
+                merge_active_owner_materials(uow, business_id, dna_version.configuration),
+                now,
+            )
             if not decision.due or decision.attempt_number != attempt_number or not case.lead.phone:
                 return None
             if _human_owns_case(uow, business_id, case_id):
+                return None
+            if _open_whatsapp_thread(uow, business_id, case_id):
                 return None
             if self.sms_service.is_suppressed(business_id, case.lead.phone):
                 return None
@@ -361,7 +378,11 @@ class PersistentFollowUpRunner:
             dna_version = uow.business_dna.get_active(business_id)
             if dna_version is None:
                 return "gone"
-            decision = decide_follow_up(case, dna_version.configuration, now)
+            decision = decide_follow_up(
+                case,
+                merge_active_owner_materials(uow, business_id, dna_version.configuration),
+                now,
+            )
             if not decision.due or decision.attempt_number != attempt_number:
                 # The provider outcome is durable, but never fabricate a
                 # FOLLOW_UP_SENT audit event for a case whose policy changed.

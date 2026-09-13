@@ -79,8 +79,8 @@ const INDUSTRY_SUGGESTIONS = [
  * directly, so these are the actual, live escalation switches. The previous
  * three-checkbox version of this step was never sent to the backend at all. */
 const ESCALATION_OPTIONS: [keyof EscalationState, string, string][] = [
-  ["highUrgency", "Stop and hand off the moment high urgency is detected", "Off by default: the engine finishes qualifying, then hands you the lead with the urgency flagged. Turn on only if you want the cycle stopped immediately."],
-  ["emergency", "Customer describes it as an emergency", "Always hands off immediately — no automated next step at all."],
+  ["highUrgency", "Stop the moment high urgency is detected", "Off by default: the engine finishes qualifying, then flags urgency on the board. Turn on only if you want the cycle stopped immediately. You still do not hop in to close."],
+  ["emergency", "Customer describes it as an emergency", "Always stops immediately — no automated next step."],
 ];
 
 const DEFAULT_QUESTION_SEED = ["What can we help you with?"];
@@ -95,7 +95,7 @@ export default function Onboarding() {
   const { user, setUser, selectBusiness, token } = useAuth();
 
   const [step, setStep] = useState(0);
-  const [business, setBusiness] = useState({ name: "", industry: "", description: "", tone: "Friendly & direct" });
+  const [business, setBusiness] = useState({ name: "", industry: "", description: "", offer: "", tone: "Friendly & direct" });
   const [services, setServices] = useState<string[]>([]);
   const [newService, setNewService] = useState("");
   const [areaMode, setAreaMode] = useState<"remote" | "local" | null>(null);
@@ -158,10 +158,11 @@ export default function Onboarding() {
         questions: (questions[name] ?? DEFAULT_QUESTION_SEED).map((q) => q.trim()).filter(Boolean),
       }));
 
+      const descriptionParts = [business.description.trim(), business.offer.trim() && `Commercial offer:\n${business.offer.trim()}`].filter(Boolean);
       const created = await api.createBusiness(token, {
         business_name: business.name.trim() || "Untitled business",
         industry: business.industry.trim(),
-        description: business.description.trim(),
+        description: descriptionParts.join("\n\n"),
         tone: business.tone,
         services: servicePayloads,
         service_zip_codes: areaMode === "local" ? zipList : [],
@@ -225,7 +226,7 @@ export default function Onboarding() {
                 {step === 0 && (
                   <>
                     <h2 className="ev-display text-4xl mb-1.5">Tell us about your business</h2>
-                    <p className="text-sm text-mute mb-7">This shapes how your engine talks to every customer — works for any kind of business.</p>
+                    <p className="text-sm text-mute mb-7">This packet is the brief for finding people and selling. It is not a list of leads.</p>
                     <Field label="Business name">
                       <input className={inputCls} placeholder="e.g. Acme Studio" value={business.name} onChange={(e) => setBusiness({ ...business, name: e.target.value })} />
                       {attemptedContinue && !business.name.trim() && <p className="text-xs mt-1.5" style={{ color: "#B4483A" }}>Give it a name to continue.</p>}
@@ -259,6 +260,18 @@ export default function Onboarding() {
                       />
                       <p className="text-xs mt-1.5 text-mute">
                         A sentence in plain language. It helps your engine recognise what customers are asking for when they describe it in their own words.
+                      </p>
+                    </Field>
+                    <Field label="Commercial offer (optional)">
+                      <textarea
+                        className={`${inputCls} min-h-[76px] resize-y`}
+                        placeholder="e.g. 50-minute consult, $180, weekdays after 4pm"
+                        maxLength={1000}
+                        value={business.offer}
+                        onChange={(e) => setBusiness({ ...business, offer: e.target.value })}
+                      />
+                      <p className="text-xs mt-1.5 text-mute">
+                        If you have one, put it here. Photos and extra files go on Advertising materials after launch — press Refresh so the engine uses them.
                       </p>
                     </Field>
                     <Field label="How should it sound to customers?">
@@ -304,7 +317,7 @@ export default function Onboarding() {
                 {step === 2 && (
                   <>
                     <h2 className="ev-display text-4xl mb-1.5">Who can you serve?</h2>
-                    <p className="text-sm text-mute mb-7">This decides which leads book automatically and which ones escalate to you instead.</p>
+                    <p className="text-sm text-mute mb-7">This is part of the brief: who you can serve when cycle 1 hunts and when cycle 2 closes.</p>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <AreaOption
                         icon={Globe}
@@ -370,8 +383,8 @@ export default function Onboarding() {
 
                 {step === 4 && (
                   <>
-                    <h2 className="ev-display text-4xl mb-1.5">When should it hand off to you?</h2>
-                    <p className="text-sm text-mute mb-7">The engine never guesses past these lines — it stops and asks.</p>
+                    <h2 className="ev-display text-4xl mb-1.5">When should it stop and ask you?</h2>
+                    <p className="text-sm text-mute mb-7">Safety and identity stops. A normal sale stays with the engine — you watch, you do not close it.</p>
                     <div className="flex flex-col gap-3">
                       {ESCALATION_OPTIONS.map(([key, title, desc]) => (
                         <label
@@ -460,7 +473,7 @@ export default function Onboarding() {
               <h2 className="ev-display text-4xl mb-2">
                 {business.name || "Your business"} is live.
               </h2>
-              <p className="text-sm text-mute mb-7 max-w-sm">It's answering new leads right now, using exactly what you just set up.</p>
+              <p className="text-sm text-mute mb-7 max-w-sm">The packet is live. Open CRM and watch: cycle 1 fills Cold when it finds people; cycle 2 writes from there. You do not hop in to close a normal sale.</p>
               <button
                 onClick={() => navigate("/app")}
                 className="text-sm font-medium text-white px-5 py-2.5 rounded-lg flex items-center gap-1.5"

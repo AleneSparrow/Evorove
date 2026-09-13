@@ -57,10 +57,14 @@ class Settings:
     # who finds the URL. None (the default) means the endpoint is disabled
     # entirely, not "open" -- see that route for the check.
     internal_task_secret: str | None = field(default=None, repr=False)
+    crm_base_url: str | None = None
     # Required only when the owner enables authenticator-app 2FA. It has no
     # development default: an operator must provide high-entropy key material
     # before the server may retain an encrypted TOTP seed.
     account_security_encryption_key: str | None = field(default=None, repr=False)
+    # Evorove WhatsApp sender on OUR Twilio account. Tenants do not OAuth
+    # Meta or paste their Instagram. Empty means WhatsApp send is off.
+    evorove_whatsapp_from: str | None = None
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_username: str | None = field(default=None, repr=False)
@@ -78,6 +82,10 @@ class Settings:
         level, same reasoning as billing_configured -- SmsService raises a
         clear, specific error per-request instead of failing app startup."""
         return self.twilio_account_sid is not None
+
+    @property
+    def whatsapp_configured(self) -> bool:
+        return bool(self.evorove_whatsapp_from and self.twilio_account_sid and self.twilio_auth_token)
 
     @property
     def openai_compatible_configured(self) -> bool:
@@ -245,10 +253,20 @@ class Settings:
                 frontend_base_url=frontend_base_url.rstrip("/") if frontend_base_url else None,
                 twilio_account_sid=os.getenv("TWILIO_ACCOUNT_SID"),
                 twilio_auth_token=os.getenv("TWILIO_AUTH_TOKEN"),
+                evorove_whatsapp_from=(
+                    os.getenv("EVOROVE_WHATSAPP_FROM").strip()
+                    if os.getenv("EVOROVE_WHATSAPP_FROM")
+                    else None
+                ),
                 public_api_base_url=(
                     public_api_base_url.rstrip("/") if public_api_base_url else None
                 ),
                 internal_task_secret=os.getenv("INTERNAL_TASK_SECRET"),
+                crm_base_url=(
+                    os.getenv("CRM_BASE_URL").rstrip("/")
+                    if os.getenv("CRM_BASE_URL")
+                    else None
+                ),
                 account_security_encryption_key=os.getenv("ACCOUNT_SECURITY_ENCRYPTION_KEY"),
                 smtp_host=os.getenv("SMTP_HOST"), smtp_port=smtp_port,
                 smtp_username=os.getenv("SMTP_USERNAME"), smtp_password=os.getenv("SMTP_PASSWORD"),

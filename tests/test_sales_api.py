@@ -417,7 +417,7 @@ def test_owner_fact_continues_the_open_customer_conversation(sales_api_environme
         outbound = [item for item in messages if item.role is MessageRole.ASSISTANT]
         assert len(outbound) == 1
         text = outbound[0].text.casefold()
-        assert "set up to handle" in text
+        assert "kind of work" in text
         assert "discount" not in text
         assert "team member" not in text
         case = uow.cases.get("biz-1", "case-biz-1")

@@ -1,0 +1,4 @@
+# Optional. Install only on the machine that will run LoRA.
+# Do not put API keys here. Do not add this to the production app image.
+
+mlx-lm>=0.22.0

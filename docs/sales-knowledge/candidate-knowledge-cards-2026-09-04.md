@@ -268,20 +268,32 @@ customer.
 ]
 ```
 
-## What the owner needs to do with this
+## Product posture applied 7 September 2026 — cards still unapproved
 
-Per the plan's own process (section 8, step 3: "Ни одна карточка не публикуется
-автоматически"), none of this is usable as-is. Concretely:
+Owner asked to resolve the contradictions without publishing cards.
+Canonical text: `docs/sales-agent-implementation-plan-ru.md` section 0.4.
+This section only records how that posture maps onto **this** candidate set.
+Status of every card remains `candidate`. Do not import or approve from here.
 
-1. Decide the posture question in Contradiction 1 (validate-first vs.
-   constructive reframe) -- it changes several cards at once.
-2. Either reject `candidate-general-cialdini-scarcity-003e` outright or wire a
-   real availability feed before ever approving it.
-3. Either name a real source for
-   `candidate-trial-time-to-value-007` or drop it -- it is the weakest card
-   here.
-4. Explicitly reject or rewrite
-   `candidate-objection-script-feel-felt-found-CONTESTED-008`.
-5. For every remaining card, confirm the underlying book/paper against an
-   actual copy before treating the citation as production-grade provenance --
-   this session did not do that verification.
+| Card | Posture |
+| --- | --- |
+| `candidate-discovery-spin-001` | Keep as candidate. Fits DISCOVERY / one question per turn. |
+| `candidate-presentation-challenger-teaching-002` | Keep as candidate. Reframe only with a Business DNA fact. |
+| `candidate-objection-price-cialdini-reciprocity-003a` | Keep as candidate. Usable later only if DNA already has a free authorized step. |
+| `candidate-objection-price-cialdini-consistency-003b` | Keep as candidate. Matches the existing commitment ladder. |
+| `candidate-general-cialdini-scarcity-003e` | Negative / prohibited example until live verified availability exists. Not a positive training target. |
+| `candidate-objection-diagnostic-question-voss-004` | Keep as candidate for DIAGNOSE_OBJECTION (one what/how question). |
+| `candidate-followup-cadence-multitouch-005` | Keep as candidate. Cadence must still respect consent, STOP, quiet hours. |
+| `candidate-price-framing-loss-aversion-006` | Keep as candidate. No manufactured numbers. |
+| `candidate-trial-time-to-value-007` | Out of corpus until a named source exists. Trial length is a DNA fact. |
+| `candidate-objection-script-feel-felt-found-CONTESTED-008` | Not a positive example. Do not train the companion to use the formula. |
+
+Owner review is still required before any card can be approved.
+
+Ни одна карточка не публикуется автоматически. Поза противоречий снята в
+спеке 0.4; осталось до публикации:
+
+1. Положить купленные копии в `private/sales-corpus/` и сверить страницы.
+2. Отдельный approve в Settings — не этот документ и не субагент.
+3. Scarcity и Feel-Felt-Found не делать положительными примерами обучения.
+4. `candidate-trial-time-to-value-007` не брать в корпус без именованного источника.

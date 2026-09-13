@@ -20,6 +20,7 @@ from src.engine.sales_live_turn import (
     DeterministicSalesTurnAnalyzer,
     booking_available_for_live_turn,
     discovery_prompt,
+    ensure_evorove_acting_for,
     merge_profile_from_analysis,
     operationally_qualified_for_commitment,
     phrase_approved_move,
@@ -259,8 +260,14 @@ def test_outbound_greet_does_not_assume_they_wrote_in() -> None:
     assert "thanks for reaching out" not in lowered
     assert "you reached out" not in lowered
     assert "got your message" not in lowered
-    assert "acme home services" in lowered
+    assert "evorove for acme home services" in lowered
     assert "plumbing" in lowered
+    stamped = ensure_evorove_acting_for(
+        "Hey — this is Acme Home Services. We help with plumbing.",
+        business_name="Acme Home Services",
+    )
+    assert "evorove for acme home services" in stamped.casefold()
+    assert ensure_evorove_acting_for(text, business_name="Acme Home Services") == text
 
 
 def test_ready_to_book_wording_does_not_set_a_slot() -> None:

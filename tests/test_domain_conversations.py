@@ -62,8 +62,8 @@ def test_closed_conversation_still_rejects_every_other_transition(target: Conver
 
 
 def test_ai_active_conversation_can_move_to_human_takeover_active() -> None:
-    """Staff reply from Conversations is an explicit takeover; the engine
-    must not keep answering that session."""
+    """Domain still allows engine HANDOFF into human takeover. Staff must not
+    use this on a normal sale — see StaffActionService."""
     conversation = _conversation(ConversationStatus.AI_ACTIVE)
     conversation.set_status(
         ConversationStatus.HUMAN_TAKEOVER_ACTIVE, datetime(2026, 1, 2, tzinfo=timezone.utc)

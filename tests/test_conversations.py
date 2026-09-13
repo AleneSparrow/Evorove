@@ -127,6 +127,21 @@ def send(client: TestClient, token: str, message: str, external_id: str):
     )
 
 
+def _assert_ready_to_book_without_a_slot(client: TestClient, token: str, offered) -> None:
+    assert offered.status_code == 200
+    assert offered.json()["current_state"] == "QUALIFIED"
+    text = offered.json()["messages"][-1]["text"].casefold()
+    assert "choose an appointment time" not in text
+    assert "confirmed" not in text
+    assert "you're in" in text
+    commercial = client.get(
+        f"/api/v1/public/businesses/tenant-a/conversations/{token}/commercial"
+    ).json()
+    assert commercial["current_state"] == "QUALIFIED"
+    assert commercial["proposed_slots"] == []
+    assert commercial["booking"] is None
+
+
 def force_case_qualified(factory, business_id: str = "tenant-a") -> None:
     """Open the commercial contour without pretending intake completeness is a sale."""
     with factory() as uow:
@@ -223,7 +238,7 @@ def test_complete_intake_fields_stay_in_discovery_and_do_not_open_slots(
     assert response.json()["current_state"] == "QUALIFYING"
     assert "Choose an appointment time" not in response.json()["messages"][-1]["text"]
     assert "how many equipment units" not in reply
-    assert "hoping to get help" in reply or "problem" in reply or "outcome" in reply
+    assert "help" in reply
     commercial = client.get(
         f"/api/v1/public/businesses/tenant-a/conversations/{token}/commercial"
     ).json()
@@ -233,10 +248,10 @@ def test_complete_intake_fields_stay_in_discovery_and_do_not_open_slots(
     assert commercial["booking"] is None
 
 
-def test_sales_cycle_closes_to_booking_only_after_commitment(
+def test_sales_cycle_closes_to_ready_to_book_then_commercial_can_book(
     conversation_environment,
 ) -> None:
-    client, _, _ = conversation_environment
+    client, factory, _ = conversation_environment
     first = create_conversation(
         client,
         "My AC stopped cooling and I need it working this week. "
@@ -256,11 +271,31 @@ def test_sales_cycle_closes_to_booking_only_after_commitment(
     assert "next step" in asked.json()["messages"][-1]["text"].casefold()
 
     offered = send(client, token, "Yes, book me", "close-5")
-    assert offered.status_code == 200
-    assert offered.json()["current_state"] == "QUALIFIED"
-    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+    _assert_ready_to_book_without_a_slot(client, token, offered)
+    with factory() as uow:
+        conversation = uow.session.scalar(
+            select(ConversationRow).where(ConversationRow.business_id == "tenant-a")
+        )
+        assert conversation is not None and conversation.case_id is not None
+        case = uow.cases.get("tenant-a", conversation.case_id)
+        assert case is not None
+        assert case.metadata.get("sales_ready_to_book") is True
+        assert case.current_state is ProcessState.QUALIFIED
+        handoff = case.metadata.get("hot_lead_handoff")
+        assert isinstance(handoff, dict)
+        assert handoff["readiness"]["signal"] == "ready_to_book"
+        assert handoff["service_id"] == "diagnostic-visit"
+        assert "booking_id" not in handoff
+        assert "slot_start_at" not in handoff
+        assert handoff["identity"]["phone"]
+        assert handoff["channel"] == "web_chat"
 
-    booked = send(client, token, "The second option works", "close-6")
+    slots = send(client, token, "I am ready for times", "close-6")
+    assert slots.status_code == 200
+    assert slots.json()["current_state"] == "QUALIFIED"
+    assert "Choose an appointment time" in slots.json()["messages"][-1]["text"]
+
+    booked = send(client, token, "The second option works", "close-7")
     assert booked.status_code == 200
     assert booked.json()["current_state"] == "BOOKED"
     assert "confirmed" in booked.json()["messages"][-1]["text"].casefold()
@@ -294,8 +329,7 @@ def test_price_objection_is_answered_then_books_without_knowledge_cards(
     assert "guarantee" not in answered.json()["messages"][-1]["text"].casefold()
 
     offered = send(client, token, "Yes, book me", "obj-6")
-    assert offered.json()["current_state"] == "QUALIFIED"
-    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+    _assert_ready_to_book_without_a_slot(client, token, offered)
 
 
 def test_other_objection_is_answered_then_books_without_knowledge_cards(
@@ -327,8 +361,7 @@ def test_other_objection_is_answered_then_books_without_knowledge_cards(
     assert "guarantee" not in text
 
     offered = send(client, token, "Yes, book me", "other-obj-6")
-    assert offered.json()["current_state"] == "QUALIFIED"
-    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+    _assert_ready_to_book_without_a_slot(client, token, offered)
 
 
 def test_callback_request_schedules_engine_follow_up_without_qualifying_or_booking(
@@ -374,8 +407,7 @@ def test_callback_request_schedules_engine_follow_up_without_qualifying_or_booki
         assert case.metadata.get("sales_follow_up_reason") == "CALLBACK_REQUESTED"
 
     offered = send(client, token, "Yes, book me", "cb-3")
-    assert offered.json()["current_state"] == "QUALIFIED"
-    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+    _assert_ready_to_book_without_a_slot(client, token, offered)
 
 
 def test_need_to_think_defers_without_pressing_then_still_books(
@@ -418,8 +450,7 @@ def test_need_to_think_defers_without_pressing_then_still_books(
         assert case.metadata.get("sales_follow_up_reason") == "OBJECTION_DEFERRED"
 
     offered = send(client, token, "Yes, book me", "think-4")
-    assert offered.json()["current_state"] == "QUALIFIED"
-    assert "Choose an appointment time" in offered.json()["messages"][-1]["text"]
+    _assert_ready_to_book_without_a_slot(client, token, offered)
 
 
 def test_conversation_books_valid_proposed_slot_and_public_status_is_token_scoped(

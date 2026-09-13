@@ -72,7 +72,8 @@ from src.domain.sales import SalesMove
 #   2026-09-06.v4 -- prior wording/contract tightening (pinned hash in tests).
 #   2026-09-07.r2 -- slice D step 10: empty CUSTOMER_CONTENT is a first outbound
 #     GREET; still forbid "thanks for reaching out" / "you reached out".
-SALES_RESPONSE_PROMPT_VERSION = "2026-09-07.r2"
+#   2026-09-12.c2-1 -- outbound GREET is Evorove for {business}, not the salon account.
+SALES_RESPONSE_PROMPT_VERSION = "2026-09-12.c2-1"
 
 
 # Server-controlled IDs only -- never a customer quote, never free text.

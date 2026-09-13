@@ -167,6 +167,8 @@ def sales_turn_analysis_prompt(
         "recommended_moves at all.\n"
         "- if requested_callback_at is set to a non-null datetime, recommended_moves must include "
         "SCHEDULE_CALLBACK.\n"
+        "- READY_FOR_NEXT_STEP means the person is ready to book. It is not evidence that a "
+        "calendar hour is already set, and it is not a booking confirmation.\n"
         "Every signal and every objection MUST carry an `evidence` string copied verbatim, "
         "character-for-character, from CUSTOMER_CONTENT_JSON. If you cannot find an exact supporting "
         "phrase, omit that signal or objection entirely rather than approximating or inferring one. "

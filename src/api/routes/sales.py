@@ -15,10 +15,12 @@ from src.engine.sales_owner_facts import (
 from src.engine.sales_policy import SalesPolicyEngine
 from src.domain.found_person import FoundPersonRejected
 from src.persistence.errors import OutboundFirstTouchBlocked, StaleSalesProfileError
+from src.persistence.crm_touch_publisher import publisher_from_settings
 from src.persistence.outbound_first_touch import OutboundFirstTouchService
 from src.persistence.sales_knowledge_import_service import SalesKnowledgeImportService
 from src.persistence.sales_live_turn import SalesLiveTurnService
 from src.persistence.sms_service import SmsService
+from src.persistence.whatsapp_mouth import WhatsAppMouth
 
 from ..dependencies import (
     ApplicationContainer,
@@ -26,6 +28,7 @@ from ..dependencies import (
     UnitOfWorkFactory,
     get_container,
     get_sms_service,
+    get_whatsapp_mouth,
     get_unit_of_work_factory,
     require_own_business,
 )
@@ -61,6 +64,7 @@ def start_outbound_first_touch(
     user: Annotated[StaffUser, Depends(require_own_business)],
     unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
     sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    whatsapp_mouth: Annotated[WhatsAppMouth, Depends(get_whatsapp_mouth)],
     container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> OutboundFirstTouchResponse:
     """Write first to a found person. No inbound customer message is required."""
@@ -70,9 +74,13 @@ def start_outbound_first_touch(
         result = OutboundFirstTouchService(
             unit_of_work_factory,
             sms_service=sms_service,
+            whatsapp_mouth=whatsapp_mouth,
             sales_live=SalesLiveTurnService(
                 analyzer=container.sales_turn_analyzer,  # type: ignore[arg-type]
                 response_generator=container.sales_response_generator,
+                crm_touch_publisher=publisher_from_settings(
+                    container.settings, container.unit_of_work_factory,
+                ),
             ),
         ).start(
             business_id,
@@ -84,6 +92,11 @@ def start_outbound_first_touch(
             name=body.name,
             phone=body.phone,
             email=body.email,
+            person_id=body.person_id,
+            preferred_channel=body.preferred_channel,
+            messenger_id=body.messenger_id,
+            gender=body.gender,
+            region=body.region,
         )
     except FoundPersonRejected as exc:
         raise RequestDataError(str(exc)) from exc
@@ -263,6 +276,7 @@ def supply_case_business_fact(
     user: Annotated[StaffUser, Depends(require_own_business)],
     unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
     sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    whatsapp_mouth: Annotated[WhatsAppMouth, Depends(get_whatsapp_mouth)],
     container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> SalesCaseContextResponse:
     """Record a fact from the owner so the engine can keep talking to the customer."""
@@ -284,8 +298,16 @@ def supply_case_business_fact(
                 dna = {} if dna_version is None else dna_version.configuration
                 SalesLiveTurnService(
                     response_generator=container.sales_response_generator,
+                    crm_touch_publisher=publisher_from_settings(
+                        container.settings, container.unit_of_work_factory,
+                    ),
                 ).resume_after_owner_fact(
-                    unit_of_work, case, dna, occurred_at=now, sms_service=sms_service,
+                    unit_of_work,
+                    case,
+                    dna,
+                    occurred_at=now,
+                    sms_service=sms_service,
+                    whatsapp_mouth=whatsapp_mouth,
                 )
                 saved = unit_of_work.sales_profiles.get(business_id, case_id) or saved
         except ValueError as exc:

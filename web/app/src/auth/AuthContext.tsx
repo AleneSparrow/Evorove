@@ -1,13 +1,25 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, ApiError, type StaffUser, type TwoFactorLoginChallenge } from "../api/client";
 
-const TOKEN_STORAGE_KEY = "flywheel.session_token";
-// Which of the account's (possibly several) businesses the dashboard is
-// currently operating on -- purely a client-side choice (see
-// resolveBusinessId), since every dashboard API call already takes
-// business_id as a URL path parameter (src/api/dependencies.py's
-// require_own_business), not something the backend needs to track.
-const BUSINESS_STORAGE_KEY = "flywheel.selected_business_id";
+const TOKEN_STORAGE_KEY = "evorove.session_token";
+const BUSINESS_STORAGE_KEY = "evorove.selected_business_id";
+const LEGACY_TOKEN_STORAGE_KEY = "flywheel.session_token";
+const LEGACY_BUSINESS_STORAGE_KEY = "flywheel.selected_business_id";
+
+function readAndMigrateLocalStorage(nextKey: string, legacyKey: string): string | null {
+  const current = localStorage.getItem(nextKey);
+  if (current) {
+    localStorage.removeItem(legacyKey);
+    return current;
+  }
+  const legacy = localStorage.getItem(legacyKey);
+  if (legacy) {
+    localStorage.setItem(nextKey, legacy);
+    localStorage.removeItem(legacyKey);
+    return legacy;
+  }
+  return null;
+}
 
 interface AuthContextValue {
   user: StaffUser | null;
@@ -33,7 +45,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
  * the first one on record. */
 function resolveBusinessId(user: StaffUser | null): string | null {
   if (!user || user.business_ids.length === 0) return null;
-  const stored = localStorage.getItem(BUSINESS_STORAGE_KEY);
+  const stored = readAndMigrateLocalStorage(BUSINESS_STORAGE_KEY, LEGACY_BUSINESS_STORAGE_KEY);
   if (stored && user.business_ids.includes(stored)) return stored;
   return user.business_id && user.business_ids.includes(user.business_id)
     ? user.business_id
@@ -41,7 +53,9 @@ function resolveBusinessId(user: StaffUser | null): string | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_STORAGE_KEY));
+  const [token, setToken] = useState<string | null>(() =>
+    readAndMigrateLocalStorage(TOKEN_STORAGE_KEY, LEGACY_TOKEN_STORAGE_KEY),
+  );
   const [user, setUserState] = useState<StaffUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [businessId, setBusinessIdState] = useState<string | null>(null);
@@ -123,6 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(BUSINESS_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_BUSINESS_STORAGE_KEY);
     setToken(null);
     setUserState(null);
     setBusinessIdState(null);

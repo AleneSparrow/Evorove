@@ -15,6 +15,7 @@ from pydantic import (
 )
 
 from src.domain.models import Lead, ProcessCase, ProcessEvent
+from src.domain.marketing_materials import MarketingAsset, MarketingGuidance, snapshot_plain_text
 from src.domain.qualification import LeadIntakeResult
 from src.domain.states import ProcessState
 from src.domain.tenancy import Business, BusinessDNAVersion
@@ -182,7 +183,7 @@ class SmsStatusResponse(ApiModel):
     phone_number: str | None = None
 
 
-# --- Billing: self-serve Lemon Squeezy subscription for the business's own Flywheel account --
+# --- Billing: self-serve Lemon Squeezy subscription for the business's own Evorove account --
 
 
 class BillingStatusResponse(ApiModel):
@@ -694,10 +695,38 @@ class DashboardLeadSchema(ApiModel):
     name: str | None
     email: str | None
     phone: str | None
+    gender: str | None = None
+    region: str | None = None
 
     @classmethod
     def from_domain(cls, lead: Lead) -> "DashboardLeadSchema":
-        return cls(lead_id=lead.lead_id, name=lead.name, email=lead.email, phone=lead.phone)
+        return cls(
+            lead_id=lead.lead_id,
+            name=lead.name,
+            email=lead.email,
+            phone=lead.phone,
+            gender=_optional_lead_attribute(lead.attributes, "gender", "sex"),
+            region=_optional_lead_attribute(
+                lead.attributes,
+                "region",
+                "state",
+                "city",
+                "zip",
+                "postal_code",
+                "service_area",
+            ),
+        )
+
+
+def _optional_lead_attribute(attributes: Mapping[str, Any], *keys: str) -> str | None:
+    """Surface owner/cycle-1 labels only. Never infer gender or region."""
+    for key in keys:
+        value = attributes.get(key)
+        if isinstance(value, str):
+            cleaned = value.strip()
+            if cleaned and len(cleaned) <= 80:
+                return cleaned
+    return None
 
 
 class DashboardCaseSummarySchema(ApiModel):
@@ -828,6 +857,8 @@ class DashboardAnalyticsSchema(ApiModel):
     booked_cases: int
     escalated_cases: int
     lost_cases: int
+    human_review_cases: int
+    conversion_eligible_cases: int
     booking_conversion_rate: float
     escalation_rate: float
     lost_rate: float
@@ -867,6 +898,55 @@ class ReportingSettingsUpdateRequest(ApiModel):
         if self.test_mode_enabled is None and not self.reset_statistics and not self.clear_statistics_baseline:
             raise ValueError("at least one reporting setting must be changed")
         return self
+
+
+class MarketingAssetSchema(ApiModel):
+    asset_id: str
+    kind: str
+    title: str
+    body_preview: str
+    filename: str | None
+    created_at: datetime
+
+    @classmethod
+    def from_domain(cls, asset: MarketingAsset) -> "MarketingAssetSchema":
+        preview = asset.body_text if len(asset.body_text) <= 280 else asset.body_text[:277] + "..."
+        return cls(
+            asset_id=asset.asset_id,
+            kind=asset.kind,
+            title=asset.title,
+            body_preview=preview,
+            filename=asset.filename,
+            created_at=asset.created_at,
+        )
+
+
+class MarketingGuidanceSchema(ApiModel):
+    revision: int
+    activated_at: datetime
+    snapshot_preview: str
+
+    @classmethod
+    def from_domain(cls, guidance: MarketingGuidance) -> "MarketingGuidanceSchema":
+        text = snapshot_plain_text(guidance.snapshot_text)
+        preview = text if len(text) <= 280 else text[:277] + "..."
+        return cls(
+            revision=guidance.revision,
+            activated_at=guidance.activated_at,
+            snapshot_preview=preview,
+        )
+
+
+class MarketingPacketResponse(ApiModel):
+    assets: tuple[MarketingAssetSchema, ...]
+    guidance: MarketingGuidanceSchema | None
+    pending: bool
+
+
+class MarketingTextAssetRequest(ApiModel):
+    kind: Literal["notes", "offer"]
+    title: str = Field(min_length=1, max_length=200)
+    body_text: str = Field(min_length=1, max_length=20_000)
 
 
 def _jsonable(value: Any) -> Any:
@@ -1185,15 +1265,43 @@ class SupplyBusinessFactRequest(ApiModel):
         return cleaned
 
 
+class CrmFoundIdentitySchema(ApiModel):
+    name: Annotated[str | None, Field(min_length=1, max_length=255)] = None
+    phone: Annotated[str | None, Field(min_length=1, max_length=64)] = None
+    email: Annotated[str | None, Field(min_length=1, max_length=320)] = None
+    messenger_id: Annotated[str | None, Field(min_length=1, max_length=128)] = None
+    gender: Annotated[str | None, Field(min_length=1, max_length=80)] = None
+    region: Annotated[str | None, Field(min_length=1, max_length=80)] = None
+
+
+class CrmFoundIngestRequest(ApiModel):
+    """CRM journal Found card. Cycle 2 writes; CRM does not send the GREET."""
+
+    schema_version: Annotated[str, Field(min_length=1, max_length=16)] = "1"
+    person_id: Annotated[str, Field(min_length=8, max_length=128)]
+    reason: Annotated[str, Field(min_length=1, max_length=2_000)]
+    source: Annotated[str, Field(min_length=1, max_length=255)]
+    preferred_channel: Annotated[str | None, Field(min_length=1, max_length=32)] = None
+    channel: Annotated[str | None, Field(min_length=1, max_length=32)] = None
+    consent_basis: Annotated[str | None, Field(max_length=64)] = None
+    identity: CrmFoundIdentitySchema
+    idempotency_key: Annotated[str | None, Field(min_length=8, max_length=128)] = None
+
+
 class OutboundFirstTouchRequest(ApiModel):
     idempotency_key: Annotated[str, Field(min_length=8, max_length=128)]
     reason: Annotated[str, Field(min_length=1, max_length=2_000)]
     source: Annotated[str, Field(min_length=1, max_length=255)]
-    channel: Annotated[str, Field(min_length=1, max_length=16)]
+    channel: Annotated[str | None, Field(min_length=1, max_length=32)] = None
     consent_basis: Annotated[str | None, Field(max_length=64)] = None
     name: Annotated[str | None, Field(min_length=1, max_length=255)] = None
     phone: Annotated[str | None, Field(min_length=1, max_length=64)] = None
     email: Annotated[str | None, Field(min_length=1, max_length=320)] = None
+    person_id: Annotated[str | None, Field(min_length=8, max_length=128)] = None
+    preferred_channel: Annotated[str | None, Field(min_length=1, max_length=32)] = None
+    messenger_id: Annotated[str | None, Field(min_length=1, max_length=128)] = None
+    gender: Annotated[str | None, Field(min_length=1, max_length=80)] = None
+    region: Annotated[str | None, Field(min_length=1, max_length=80)] = None
 
 
 class OutboundFirstTouchResponse(ApiModel):

@@ -159,7 +159,7 @@ def test_prompt_version_was_bumped_for_the_2026_09_06_content_changes() -> None:
     # Hardcoded literal, not just "equals the imported constant" -- this is
     # the test the task asked for: it fails if SALES_PROMPT_VERSION is ever
     # reverted to (or left at) an old value.
-    assert SALES_PROMPT_VERSION == "2026-09-06.v3"
+    assert SALES_PROMPT_VERSION == "2026-09-07.v1"
 
 
 def test_ai_request_and_report_summary_carry_the_current_prompt_version() -> None:
@@ -183,6 +183,7 @@ def test_prompt_content_hash_is_pinned_to_its_version() -> None:
     digest = hashlib.sha256(static_content.encode("utf-8")).hexdigest()
     expected_digest_by_version = {
         "2026-09-06.v3": "bbed2e958cbd516a0d88b945f20fbce9f4abe1825bfbfb4c6fce1b8672f5183d",
+        "2026-09-07.v1": "0b6b505dfdafac44f9902432aa8fb1ebb8e3651be5a1da03416a1b7fd6c0815f",
     }
     assert SALES_PROMPT_VERSION in expected_digest_by_version, (
         f"no pinned hash recorded for prompt version {SALES_PROMPT_VERSION} -- "

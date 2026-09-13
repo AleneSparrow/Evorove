@@ -210,8 +210,8 @@ function MobileNav({
                 </button>
               </div>
               <nav className="flex flex-col gap-1">
-                <NavItem icon={LayoutGrid} label="Overview" to="/app" end onClick={() => setOpen(false)} />
-                <NavItem icon={MessageSquare} label="Conversations" to="/app/conversations" onClick={() => setOpen(false)} />
+                <NavItem icon={LayoutGrid} label="CRM" to="/app" end onClick={() => setOpen(false)} />
+                <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" onClick={() => setOpen(false)} />
                 <NavItem icon={Workflow} label="Settings" to="/app/settings" onClick={() => setOpen(false)} />
                 <NavItem icon={CreditCard} label="Billing" to="/app/billing" onClick={() => setOpen(false)} />
                 <NavItem icon={Plus} label="Add another business" to="/onboarding" onClick={() => setOpen(false)} />
@@ -320,8 +320,8 @@ export function Sidebar() {
             </div>
           </div>
           <nav className="flex flex-col gap-1">
-            <NavItem icon={LayoutGrid} label="Overview" to="/app" end />
-            <NavItem icon={MessageSquare} label="Conversations" to="/app/conversations" />
+            <NavItem icon={LayoutGrid} label="CRM" to="/app" end />
+            <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" />
             <NavItem icon={Workflow} label="Settings" to="/app/settings" />
             <NavItem icon={CreditCard} label="Billing" to="/app/billing" />
             <NavItem icon={Plus} label="Add another business" to="/onboarding" />
@@ -340,7 +340,7 @@ export function Sidebar() {
             <LogOut size={16} strokeWidth={2} /> Sign out
           </button>
           <div className="px-2 mt-3 text-[11px] text-clay leading-relaxed">
-            Every step your engine takes — logged, reversible, never silent.
+            Every step on the board — logged. You watch. You do not hop in to close.
           </div>
           <div className="px-2 mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-clay">
             <NavLink to="/privacy" className="hover:text-ink">Privacy</NavLink>

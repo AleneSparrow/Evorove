@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Search, Send, Check, Phone, Mail, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Search, Phone, Mail, Loader2, AlertTriangle } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { StatePill, Stepper, mapProcessState, describeEvent, formatRelativeTime } from "../components/Shared";
 import { ConversationSalesPanel } from "../components/ConversationSalesPanel";
+import { CONVERSATION_STATUS_LABELS } from "../lib/escalationCopy";
 import { useAuth, describeError } from "../auth/AuthContext";
 import {
   api,
@@ -47,26 +48,14 @@ export default function Conversation() {
   // Opened from the dashboard bell as ?attention=1, which is the whole point
   // of that control: it must LAND you on a list of only what needs you, not
   // quietly set a filter somewhere you cannot see.
-  const [attentionOnly, setAttentionOnly] = useState(searchParams.get("attention") === "1");
+  const [attentionOnly, setAttentionOnly] = useState(searchParams.get("attention") !== "0");
   const [requestedCaseMissing, setRequestedCaseMissing] = useState(false);
   const [detail, setDetail] = useState<DashboardConversationDetail | null>(null);
   const [caseDetail, setCaseDetail] = useState<DashboardCaseDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [reply, setReply] = useState("");
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
-  const [resolving, setResolving] = useState(false);
-  const [feedbackSending, setFeedbackSending] = useState<string | null>(null);
-  const [feedbackSaved, setFeedbackSaved] = useState<string | null>(null);
-
-  const refreshList = useCallback(() => {
-    if (!token || !businessId) return;
-    api
-      .listConversations(token, businessId)
-      .then((res) => setConversations(res.conversations))
-      .catch((err) => setError(describeError(err)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, businessId]);
+  const [riskDraft, setRiskDraft] = useState("");
+  const [riskBusy, setRiskBusy] = useState(false);
+  const [riskError, setRiskError] = useState<string | null>(null);
 
   const refreshDetail = useCallback(
     (conversationId: string) => {
@@ -141,7 +130,6 @@ export default function Conversation() {
     let cancelled = false;
     setDetail(null);
     setCaseDetail(null);
-    setActionError(null);
     if (!token || !businessId || !selectedId) return;
     refreshDetail(selectedId).catch((err) => {
       if (!cancelled) setError(describeError(err));
@@ -152,55 +140,12 @@ export default function Conversation() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, businessId, selectedId]);
 
+  useEffect(() => {
+    setRiskDraft("");
+    setRiskError(null);
+  }, [selectedId]);
+
   const stateInfo = useMemo(() => (caseDetail ? mapProcessState(caseDetail.current_state) : null), [caseDetail]);
-  const canReply = detail !== null && detail.conversation.status !== "closed";
-  const canResolve = caseDetail !== null && caseDetail.current_state === "NEEDS_HUMAN";
-
-  const handleSend = async () => {
-    if (!token || !businessId || !selectedId || !reply.trim()) return;
-    setSending(true);
-    setActionError(null);
-    try {
-      await api.replyToConversation(token, businessId, selectedId, reply.trim());
-      setReply("");
-      await refreshDetail(selectedId);
-      refreshList();
-    } catch (err) {
-      setActionError(describeError(err));
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleResolve = async () => {
-    if (!token || !businessId || !selectedId) return;
-    setResolving(true);
-    setActionError(null);
-    try {
-      await api.resolveConversation(token, businessId, selectedId);
-      await refreshDetail(selectedId);
-      refreshList();
-    } catch (err) {
-      setActionError(describeError(err));
-    } finally {
-      setResolving(false);
-    }
-  };
-
-  const handleFeedback = async (outcome: "unnecessary" | "missed" | "wrong_service" | "identity_same_customer" | "identity_different_customer") => {
-    if (!token || !businessId || !selectedId) return;
-    setFeedbackSending(outcome);
-    setActionError(null);
-    try {
-      await api.recordEscalationFeedback(token, businessId, selectedId, outcome);
-      setFeedbackSaved(outcome);
-      await refreshDetail(selectedId);
-    } catch (err) {
-      setActionError(describeError(err));
-    } finally {
-      setFeedbackSending(null);
-    }
-  };
 
   const escalationLabel = detail?.conversation.escalation_reason
     ? ({
@@ -223,11 +168,12 @@ export default function Conversation() {
         <div className="flex-1 min-w-0 flex">
           <div className="w-72 shrink-0 border-r border-line flex flex-col">
             <div className="px-4 py-4 border-b border-line">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-coral mb-3">Safety</p>
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-clay" />
                 <input
-                  aria-label="Search conversations"
-                  placeholder="Search conversations..."
+                  aria-label="Search safety stops"
+                  placeholder="Search safety stops…"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   className="w-full pl-8 pr-3 py-2 rounded-lg bg-white border border-line text-sm outline-none"
@@ -238,7 +184,7 @@ export default function Conversation() {
                 className="mt-2 w-full rounded-lg px-3 py-1.5 text-xs font-medium border border-line"
                 style={{ backgroundColor: attentionOnly ? "#C6FF00" : "#fff", color: attentionOnly ? "#0B0B0D" : "#6B6459" }}
             >
-                Needs attention only
+                Safety stops only
               </button>
             </div>
             {error && (
@@ -253,9 +199,11 @@ export default function Conversation() {
                 </div>
               )
             ) : conversations.length === 0 ? (
-              <div className="px-4 py-8 text-sm text-mute text-center">No conversations yet.</div>
+              <div className="px-4 py-8 text-sm text-mute text-center">No threads yet. Watch sales on CRM.</div>
             ) : filteredConversations.length === 0 ? (
-              <div className="px-4 py-8 text-sm text-mute text-center">No conversations match your search.</div>
+              <div className="px-4 py-8 text-sm text-mute text-center">
+                {attentionOnly ? "No safety stops. Normal sales stay on CRM." : "No threads match the search."}
+              </div>
             ) : (
               <ul className="flex-1 overflow-y-auto">
                 {filteredConversations.map((c) => {
@@ -271,7 +219,7 @@ export default function Conversation() {
                         <span className="text-sm font-semibold">{c.lead_name || "Unnamed lead"}</span>
                         <span className="text-[11px] text-clay">{formatRelativeTime(c.last_activity_at)}</span>
                       </div>
-                      <div className="text-xs text-mute truncate mb-1.5">{c.channel} · {c.status.replace(/_/g, " ")}</div>
+                      <div className="text-xs text-mute truncate mb-1.5">{c.channel} · {CONVERSATION_STATUS_LABELS[c.status] ?? c.status.replace(/_/g, " ")}</div>
                       {c.case_state && <StatePill state={meta.caseState} />}
                     </li>
                   );
@@ -286,8 +234,8 @@ export default function Conversation() {
                 {conversations === null
                   ? "Loading…"
                   : requestedCaseMissing
-                    ? "No conversation is linked to this lead yet."
-                    : "Select a conversation"}
+                    ? "No conversation is linked to this lead yet. Cold stays quiet until cycle 2 writes."
+                    : "Safety stops only. Open a lead from CRM to watch a normal sale."}
               </div>
             ) : !detail ? (
               <div className="flex-1 flex items-center justify-center text-sm text-mute">
@@ -305,10 +253,25 @@ export default function Conversation() {
                           {detail.conversation.case_id ? detail.conversation.case_id.slice(0, 8) : detail.conversation.conversation_id.slice(0, 8)}
                         </span>
                       </div>
-                      <p className="text-xs text-mute mt-0.5">{detail.conversation.channel} · {detail.conversation.status.replace(/_/g, " ")}</p>
+                      <p className="text-xs text-mute mt-0.5">{detail.conversation.channel} · {CONVERSATION_STATUS_LABELS[detail.conversation.status] ?? detail.conversation.status.replace(/_/g, " ")}</p>
                     </div>
                   </div>
-                  {stateInfo && <StatePill state={stateInfo.caseState} />}
+                  <div className="flex items-center gap-3">
+                    {stateInfo && <StatePill state={stateInfo.caseState} />}
+                    {detail.conversation.case_id ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const caseId = detail.conversation.case_id;
+                          if (!caseId) return;
+                          navigate(`/app?view=board&lead=${encodeURIComponent(caseId)}`);
+                        }}
+                        className="text-xs font-medium px-3 py-1.5 rounded-full border border-line"
+                      >
+                        Open on CRM
+                      </button>
+                    ) : null}
+                  </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-3">
@@ -339,88 +302,88 @@ export default function Conversation() {
                 </div>
 
                 <div className="border-t border-line p-4">
-                  {caseDetail && (
+                  {escalationLabel && (
                     <div className="mb-3 rounded-xl border border-[#E8CFAF] bg-[#FFF8EE] p-3">
-                      {escalationLabel && (
-                        <>
-                          <div className="flex items-center gap-2 text-xs font-semibold text-[#8A561B]">
-                            <AlertTriangle size={14} /> Why this needs attention
-                          </div>
-                          <p className="mt-1 text-sm text-mute">{escalationLabel}</p>
-                        </>
-                      )}
-                      <div className={`text-xs font-semibold text-mute ${escalationLabel ? "mt-3" : ""}`}>Help improve AI decisions</div>
-                      <div className="mt-2.5 flex flex-wrap gap-2">
-                        {([
-                          ...(detail.conversation.escalation_reason === "identity_conflict"
-                            ? [
-                                ["identity_same_customer", "Same customer — keep separate"],
-                                ["identity_different_customer", "Different customers"],
-                              ]
-                            : escalationLabel ? [["unnecessary", "Escalation wasn't needed"]] : []),
-                          ["missed", "Should have escalated"],
-                          ["wrong_service", "Wrong service"],
-                        ] as [("unnecessary" | "missed" | "wrong_service" | "identity_same_customer" | "identity_different_customer"), string][]).map(([outcome, label]) => (
-                          <button
-                            key={outcome}
-                            onClick={() => handleFeedback(outcome)}
-                            disabled={feedbackSending !== null || feedbackSaved === outcome}
-                            className="rounded-lg border border-[#E8CFAF] bg-white px-2.5 py-1.5 text-[11px] font-medium text-mute disabled:opacity-50"
-                        >
-                            {feedbackSending === outcome ? "Saving…" : feedbackSaved === outcome ? "Saved" : label}
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-2 text-xs font-semibold text-[#8A561B]">
+                        <AlertTriangle size={14} /> Safety or policy stop
                       </div>
+                      <p className="mt-1 text-sm text-mute">{escalationLabel}</p>
                     </div>
                   )}
-                  {actionError && (
-                    <div className="mb-2.5 px-3 py-2 rounded-lg text-xs" style={{ backgroundColor: "#FBEBE9", color: "#8A3225" }}>
-                      {actionError}
-                    </div>
-                  )}
-                  <div className="flex items-end gap-2">
-                    <textarea
-                      value={reply}
-                      onChange={(e) => setReply(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (canReply && !sending && reply.trim()) handleSend();
-                        }
+                  {detail.conversation.status === "human_takeover_requested"
+                    || detail.conversation.status === "human_takeover_active" ? (
+                    <form
+                      className="flex flex-col gap-2"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        if (!token || !businessId || !selectedId || !riskDraft.trim() || riskBusy) return;
+                        setRiskBusy(true);
+                        setRiskError(null);
+                        api
+                          .replyToConversation(token, businessId, selectedId, riskDraft.trim())
+                          .then(() => {
+                            setRiskDraft("");
+                            return Promise.all([
+                              refreshDetail(selectedId),
+                              api.listConversations(token, businessId).then((res) => setConversations(res.conversations)),
+                            ]);
+                          })
+                          .catch((err) => setRiskError(describeError(err)))
+                          .finally(() => setRiskBusy(false));
                       }}
-                      placeholder={canReply ? "Reply as your business..." : "This conversation is closed"}
-                      rows={2}
-                      disabled={!canReply || sending}
-                      className="flex-1 px-3.5 py-2.5 rounded-lg border border-line bg-white text-sm outline-none resize-none disabled:opacity-60 disabled:bg-[#FAFAF7]"
-                    />
-                    <button
-                      onClick={handleSend}
-                      disabled={!canReply || sending || !reply.trim()}
-                      title={canReply ? "Send reply" : "This conversation is closed"}
-                      className="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{ backgroundColor: "#0B0B0D" }}
-                  >
-                      {sending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-                    </button>
-                  </div>
-                  <div className="mt-2.5 flex items-center justify-between">
-                    <p className="text-xs text-clay">
-                      {canResolve
-                        ? "This case is waiting on your review."
-                        : caseDetail
-                          ? "Not currently waiting on human review."
-                          : "This conversation isn't linked to a case."}
+                    >
+                      <p className="text-sm text-mute">
+                        Risk or policy only — this is not a sales close. The engine still owns a normal sale.
+                      </p>
+                      {riskError && (
+                        <p className="text-xs" style={{ color: "#8A3225" }}>{riskError}</p>
+                      )}
+                      <textarea
+                        aria-label="Risk reply"
+                        value={riskDraft}
+                        onChange={(event) => setRiskDraft(event.target.value)}
+                        rows={3}
+                        className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none"
+                        placeholder="Write a policy or emergency reply…"
+                      />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="submit"
+                          disabled={riskBusy || !riskDraft.trim()}
+                          className="text-sm font-medium px-4 py-2 rounded-lg text-[#0B0B0D] disabled:opacity-50"
+                          style={{ backgroundColor: "#C6FF00" }}
+                        >
+                          {riskBusy ? "Sending…" : "Send risk reply"}
+                        </button>
+                        {caseDetail?.current_state === "NEEDS_HUMAN" && (
+                          <button
+                            type="button"
+                            disabled={riskBusy}
+                            onClick={() => {
+                              if (!token || !businessId || !selectedId) return;
+                              setRiskBusy(true);
+                              setRiskError(null);
+                              api
+                                .resolveConversation(token, businessId, selectedId)
+                                .then(() => Promise.all([
+                                  refreshDetail(selectedId),
+                                  api.listConversations(token, businessId).then((res) => setConversations(res.conversations)),
+                                ]))
+                                .catch((err) => setRiskError(describeError(err)))
+                                .finally(() => setRiskBusy(false));
+                            }}
+                            className="text-sm font-medium px-4 py-2 rounded-lg border border-line"
+                          >
+                            Resolve
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-mute">
+                      Watch only. The engine talks until Done. Open the board and click a lead to read the thread there too.
                     </p>
-                    <button
-                      onClick={handleResolve}
-                      disabled={!canResolve || resolving}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{ borderColor: "#E4DCCB", color: "#0B0B0D" }}
-                  >
-                      {resolving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-                      Mark resolved
-                    </button>
-                  </div>
+                  )}
                 </div>
               </>
             )}

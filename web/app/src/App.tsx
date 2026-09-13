@@ -17,8 +17,7 @@ import Billing from "./pages/Billing";
 import Account from "./pages/Account";
 import AppFaq from "./pages/AppFaq";
 
-/** Shared layout element for every subscription-gated route (Overview,
- * Conversations). Previously /app and /app/conversations each had their
+/** Shared layout for CRM and Safety. Previously each route had its own
  * own <RequireActiveSubscription>, so switching between those two tabs
  * unmounted and remounted the guard on every click -- flashing a
  * full-screen loader and re-checking billing status each time, which is

@@ -44,7 +44,7 @@ _REASON_PHRASES = {
         "Just checking in — no rush. Whenever you are ready, I can help with the next step."
     ),
     FollowUpReason.CALLBACK_REQUESTED: (
-        "Following up as you asked. When you are ready, I can help with the next step."
+        "Following up on your callback request. When you are ready, I can help with the next step."
     ),
 }
 

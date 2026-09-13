@@ -16,7 +16,7 @@ from src.ai.errors import (
 )
 from src.ai.fake_provider import FakeAIProvider
 from src.ai.models import AIRequest, IntentOutput
-from src.ai.anthropic_provider import AnthropicProvider
+from src.ai.anthropic_provider import AnthropicProvider, unwrap_forced_tool_input
 from src.ai.openai_provider import OpenAIProvider
 from src.ai.prompts import intent_prompt
 from src.ai.provider import RetryingAIProvider
@@ -789,6 +789,77 @@ def test_anthropic_adapter_raises_invalid_output_after_exhausting_resamples() ->
     with pytest.raises(AIInvalidOutputError):
         provider.generate(request)
     assert messages.call_count == 3
+
+
+def test_unwrap_forced_tool_input_lifts_a_single_wrapper_key() -> None:
+    inner = intent_output()
+    assert unwrap_forced_tool_input({"parameters": inner}) == inner
+    assert unwrap_forced_tool_input({"input": inner}) == inner
+    assert unwrap_forced_tool_input(inner) == inner
+
+
+def test_unwrap_forced_tool_input_leaves_ambiguous_payloads_alone() -> None:
+    inner = intent_output()
+    mixed = {**inner, "parameters": inner}
+    assert unwrap_forced_tool_input(mixed) == mixed
+    assert unwrap_forced_tool_input({"parameters": "not-an-object"}) == {"parameters": "not-an-object"}
+    assert unwrap_forced_tool_input(["parameters"]) == ["parameters"]
+
+
+def test_anthropic_adapter_accepts_schema_nested_under_parameters() -> None:
+    """Live 2026-09-04 defect: Claude put every schema field under `parameters`.
+    Prompt text reduced the rate; this unwrap recovers a valid first attempt
+    instead of burning the resample budget."""
+
+    class ToolUseBlock:
+        type = "tool_use"
+        input = {"parameters": intent_output()}
+
+    class WrappedResponse:
+        content = [ToolUseBlock()]
+        usage = type("Usage", (), {"input_tokens": 12, "output_tokens": 6})()
+
+    class OnceMessagesStub:
+        def __init__(self) -> None:
+            self.call_count = 0
+
+        def create(self, **arguments: object):
+            self.call_count += 1
+            return WrappedResponse()
+
+    messages = OnceMessagesStub()
+    provider = object.__new__(AnthropicProvider)
+    provider.model = "test-anthropic-model"
+    provider._client = type("Client", (), {"messages": messages})()
+    request = AIRequest("intent", "v1", "intent_extraction", "system", "user", IntentOutput)
+
+    result = provider.generate(request)
+
+    assert messages.call_count == 1
+    assert result.output == IntentOutput.model_validate(intent_output())
+
+
+def test_anthropic_adapter_accepts_schema_nested_under_input() -> None:
+    class ToolUseBlock:
+        type = "tool_use"
+        input = {"input": intent_output()}
+
+    class WrappedResponse:
+        content = [ToolUseBlock()]
+        usage = type("Usage", (), {"input_tokens": 12, "output_tokens": 6})()
+
+    class OnceMessagesStub:
+        def create(self, **arguments: object):
+            return WrappedResponse()
+
+    provider = object.__new__(AnthropicProvider)
+    provider.model = "test-anthropic-model"
+    provider._client = type("Client", (), {"messages": OnceMessagesStub()})()
+    request = AIRequest("intent", "v1", "intent_extraction", "system", "user", IntentOutput)
+
+    result = provider.generate(request)
+
+    assert result.output == IntentOutput.model_validate(intent_output())
 
 
 class _RecordingMessagesStub:

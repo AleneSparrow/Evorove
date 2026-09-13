@@ -1125,3 +1125,39 @@ class SmsSuppressionRow(Base):
     )
     phone_number: Mapped[str] = mapped_column(String(64), primary_key=True)
     suppressed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class MarketingAssetRow(Base):
+    """Owner-supplied brief assets. Text is the only payload the engine reads."""
+
+    __tablename__ = "marketing_assets"
+
+    id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), nullable=False
+    )
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    body_text: Mapped[str] = mapped_column(Text, nullable=False)
+    filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("kind IN ('notes', 'offer', 'media')", name="ck_marketing_assets_kind"),
+        Index("ix_marketing_assets_business_created", "business_id", "created_at"),
+    )
+
+
+class MarketingGuidanceRow(Base):
+    """The packet currently in force for AI wording. Uploads do not apply until activate."""
+
+    __tablename__ = "marketing_guidance"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), primary_key=True
+    )
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    snapshot_text: Mapped[str] = mapped_column(Text, nullable=False)
+    activated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (CheckConstraint("revision > 0", name="ck_marketing_guidance_revision"),)

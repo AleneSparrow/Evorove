@@ -1,0 +1,362 @@
+{
+  "ai_provider_changed": false,
+  "cards_approved": false,
+  "model": "alenesparrowvn-365f/evorove-eval",
+  "eval_set": "seed_only",
+  "row_count": 35,
+  "passed": 0,
+  "failed": 35,
+  "pass_rate": 0.0,
+  "breakdown": {
+    "by_move": {
+      "GREET_AND_SET_CONTEXT": {
+        "pass": 0,
+        "fail": 4
+      },
+      "ASK_DISCOVERY_QUESTION": {
+        "pass": 0,
+        "fail": 3
+      },
+      "CONFIRM_CUSTOMER_NEED": {
+        "pass": 0,
+        "fail": 1
+      },
+      "DIAGNOSE_OBJECTION": {
+        "pass": 0,
+        "fail": 10
+      },
+      "OFFER_BOOKING_SLOTS": {
+        "pass": 0,
+        "fail": 2
+      },
+      "HANDOFF_TO_HUMAN": {
+        "pass": 0,
+        "fail": 7
+      },
+      "ANSWER_OBJECTION": {
+        "pass": 0,
+        "fail": 1
+      },
+      "ASK_FOR_COMMITMENT": {
+        "pass": 0,
+        "fail": 3
+      },
+      "END_CONTACT": {
+        "pass": 0,
+        "fail": 2
+      },
+      "NURTURE_WITHOUT_PRESSURE": {
+        "pass": 0,
+        "fail": 1
+      },
+      "PRESENT_RELEVANT_VALUE": {
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "by_objection_type": {
+      "PRICE": {
+        "pass": 0,
+        "fail": 2
+      },
+      "TIMING": {
+        "pass": 0,
+        "fail": 1
+      },
+      "TRUST": {
+        "pass": 0,
+        "fail": 1
+      },
+      "COMPETITOR": {
+        "pass": 0,
+        "fail": 1
+      },
+      "OTHER": {
+        "pass": 0,
+        "fail": 2
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "an-greet-outbound-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-discovery-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-need-confirm-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-objection-price-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-discount-demand-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-ready-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-nurture-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-stop-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-injection-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-emergency-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-injection-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-injection-003",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-emergency-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-emergency-003",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-objection-trust-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-objection-competitor-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-objection-other-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "an-objection-other-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-greet-outbound-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-greet-inbound-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-discover-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-diagnose-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-answer-dna-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-commit-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-slots-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-stop-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-stop-002",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-nurture-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-fff-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-scarcity-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-discount-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-guarantee-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-outbound-thanks-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-two-questions-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    },
+    {
+      "id": "gen-neg-invented-gift-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1020)>"
+      ]
+    }
+  ]
+}

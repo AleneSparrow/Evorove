@@ -7,6 +7,25 @@ from typing import Mapping
 
 from src.domain.sales import SalesMove
 
+# 12 September 2026: whichever generator eventually writes `message_text`
+# (today: server-templated phrases; tomorrow, possibly, an LLM grounded on
+# the depositied sales-book corpus via src/companion_corpus/rag.py), this
+# validator is the one authorization boundary every candidate passes
+# through before a customer sees it. Importing the corpus's verbatim-quote
+# detector here -- instead of only inside the companion eval path -- means
+# the "ground on the books, never quote them to a customer" guarantee holds
+# regardless of which generator produced the text, at zero hosting cost:
+# it is a pure function over already-depositied local text, no network,
+# no API key. Lazy import so a caller that never triggers this check pays
+# nothing, and a checkout with no depositied corpus still works (the
+# checker degrades to "never flags" rather than raising).
+def _verbatim_book_quote(text: str) -> bool:
+    try:
+        from src.companion_corpus.mouth_guard import check_verbatim_quote
+    except ImportError:
+        return False
+    return check_verbatim_quote(text)
+
 
 _UNAUTHORIZED_EXECUTION = re.compile(
     r"\b(?:your (?:booking|appointment) is confirmed|you(?:'ve| have) been booked|"
@@ -112,6 +131,8 @@ class SalesPolicyValidator:
             violations.append("callback_not_recorded")
         if _UNAUTHORIZED_EXECUTION.search(text):
             violations.append("unauthorized_commercial_execution")
+        if not candidate.used_safe_fallback and _verbatim_book_quote(text):
+            violations.append("verbatim_book_quote")
 
         referenced_facts = "\n".join(
             context.approved_business_facts[fact_id]

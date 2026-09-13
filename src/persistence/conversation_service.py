@@ -42,6 +42,7 @@ from .errors import (
     MessageScopeError,
 )
 from .lead_intake import PersistentLeadIntakeService
+from .owner_materials import merge_active_owner_materials
 from .repositories import UnitOfWork, UnitOfWorkFactory
 from .sales_live_turn import SalesLiveTurnService
 
@@ -190,6 +191,7 @@ class ConversationService:
         sales_turn_analyzer: object | None = None,
         sales_response_generator: object | None = None,
         token_ttl_hours: int = 720,
+        crm_touch_publisher=None,
     ) -> None:
         if not 1 <= token_ttl_hours <= 8_760:
             raise ValueError("conversation token TTL must be between 1 and 8760 hours")
@@ -208,6 +210,7 @@ class ConversationService:
             response_generator=sales_response_generator,  # type: ignore[arg-type]
             commercial=self.commercial,
             process_engine=self.intake.process_engine,
+            crm_touch_publisher=crm_touch_publisher,
         )
         self.token_ttl = timedelta(hours=token_ttl_hours)
 
@@ -941,7 +944,11 @@ class ConversationService:
         version = uow.business_dna.get_active(business_id)
         if version is None:
             raise RuntimeError("business has no active Business DNA")
-        return PersistentLeadIntakeService._plain_json(version.configuration)
+        return merge_active_owner_materials(
+            uow,
+            business_id,
+            PersistentLeadIntakeService._plain_json(version.configuration),
+        )
 
     @staticmethod
     def _ensure_public_chat_enabled(dna: Mapping[str, Any]) -> None:

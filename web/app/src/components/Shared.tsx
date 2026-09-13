@@ -21,20 +21,21 @@ import { brand } from "../brand/theme";
  */
 export const STAGES = ["New", "Contacted", "Qualified", "Booked", "Completed"];
 
-export type CaseState = "NEW" | "QUALIFYING" | "NEEDS_HUMAN" | "BOOKED" | "LOST" | "COMPLETED";
+export type CaseState = "NEW" | "QUALIFYING" | "READY_TO_BOOK" | "NEEDS_HUMAN" | "BOOKED" | "LOST" | "COMPLETED";
 
 // QUALIFYING uses Pulse coral: the lead is in motion. Lime is reserved for
 // "needs you" and other human/CTA states. Resting states stay mute or ink.
 export const STATE_META: Record<CaseState, { label: string; color: string; bg: string }> = {
   NEW: { label: "New", color: brand.mute, bg: "#F1F1EF" },
   QUALIFYING: { label: "Qualifying", color: brand.coral, bg: brand.coralWash },
-  NEEDS_HUMAN: { label: "Needs you", color: brand.limeInk, bg: brand.limeWash },
+  READY_TO_BOOK: { label: "Ready to book", color: brand.coral, bg: brand.coralWash },
+  NEEDS_HUMAN: { label: "Safety stop", color: brand.limeInk, bg: brand.limeWash },
   BOOKED: { label: "Booked", color: "#1E7B52", bg: "#E9F5EF" },
   LOST: { label: "Lost", color: "#B4483A", bg: "#FBEBE9" },
   COMPLETED: { label: "Completed", color: brand.ink, bg: "#F1F1EF" },
 };
 
-export { EvoroveMark, EvoroveMark as FlywheelMark } from "../brand/BrandLockup";
+export { EvoroveMark } from "../brand/BrandLockup";
 
 /**
  * The real engine has more states than the UI's simplified five-bucket view
@@ -51,7 +52,7 @@ export function mapProcessState(state: ProcessState): { caseState: CaseState; st
     case "QUALIFYING":
       return { caseState: "QUALIFYING", stage: 1 };
     case "QUALIFIED":
-      return { caseState: "QUALIFYING", stage: 2 };
+      return { caseState: "READY_TO_BOOK", stage: 2 };
     case "NEEDS_HUMAN":
       return { caseState: "NEEDS_HUMAN", stage: 2 };
     case "BOOKED":
@@ -85,8 +86,8 @@ export function mapProcessState(state: ProcessState): { caseState: CaseState; st
  * engineering telemetry; these are the same distinctions in plain English.
  */
 const EVENT_TYPE_META: Record<string, { stage: string; label: string }> = {
-  TRIGGER_RECEIVED: { stage: "Received", label: "Inbound message received" },
-  LEAD_INTAKE_RECEIVED: { stage: "Received", label: "Lead intake received" },
+  TRIGGER_RECEIVED: { stage: "Received", label: "Message received" },
+  LEAD_INTAKE_RECEIVED: { stage: "Received", label: "Lead received" },
   INTENT_EXTRACTED: { stage: "Understood", label: "Customer intent understood" },
   QUALIFICATION_EVALUATED: { stage: "Decided", label: "Qualification evaluated" },
   DECISION_RECORDED: { stage: "Decided", label: "Decision recorded" },
@@ -95,7 +96,7 @@ const EVENT_TYPE_META: Record<string, { stage: string; label: string }> = {
   TRANSITION_REJECTED: { stage: "Updated", label: "Transition rejected" },
   DUPLICATE_IGNORED: { stage: "Updated", label: "Duplicate message ignored" },
   LEAD_QUALIFICATION_TRANSITION: { stage: "Decided", label: "Qualification stage updated" },
-  HUMAN_REPLY_SENT: { stage: "Replied", label: "Staff replied to customer" },
+  HUMAN_REPLY_SENT: { stage: "Safety", label: "Risk or policy reply sent" },
   CALLBACK_REQUESTED: { stage: "Follow-up", label: "Customer asked for a callback" },
   SALES_FOLLOW_UP_SENT: { stage: "Follow-up", label: "Sales follow-up sent" },
 };
