@@ -13,6 +13,7 @@ from src.persistence.business_provisioning_service import (
     BusinessIdTakenError,
     InvalidBusinessDNAError,
 )
+from src.persistence.lemonsqueezy_client import LemonSqueezyAPIError
 from src.persistence.errors import (
     BillingAlreadyActiveError,
     BillingAccountNotFoundError,
@@ -340,6 +341,18 @@ def install_error_handlers(app: FastAPI) -> None:
         code = "webhook_signature_invalid"
         _log_error(request, code, 400, type(exc).__name__)
         return _response(request, 400, code, "Webhook signature verification failed")
+
+    @app.exception_handler(LemonSqueezyAPIError)
+    async def lemonsqueezy_api_error_handler(request: Request, exc: LemonSqueezyAPIError) -> JSONResponse:
+        # Distinct from BillingNotConfiguredError: the deployment *has*
+        # LEMONSQUEEZY_API_KEY set, but Lemon Squeezy itself rejected the
+        # call -- most commonly a store/variant ID that doesn't exist under
+        # that API key (e.g. a test-mode ID paired with a live-mode key, or
+        # vice versa). Surfaced distinctly so this doesn't read as "billing
+        # isn't set up" when it actually is, just misconfigured.
+        code = "billing_provider_error"
+        _log_error(request, code, 502, type(exc).__name__)
+        return _response(request, 502, code, "Billing provider rejected the request; check the store/variant configuration")
 
     @app.exception_handler(Exception)
     async def unexpected_error_handler(request: Request, exc: Exception) -> JSONResponse:

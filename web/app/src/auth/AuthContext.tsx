@@ -181,6 +181,8 @@ export function describeError(err: unknown): string {
         return "That conversation couldn't be found.";
       case "billing_not_configured":
         return "Billing isn't set up on this deployment yet.";
+      case "billing_provider_error":
+        return "Billing provider rejected the request — the store or plan configuration needs a look.";
       case "invalid_plan":
         return "That plan isn't available right now.";
       case "billing_account_not_found":
