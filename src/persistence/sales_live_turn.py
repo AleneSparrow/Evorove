@@ -22,6 +22,7 @@ from src.domain.sales import (
     FollowUpReason,
     SalesMove,
     SalesMoveDecision,
+    SalesObjection,
     SalesObjectionRecord,
     SalesStage,
     SalesTurn,
@@ -64,6 +65,28 @@ from .crm_touch_publisher import publisher_from_env, touch_payloads_for_turn
 
 class _SmsSender(Protocol):
     def send_outbound(self, business_id: str, *, to_number: str, body: str) -> str | None: ...
+
+
+def _retrieval_context_for(customer_text: str, active_objection: SalesObjection | None) -> str:
+    """Step 2.5 (12 September 2026): background style grounding for the live
+    generator, pulled from the depositied sales-book corpus. Purely local,
+    no network, no cost -- the same `rag.py` used by the companion eval.
+    Query is just the customer's own words plus the diagnosed objection
+    type when present; retrieval is lexical (term overlap), not semantic,
+    so this is a best-effort nudge, not a guarantee of relevance. Degrades
+    to "" (no grounding, prompt behaves exactly as before this feature)
+    when the private corpus isn't depositied on this checkout, or on any
+    retrieval error -- a broken retrieval must never block a sales turn.
+    """
+    try:
+        from src.companion_corpus.rag import format_context, retrieve
+
+        query = customer_text
+        if active_objection is not None:
+            query = f"{query} {active_objection.objection_type.value}"
+        return format_context(retrieve(query, top_k=2))
+    except Exception:
+        return ""
 
 
 _OWNER_RESUME_MOVES = frozenset({
@@ -196,6 +219,8 @@ class SalesLiveTurnService:
                 uow, conversation, case, profile, persisted, analysis, decision,
                 knowledge_ids=(), validation={"handoff": True}, occurred_at=occurred_at,
                 source_message_id=source_message_id,
+                customer_text=customer_text,
+                engine_text=handoff_text,
             )
             return SalesLiveTurnResult(
                 handoff_text, decision.reason_code, case.current_state, decision.move, True,
@@ -261,6 +286,8 @@ class SalesLiveTurnService:
             )),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
+            customer_text=customer_text,
+            engine_text=message_text,
         )
         return SalesLiveTurnResult(
             message_text, decision.reason_code, case.current_state, decision.move, False,
@@ -349,6 +376,7 @@ class SalesLiveTurnService:
             ),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
+            engine_text=message_text,
         )
         uow.events.add(
             case.business_id,
@@ -469,6 +497,7 @@ class SalesLiveTurnService:
             ),
             validation=validation, occurred_at=occurred_at,
             source_message_id=source_message_id,
+            engine_text=message_text,
         )
         delivered = _deliver_outbound(
             uow, conversation, case, message_text,
@@ -604,6 +633,7 @@ class SalesLiveTurnService:
                     safe_fallback_text=fallback,
                     conversation_context={"case_state": case.current_state.value},
                     customer_message=customer_text,
+                    retrieval_context=_retrieval_context_for(customer_text, profile.active_objection),
                 ))
                 candidate = to_sales_response_candidate(generated.output)
             except (AIProviderError, AIInvalidOutputError, AttributeError):
@@ -645,6 +675,8 @@ class SalesLiveTurnService:
         occurred_at: datetime,
         source_message_id: str,
         business_fact_ids: tuple[str, ...] = (),
+        customer_text: str = "",
+        engine_text: str = "",
     ) -> None:
         current = uow.sales_profiles.get(conversation.business_id, case.case_id, for_update=True)
         if current is None:
@@ -697,6 +729,8 @@ class SalesLiveTurnService:
             decision=decision,
             source_message_id=source_message_id,
             summary=decision.reason_code.replace("_", " ").title(),
+            customer_text=customer_text,
+            engine_text=engine_text,
         ):
             self._crm_touch.publish(conversation.business_id, payload)
 

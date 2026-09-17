@@ -67,7 +67,7 @@ export default function LawyersLanding() {
         </h1>
         <p className="text-base md:text-lg text-mute leading-relaxed mb-8 max-w-2xl mx-auto">
           Subscribe. Describe the practice. Evorove studies the packet, finds people in the open web,
-          puts them on Cold, then sells until Done — a booked consult hour. You watch four tabs.
+          puts them on Cold, then sells until Done — a booked consult hour. The board moves as it happens. Open a person to read the dialogue.
           You do not hop in to close. Hard limits: no legal advice, no promised outcome.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">

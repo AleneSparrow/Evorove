@@ -286,6 +286,13 @@ def ensure_person_id(case: ProcessCase) -> str | None:
     return person_id
 
 
+def _dialogue_line(text: str | None) -> str:
+    """Bound a spoken line for the CRM card. The board shows the dialogue, not a status word."""
+
+    cleaned = " ".join((text or "").split())
+    return cleaned[:2000]
+
+
 def touch_payloads_for_turn(
     *,
     case: ProcessCase,
@@ -293,6 +300,8 @@ def touch_payloads_for_turn(
     decision: SalesMoveDecision,
     source_message_id: str,
     summary: str,
+    customer_text: str | None = None,
+    engine_text: str | None = None,
 ) -> list[dict[str, Any]]:
     person_id = ensure_person_id(case)
     if person_id is None:
@@ -326,6 +335,8 @@ def touch_payloads_for_turn(
                     "case_id": case.case_id,
                     "move": decision.move.value,
                     "source_message_id": source_message_id,
+                    "customer_text": _dialogue_line(customer_text),
+                    "engine_text": _dialogue_line(engine_text),
                 },
             }
         )

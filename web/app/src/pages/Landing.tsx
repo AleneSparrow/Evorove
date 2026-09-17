@@ -114,7 +114,7 @@ export default function Landing() {
             ["You connect once", "Pay the subscription. Fill in the business, multimedia, and the commercial offer if you have one. That packet is the brief — not a list of leads."],
             ["Then it thinks, then it hunts", "Hypotheses, marketing analysis, public data, a second pass against the portrait. Only then does a person land in Cold."],
             ["Then it sells", "Each Cold lead gets a live conversation. Objections, techniques, your offer at the right moment. The engine talks until Done."],
-            ["You watch four tabs", "Cold, In progress, Offer made, Done. Click a lead to read the thread. Do not jump in to close a normal sale."],
+            ["The board moves as it happens", "Cold, In progress, Offer made, Done — each step shows up when it happens. Open a person and the dialogue is there. Do not jump in to close a normal sale."],
           ].map(([title, body]) => (
             <div key={title} className="p-6 border" style={{ borderColor: "#E4DCCB", background: "#FFFCF6" }}>
               <h3 className="font-semibold mb-2">{title}</h3>

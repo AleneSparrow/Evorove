@@ -11,7 +11,7 @@ export const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "What are the four CRM tabs?",
-    a: "Cold — found, not written. In progress — the sales engine is in the conversation. Offer made — value or the offer has been named, the person is not closed. Done — the sale happened, or (for an offline service) a specific hour is set. You watch the board. You do not hop in to close a normal sale.",
+    a: "Cold — found, not written. In progress — the sales engine is in the conversation. Offer made — value or the offer has been named, the person is not closed. Done — they paid through your payment link, or (for an offline service) a specific hour is on your calendar. The board updates as each step happens. Open a person to read the dialogue. You do not hop in to close a normal sale.",
   },
   {
     q: "Who talks to the lead?",

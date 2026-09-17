@@ -30,6 +30,30 @@ def test_first_turn_is_opened() -> None:
     assert payloads[0]["person_id"].startswith("ppl_")
     assert payloads[0]["cycle"] == 2
     assert payloads[0]["touch_id"] == "cycle2:opened:msg-1"
+    assert payloads[0]["payload"]["customer_text"] == ""
+    assert payloads[0]["payload"]["engine_text"] == ""
+
+
+def test_touch_carries_the_dialogue_not_only_a_status_word() -> None:
+    lead = Lead("lead-1", email="ada@example.com")
+    case = ProcessCase("case-1", "biz-1", lead)
+    previous = CustomerSalesProfile("biz-1", "case-1")
+    decision = SalesMoveDecision(
+        move=SalesMove.GREET_AND_SET_CONTEXT,
+        target_stage=SalesStage.GREETING,
+        reason_code="greeting",
+    )
+    payloads = touch_payloads_for_turn(
+        case=case,
+        previous=previous,
+        decision=decision,
+        source_message_id="msg-1",
+        summary="Greeting",
+        customer_text="We need help closing inbound leads.",
+        engine_text="Evorove for Northwind. I can show how the board fills.",
+    )
+    assert payloads[0]["payload"]["customer_text"] == "We need help closing inbound leads."
+    assert payloads[0]["payload"]["engine_text"].startswith("Evorove for Northwind")
 
 
 def test_later_turn_is_in_play() -> None:
