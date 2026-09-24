@@ -1,0 +1,93 @@
+# The whole Evorove system on one machine: cycle 1 (evorove_lead), cycle 2
+# (this repo) and the CRM board (evorove-crm), each with its own database.
+#
+#   cd system && ./run-e2e.sh
+#
+# Sister repos are expected next to this one (~/dev/evorove, ~/dev/evorove-crm,
+# ~/dev/evorove_lead). Override with CRM_DIR / LEAD_DIR if yours differ.
+# Local-only values below; never reuse them in a deployment.
+
+x-secret: &secret
+  INTERNAL_TASK_SECRET: ${INTERNAL_TASK_SECRET:-local_development_only}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: evorove
+      POSTGRES_PASSWORD: local_development_only
+      POSTGRES_DB: evorove
+    ports:
+      - "${SYSTEM_POSTGRES_PORT:-5440}:5432"
+    volumes:
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evorove -d evorove"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  engine:
+    build:
+      context: ..
+    environment:
+      <<: *secret
+      DATABASE_URL: postgresql+psycopg://evorove:local_development_only@postgres:5432/engine
+      APP_ENV: development
+      AI_PROVIDER: ${AI_PROVIDER:-deterministic}
+      CRM_BASE_URL: http://crm:8000
+    command: sh -c "alembic upgrade head && python examples/seed_example_business.py && exec uvicorn src.api.app:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "${ENGINE_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - ./:/system:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  crm:
+    build:
+      context: ${CRM_DIR:-../../evorove-crm}
+    environment:
+      <<: *secret
+      DATABASE_URL: postgresql+psycopg://evorove:local_development_only@postgres:5432/crm
+      APP_ENV: development
+      AI_PROVIDER: deterministic
+      EVOROVE_BASE_URL: http://engine:8000
+      EVOROVE_LEAD_BASE_URL: http://lead:8002
+    command: sh -c "alembic upgrade head && python examples/seed_example_business.py && exec uvicorn src.api.app:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "${CRM_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  lead:
+    build:
+      context: ${LEAD_DIR:-../../evorove_lead}
+    environment:
+      <<: *secret
+      DATABASE_URL: postgresql+psycopg://evorove:local_development_only@postgres:5432/lead
+      CRM_BASE_URL: http://crm:8000
+    ports:
+      - "${LEAD_PORT:-8002}:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/openapi.json')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - ./fixtures:/fixtures:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
