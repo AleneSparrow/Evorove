@@ -258,3 +258,15 @@ def test_unsubscribe_page_confirms_before_acting(tmp_path: Path, monkeypatch: py
         assert [p["kind"] for p in posts] == ["stopped"]
         assert client.post("/api/v1/public/unsubscribe/forged.token").status_code == 404
     engine.dispose()
+
+
+def test_cold_phone_only_person_is_never_texted(world) -> None:
+    """Roadmap step 17: no SMS without explicit consent; cold people never get one."""
+    service, email, smtp, _, factory = world
+    email.connect("tenant-a", _settings())
+    assert _assign(service, email=None, phone="+13125550190") == "skipped"
+    with pytest.raises(OutreachError, match="drafted"):
+        service.approve("tenant-a", "person-0001", approved_by="a")
+    with factory() as uow:
+        kinds = {row.kind for row in uow.session.scalars(select(IntegrationOutboxRow)).all()}
+    assert not any("sms" in kind for kind in kinds) and smtp.sent == []
