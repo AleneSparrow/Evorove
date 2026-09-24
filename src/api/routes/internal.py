@@ -1,7 +1,8 @@
 """Operator-triggered internal tasks -- not part of the tenant-facing API.
 
-Currently three endpoints behind the same secret: stalled-lead follow-up,
-CRM/SMS outbox delivery, and commercial expiry. See DEPLOY.md.
+Currently three endpoints behind the same secret: stalled-lead follow-up
+(plus contextual sales follow-up after a pause), CRM/SMS outbox delivery,
+and commercial expiry. See DEPLOY.md.
 """
 
 import hmac
@@ -13,6 +14,10 @@ from src.domain.models import utc_now
 from src.persistence.commercial_expiry import CommercialExpirySweep
 from src.persistence.crm_webhook_service import CrmWebhookService
 from src.persistence.follow_up_service import FollowUpSweepResult, PersistentFollowUpRunner
+from src.persistence.sales_contextual_follow_up import (
+    PersistentSalesContextualFollowUpRunner,
+    SalesContextualFollowUpSweepResult,
+)
 from src.persistence.sms_service import SmsService
 
 from ..dependencies import ApplicationContainer, get_container
@@ -38,6 +43,7 @@ def run_follow_up_sweep(
     x_internal_task_secret: Annotated[str | None, Header()] = None,
 ) -> dict[str, int]:
     _require_task_secret(container, x_internal_task_secret)
+    now = utc_now()
     sms_service = SmsService(
         container.unit_of_work_factory,
         account_sid=container.settings.twilio_account_sid,
@@ -45,12 +51,22 @@ def run_follow_up_sweep(
         public_api_base_url=container.settings.public_api_base_url,
     )
     runner = PersistentFollowUpRunner(container.unit_of_work_factory, sms_service)
-    result: FollowUpSweepResult = runner.run(utc_now())
+    result: FollowUpSweepResult = runner.run(now)
+    sales_runner = PersistentSalesContextualFollowUpRunner(
+        container.unit_of_work_factory,
+        sms_service,
+        response_generator=container.sales_response_generator,
+    )
+    sales: SalesContextualFollowUpSweepResult = sales_runner.run(now)
     return {
         "businesses_scanned": result.businesses_scanned,
         "cases_considered": result.cases_considered,
         "follow_ups_sent": result.follow_ups_sent,
         "follow_ups_skipped_stale": result.follow_ups_skipped_stale,
+        "sales_cases_considered": sales.cases_considered,
+        "sales_follow_ups_sent": sales.follow_ups_sent,
+        "sales_follow_ups_skipped_no_channel": sales.follow_ups_skipped_no_channel,
+        "sales_follow_ups_skipped_stale": sales.follow_ups_skipped_stale,
     }
 
 

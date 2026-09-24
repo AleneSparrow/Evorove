@@ -34,3 +34,17 @@ class EventType(StrEnum):
     # section 8) -- recorded by PersistentFollowUpRunner, never by the
     # reactive LeadIntakeService.receive() path.
     FOLLOW_UP_SENT = "FOLLOW_UP_SENT"
+    # Customer asked to continue later. This is the engine's own follow-up
+    # in the same channel, not a staff phone call and not a CRM record.
+    # Recorded by SalesLiveTurnService when it executes SCHEDULE_CALLBACK.
+    CALLBACK_REQUESTED = "CALLBACK_REQUESTED"
+    # Outbound sales follow-up after a pause (spec section 13). Distinct from
+    # FOLLOW_UP_SENT (stalled pre-QUALIFIED SMS) and from ProcessState.FOLLOW_UP.
+    # Does not change ProcessState and does not create a CRM record.
+    SALES_FOLLOW_UP_SENT = "SALES_FOLLOW_UP_SENT"
+    # Engine asked the business owner for a missing fact. The customer
+    # conversation stays with the engine. Not NEEDS_HUMAN and not a CRM task.
+    BUSINESS_FACT_REQUESTED = "BUSINESS_FACT_REQUESTED"
+    # Owner supplied the missing fact; the engine continued in-channel.
+    # Does not change ProcessState and is not a human takeover.
+    BUSINESS_FACT_RESUMED = "BUSINESS_FACT_RESUMED"

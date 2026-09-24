@@ -45,7 +45,11 @@ from src.domain.sales import CommitmentLevel, ObjectionStatus, ObjectionType, Sa
 #     ANSWER_OBJECTION with objections=[] for a guarantee/discount request).
 #     Closed in model_post_init below; prompt text updated to match, which is
 #     why this needed its own version rather than silently patching v2.
-SALES_PROMPT_VERSION = "2026-09-06.v3"
+#   2026-09-07.v4 -- CLOSED_ENUMS gained SalesMove.REQUEST_BUSINESS_FACT (owner
+#     decision 2026-09-07: ask the owner for a missing fact instead of handing
+#     the customer to a person). Prompt wording unchanged; the enum block the
+#     model sees changed, so the version moves with it.
+SALES_PROMPT_VERSION = "2026-09-07.v4"
 
 
 class SalesSignalOutput(StrictAIModel):

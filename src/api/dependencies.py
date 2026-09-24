@@ -8,6 +8,8 @@ from fastapi import Depends, Header, Path, Request
 from sqlalchemy import Engine
 
 from src.config import Settings
+from src.ai.sales_response_generator import AISalesResponseGenerator
+from src.ai.sales_turn_analyzer import AISalesTurnAnalyzer
 from src.domain.auth import StaffUser
 from src.domain.tenancy import Business
 from src.engine.intent_extractor import IntentExtractor
@@ -53,6 +55,8 @@ class ApplicationContainer:
     universal_reassurance_response_generator: UniversalReassuranceResponseGenerator
     ai_provider_name: str
     ai_model_name: str
+    sales_response_generator: AISalesResponseGenerator | None
+    sales_turn_analyzer: AISalesTurnAnalyzer | None
     public_chat_rate_limiter: RateLimiter
     account_security_rate_limiter: RateLimiter
     password_reset_email_sender: PasswordResetEmailSender
@@ -118,6 +122,8 @@ def get_intake_service(
         customer_response_generator=container.customer_response_generator,
         reassurance_response_generator=container.reassurance_response_generator,
         universal_reassurance_response_generator=container.universal_reassurance_response_generator,
+        sales_turn_analyzer=container.sales_turn_analyzer,
+        sales_response_generator=container.sales_response_generator,
     )
 
 
@@ -131,6 +137,8 @@ def get_conversation_service(
         container.customer_response_generator,
         reassurance_response_generator=container.reassurance_response_generator,
         universal_reassurance_response_generator=container.universal_reassurance_response_generator,
+        sales_turn_analyzer=container.sales_turn_analyzer,
+        sales_response_generator=container.sales_response_generator,
         token_ttl_hours=container.settings.public_conversation_token_ttl_hours,
     )
 

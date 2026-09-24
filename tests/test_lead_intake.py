@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 
 from src.domain.events import EventType
-from src.domain.qualification import IncomingMessage, IntentResult, Urgency
+from src.domain.models import Lead, ProcessCase
+from src.domain.qualification import IncomingMessage, IntentResult, QualificationReasonCode, QualificationResult, Urgency
 from src.domain.states import ProcessState
 from src.engine.intent_extractor import DeterministicIntentExtractor
 from src.engine.lead_intake import LeadIntakeService
@@ -75,6 +76,53 @@ def test_valid_service_area_and_information_becomes_qualified() -> None:
     case = intake.get_case(result.case_id)
     changes = [event.payload["to"] for event in case.event_history if event.event_type is EventType.STATE_CHANGED]
     assert changes == ["CONTACTED", "QUALIFYING", "QUALIFIED"]
+
+
+def test_completeness_does_not_advance_process_state_when_held_for_sales() -> None:
+    intake = service_with({"msg-hold": valid_intent()})
+    case = ProcessCase("case-hold", "acme-home-services", Lead("lead-hold", "Ada", None, "+13125550100"))
+    qualification = QualificationResult(
+        qualified=True,
+        reasons=("All mandatory qualification requirements are satisfied",),
+        reason_codes=(QualificationReasonCode.QUALIFIED.value,),
+        missing_fields=(),
+        unanswered_questions=(),
+        confidence=0.95,
+        recommended_next_state=ProcessState.QUALIFIED,
+        requires_human=False,
+        booking_allowed=True,
+        service_id="diagnostic-visit",
+    )
+    intake._progress_case(case, message("msg-hold"), qualification, advance_on_completeness=False)
+    assert case.current_state is ProcessState.QUALIFYING
+    intake._progress_case(case, message("msg-advance"), qualification, advance_on_completeness=True)
+    assert case.current_state is ProcessState.QUALIFIED
+
+
+def test_low_confidence_does_not_escalate_when_held_for_sales() -> None:
+    intake = service_with({"msg-hold": valid_intent()})
+    case = ProcessCase(
+        "case-uncertain",
+        "acme-home-services",
+        Lead("lead-uncertain", "Ada", None, "+13125550100"),
+        current_state=ProcessState.QUALIFYING,
+    )
+    qualification = QualificationResult(
+        qualified=False,
+        reasons=("Intent confidence is below policy or extraction requested review",),
+        reason_codes=(QualificationReasonCode.LOW_CONFIDENCE.value,),
+        missing_fields=(),
+        unanswered_questions=(),
+        confidence=0.6,
+        recommended_next_state=ProcessState.NEEDS_HUMAN,
+        requires_human=True,
+        booking_allowed=False,
+        service_id="diagnostic-visit",
+    )
+    intake._progress_case(case, message("msg-short"), qualification, advance_on_completeness=False)
+    assert case.current_state is ProcessState.QUALIFYING
+    intake._progress_case(case, message("msg-short-2"), qualification, advance_on_completeness=True)
+    assert case.current_state is ProcessState.NEEDS_HUMAN
 
 
 def test_missing_phone_remains_qualifying_and_generates_configured_question() -> None:

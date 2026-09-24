@@ -96,6 +96,14 @@ def test_not_due_once_qualified() -> None:
     assert decision.reason == "case_not_in_stalled_state"
 
 
+def test_not_due_when_sales_contextual_follow_up_owns_case() -> None:
+    case = make_case(ProcessState.QUALIFYING, last_activity=NOW - timedelta(hours=25))
+    case.metadata["sales_follow_up_reason"] = "OBJECTION_DEFERRED"
+    decision = decide_follow_up(case, BUSINESS_DNA, NOW)
+    assert decision.due is False
+    assert decision.reason == "sales_contextual_follow_up_owns_case"
+
+
 def test_not_due_when_needs_human() -> None:
     """A human is already expected to be handling this case -- an automated
     nudge here could cross wires with what they're about to send."""

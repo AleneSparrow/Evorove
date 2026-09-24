@@ -21,10 +21,14 @@
  *   GET  /api/v1/businesses/{id}/sales/playbook                 (active published playbook)
  *   GET  /api/v1/businesses/{id}/sales/playbooks                (playbook version list)
  *   GET  /api/v1/businesses/{id}/sales/knowledge-cards          (optional ?status=)
+ *   POST /api/v1/businesses/{id}/sales/knowledge-cards/import/validate
+ *   POST /api/v1/businesses/{id}/sales/knowledge-cards/import
  *   POST /api/v1/businesses/{id}/sales/knowledge-cards/{id}/versions/{v}/approve
  *   POST /api/v1/businesses/{id}/sales/knowledge-cards/{id}/versions/{v}/reject
  *   GET  /api/v1/businesses/{id}/sales/cases/{case_id}          (sales conversation context)
  *   GET  /api/v1/businesses/{id}/sales/cases/{case_id}/turns    (provenance / sales turns)
+ *   GET  /api/v1/businesses/{id}/sales/cases/{case_id}/shadow-results
+ *   POST /api/v1/businesses/{id}/sales/cases/{case_id}/shadow-results/{shadow_id}/evaluate
  *
  * reply/resolve only work while the case is actually NEEDS_HUMAN with a pending
  * transition (see StaffActionService) — resolve approves that exact pending
@@ -345,6 +349,7 @@ export type SalesMove =
   | "SCHEDULE_CALLBACK"
   | "SEND_CONTEXTUAL_FOLLOW_UP"
   | "NURTURE_WITHOUT_PRESSURE"
+  | "REQUEST_BUSINESS_FACT"
   | "HANDOFF_TO_HUMAN"
   | "END_CONTACT";
 
@@ -397,6 +402,12 @@ export interface SalesObjectionRecord {
   version: number;
 }
 
+export interface PendingBusinessFactRequest {
+  needed_for: string;
+  reason_code: string;
+  requested_at: string | null;
+}
+
 export interface SalesCaseContext {
   case_id: string;
   stage: SalesStage;
@@ -414,6 +425,7 @@ export interface SalesCaseContext {
   human_review_reason: string | null;
   version: number;
   objections: SalesObjectionRecord[];
+  pending_business_fact_request: PendingBusinessFactRequest | null;
 }
 
 export interface SalesEvidence {
@@ -440,6 +452,77 @@ export interface SalesTurn {
 
 export interface SalesTurnListResponse {
   turns: SalesTurn[];
+}
+
+export type SalesShadowStatus =
+  | "PENDING"
+  | "VALID"
+  | "BLOCKED"
+  | "PROVIDER_ERROR"
+  | "VALIDATOR_ERROR"
+  | "EVALUATED";
+
+export type SalesShadowEvaluation = "APPROVED" | "UNSAFE" | "IRRELEVANT" | "WRONG_TONE";
+
+export interface SalesKnowledgeSourceImport {
+  title: string;
+  location: string;
+  author?: string | null;
+  edition?: string | null;
+  url?: string | null;
+}
+
+export interface SalesKnowledgeCardImport {
+  knowledge_id: string;
+  version: number;
+  source: SalesKnowledgeSourceImport;
+  principle: string;
+  applicable_when: string[];
+  prohibited_when?: string[];
+  required_sequence?: string[];
+  forbidden_actions?: string[];
+  approved_examples?: string[];
+}
+
+export interface SalesKnowledgeImportRequest {
+  cards: SalesKnowledgeCardImport[];
+}
+
+export interface SalesKnowledgeImportCheck {
+  knowledge_id: string;
+  version: number;
+  status: "READY" | "DUPLICATE_VERSION";
+}
+
+export interface SalesKnowledgeImportResponse {
+  valid: boolean;
+  imported: boolean;
+  cards_are_candidates: true;
+  checks: SalesKnowledgeImportCheck[];
+}
+
+export interface SalesShadowResult {
+  shadow_id: string;
+  conversation_id: string;
+  source_message_id: string;
+  approved_move: SalesMove;
+  status: SalesShadowStatus;
+  proposed_response_text: string | null;
+  delivered_response_text: string | null;
+  knowledge_ids: string[];
+  business_fact_ids: string[];
+  customer_evidence_ids: string[];
+  violations: string[];
+  prompt_version: string | null;
+  model_name: string | null;
+  created_at: string;
+  evaluation: SalesShadowEvaluation | null;
+  evaluated_by: string | null;
+  evaluated_at: string | null;
+}
+
+export interface SalesShadowResultListResponse {
+  results: SalesShadowResult[];
 }
 
 // What a service does once a lead qualifies for it -- see
@@ -774,6 +857,28 @@ export const api = {
     );
   },
 
+  validateSalesKnowledgeImport: (
+    token: string,
+    businessId: string,
+    payload: SalesKnowledgeImportRequest,
+  ) =>
+    request<SalesKnowledgeImportResponse>(
+      `/api/v1/businesses/${businessId}/sales/knowledge-cards/import/validate`,
+      { method: "POST", body: JSON.stringify(payload) },
+      token,
+    ),
+
+  importSalesKnowledgeCards: (
+    token: string,
+    businessId: string,
+    payload: SalesKnowledgeImportRequest,
+  ) =>
+    request<SalesKnowledgeImportResponse>(
+      `/api/v1/businesses/${businessId}/sales/knowledge-cards/import`,
+      { method: "POST", body: JSON.stringify(payload) },
+      token,
+    ),
+
   approveSalesKnowledgeCard: (token: string, businessId: string, knowledgeId: string, version: number) =>
     request<SalesKnowledgeCard>(
       `/api/v1/businesses/${businessId}/sales/knowledge-cards/${encodeURIComponent(knowledgeId)}/versions/${version}/approve`,
@@ -795,10 +900,37 @@ export const api = {
       token,
     ),
 
+  supplyCaseBusinessFact: (token: string, businessId: string, caseId: string, text: string) =>
+    request<SalesCaseContext>(
+      `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}/business-facts`,
+      { method: "POST", body: JSON.stringify({ text }) },
+      token,
+    ),
+
   listCaseSalesTurns: (token: string, businessId: string, caseId: string) =>
     request<SalesTurnListResponse>(
       `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}/turns`,
       { method: "GET" },
+      token,
+    ),
+
+  listCaseSalesShadowResults: (token: string, businessId: string, caseId: string) =>
+    request<SalesShadowResultListResponse>(
+      `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}/shadow-results`,
+      { method: "GET" },
+      token,
+    ),
+
+  evaluateSalesShadowResult: (
+    token: string,
+    businessId: string,
+    caseId: string,
+    shadowId: string,
+    evaluation: SalesShadowEvaluation,
+  ) =>
+    request<SalesShadowResult>(
+      `/api/v1/businesses/${businessId}/sales/cases/${encodeURIComponent(caseId)}/shadow-results/${encodeURIComponent(shadowId)}/evaluate`,
+      { method: "POST", body: JSON.stringify({ evaluation }) },
       token,
     ),
 };

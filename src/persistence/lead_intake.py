@@ -49,6 +49,8 @@ class PersistentLeadIntakeService:
         customer_response_generator: CustomerResponseGenerator | None = None,
         reassurance_response_generator: ReassuranceResponseGenerator | None = None,
         universal_reassurance_response_generator: UniversalReassuranceResponseGenerator | None = None,
+        sales_turn_analyzer: object | None = None,
+        sales_response_generator: object | None = None,
     ) -> None:
         self.unit_of_work_factory = unit_of_work_factory
         self.intent_extractor = intent_extractor
@@ -64,8 +66,19 @@ class PersistentLeadIntakeService:
         )
         self.qualification_service = qualification_service or QualificationService()
         self.process_engine = process_engine or ProcessEngine()
+        self.sales_turn_analyzer = sales_turn_analyzer
+        self.sales_response_generator = sales_response_generator
 
-    def receive(self, message: IncomingMessage) -> LeadIntakeResult:
+    def receive(
+        self,
+        message: IncomingMessage,
+        *,
+        sales_led_conversation: bool = False,
+    ) -> LeadIntakeResult:
+        if sales_led_conversation:
+            from .sales_led_intake import SalesLedIntakeService
+
+            return SalesLedIntakeService(self).receive(message)
         with self.unit_of_work_factory() as uow:
             result = self.receive_in_unit_of_work(uow, message)
             uow.commit()
@@ -75,8 +88,17 @@ class PersistentLeadIntakeService:
         self,
         uow: UnitOfWork,
         message: IncomingMessage,
+        *,
+        sales_led_conversation: bool = False,
+        complete_idempotency: bool = True,
     ) -> LeadIntakeResult:
-        """Process intake in an already-active transaction without committing it."""
+        """Process intake in an already-active transaction without committing it.
+
+        `sales_led_conversation` keeps qualification as an operational side
+        check: completeness does not advance ProcessState to QUALIFIED, and
+        the customer-facing reply is left to the sales layer except for
+        LOST / NEEDS_HUMAN outcomes.
+        """
         fingerprint = self.fingerprint(message)
         channel = message.channel.casefold()
         business = uow.businesses.get(message.business_id)
@@ -199,7 +221,18 @@ class PersistentLeadIntakeService:
             )
         if case.current_state is ProcessState.NEEDS_HUMAN:
             qualification = workflow._already_escalated_result(intent, qualification.service_id)
-        response = workflow._create_response(case, message, qualification, intent)
+        defer_uncertainty = (
+            sales_led_conversation
+            and qualification.recommended_next_state is ProcessState.NEEDS_HUMAN
+            and set(qualification.reason_codes) <= LeadIntakeService._SALES_DEFERRED_HUMAN_REASONS
+        )
+        terminal_ops = qualification.recommended_next_state is ProcessState.LOST or (
+            qualification.recommended_next_state is ProcessState.NEEDS_HUMAN and not defer_uncertainty
+        )
+        if sales_led_conversation and not terminal_ops:
+            response = None
+        else:
+            response = workflow._create_response(case, message, qualification, intent)
 
         existing_event_count = len(case.event_history)
         expected_version = case.version
@@ -212,7 +245,12 @@ class PersistentLeadIntakeService:
             dna_version.version,
             workflow.business_dna,
         )
-        workflow._progress_case(case, message, qualification)
+        workflow._progress_case(
+            case,
+            message,
+            qualification,
+            advance_on_completeness=not sales_led_conversation,
+        )
         if response is not None:
             self._record_response(case, message, response)
 
@@ -235,13 +273,14 @@ class PersistentLeadIntakeService:
             response,
             case_created,
         )
-        uow.idempotency.complete(
-            message.business_id,
-            channel,
-            message.external_message_id,
-            case.case_id,
-            self._serialize_result(result),
-        )
+        if complete_idempotency:
+            uow.idempotency.complete(
+                message.business_id,
+                channel,
+                message.external_message_id,
+                case.case_id,
+                self._serialize_result(result),
+            )
         return result
 
     @staticmethod

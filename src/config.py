@@ -13,6 +13,7 @@ class Settings:
     ai_provider: str = "deterministic"
     openai_api_key: str | None = field(default=None, repr=False)
     openai_model: str | None = None
+    openai_base_url: str | None = None
     anthropic_api_key: str | None = field(default=None, repr=False)
     anthropic_model: str | None = None
     ai_timeout_seconds: float = 20.0
@@ -79,6 +80,23 @@ class Settings:
         return self.twilio_account_sid is not None
 
     @property
+    def openai_compatible_configured(self) -> bool:
+        """Key + model are present so the OpenAI-compatible adapter can run.
+
+        Used as the production primary when AI_PROVIDER=openai, and as the
+        second cloud fallback when AI_PROVIDER=anthropic. An optional
+        OPENAI_BASE_URL points the same adapter at Groq, Together, vLLM, or
+        any other OpenAI-compatible API. Empty docker-compose values do not
+        count as configured.
+        """
+        return bool(
+            self.openai_api_key
+            and self.openai_api_key.strip()
+            and self.openai_model
+            and self.openai_model.strip()
+        )
+
+    @property
     def billing_configured(self) -> bool:
         """Whether Lemon Squeezy billing is wired up. Deliberately optional at the
         Settings level (unlike ai_provider) so local dev and early deploys can boot
@@ -97,6 +115,12 @@ class Settings:
             raise ValueError("ai_timeout_seconds must be greater than 0 and at most 120")
         if not 0 <= self.ai_max_retries <= 3:
             raise ValueError("ai_max_retries must be between 0 and 3")
+        if self.openai_base_url is not None:
+            if not (
+                self.openai_base_url.startswith("https://")
+                or self.openai_base_url.startswith("http://")
+            ):
+                raise ValueError("OPENAI_BASE_URL must be an http(s) URL")
         if self.ai_provider == "openai":
             if self.openai_api_key is None or not self.openai_api_key.strip():
                 raise ValueError("OPENAI_API_KEY is required when AI_PROVIDER=openai")
@@ -187,6 +211,12 @@ class Settings:
         )
         frontend_base_url = os.getenv("FRONTEND_BASE_URL")
         public_api_base_url = os.getenv("PUBLIC_API_BASE_URL")
+        openai_base_raw = os.getenv("OPENAI_BASE_URL")
+        openai_base_url = (
+            openai_base_raw.strip().rstrip("/")
+            if openai_base_raw and openai_base_raw.strip()
+            else None
+        )
         try:
             return cls(
                 database_url=database_url,
@@ -195,6 +225,7 @@ class Settings:
                 ai_provider=ai_provider,
                 openai_api_key=os.getenv("OPENAI_API_KEY"),
                 openai_model=os.getenv("OPENAI_MODEL"),
+                openai_base_url=openai_base_url,
                 anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
                 anthropic_model=os.getenv("ANTHROPIC_MODEL"),
                 ai_timeout_seconds=ai_timeout_seconds,

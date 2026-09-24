@@ -50,8 +50,12 @@ launch, only mentioned in case you already have a Render account.)
      turns off AI-assisted intake wording), or `anthropic`/`openai` if you
      want AI-assisted wording — if `anthropic`, also set `ANTHROPIC_API_KEY`
      and `ANTHROPIC_MODEL`; if `openai`, set `OPENAI_API_KEY` and
-     `OPENAI_MODEL` instead — either way, set the key **directly in
-     Railway's Variables tab**, not by giving it to Claude.
+     `OPENAI_MODEL` instead. Optional `OPENAI_BASE_URL` points the OpenAI
+     adapter at Groq, Together, or another OpenAI-compatible API. With
+     `AI_PROVIDER=anthropic`, the same `OPENAI_*` values are an optional
+     second cloud: Anthropic outage continues the same constrained request
+     there before deterministic fallback. Set keys **directly in
+     Railway's Variables tab**, not by giving them to Claude.
    - `CORS_ALLOWED_ORIGINS` — leave a placeholder for now
      (`https://placeholder.example`); you'll come back and set this to your
      real frontend URL in step 3. The app refuses to start in production

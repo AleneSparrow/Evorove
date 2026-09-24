@@ -96,6 +96,8 @@ const EVENT_TYPE_META: Record<string, { stage: string; label: string }> = {
   DUPLICATE_IGNORED: { stage: "Updated", label: "Duplicate message ignored" },
   LEAD_QUALIFICATION_TRANSITION: { stage: "Decided", label: "Qualification stage updated" },
   HUMAN_REPLY_SENT: { stage: "Replied", label: "Staff replied to customer" },
+  CALLBACK_REQUESTED: { stage: "Follow-up", label: "Customer asked for a callback" },
+  SALES_FOLLOW_UP_SENT: { stage: "Follow-up", label: "Sales follow-up sent" },
 };
 
 export function describeEvent(eventType: string): { stage: string; label: string } {

@@ -664,6 +664,31 @@ def test_openai_adapter_uses_sdk_typed_parse_contract_without_live_call() -> Non
     assert result.metadata.total_tokens == 18
 
 
+def test_openai_adapter_forwards_optional_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs: object) -> None:
+            captured.update(kwargs)
+
+    monkeypatch.setattr("src.ai.openai_provider.OpenAI", FakeClient)
+    provider = OpenAIProvider(
+        api_key="test-key",
+        model="llama-test",
+        timeout_seconds=8,
+        base_url="https://api.groq.com/openai/v1",
+    )
+    assert captured["base_url"] == "https://api.groq.com/openai/v1"
+    assert captured["timeout"] == 8
+    assert captured["max_retries"] == 0
+    assert provider.base_url == "https://api.groq.com/openai/v1"
+
+    captured.clear()
+    default = OpenAIProvider(api_key="test-key", model="gpt-test", timeout_seconds=8)
+    assert "base_url" not in captured
+    assert default.base_url is None
+
+
 def test_anthropic_adapter_uses_forced_tool_call_contract_without_live_call() -> None:
     class ToolUseBlock:
         type = "tool_use"
@@ -1282,7 +1307,8 @@ def test_live_zip_phrase_is_qualified_by_deterministic_service_area_rules(persis
         )
 
     assert response.status_code == 200
-    assert response.json()["current_state"] == "QUALIFIED"
+    assert response.json()["current_state"] == "QUALIFYING"
+    assert response.json()["qualification"]["qualified"] is True
     assert response.json()["qualification"]["service_id"] == "diagnostic-visit"
     assert response.json()["qualification"]["reasons"] == [
         "All mandatory qualification requirements are satisfied"

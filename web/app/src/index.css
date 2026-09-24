@@ -36,6 +36,49 @@ body {
   animation: evSpin 9s linear infinite;
 }
 
+.ev-orbit-frame {
+  isolation: isolate;
+}
+
+.ev-orbit-frame canvas {
+  display: block;
+  outline: none;
+  background: transparent;
+}
+
+.ev-orbit-hero {
+  -webkit-mask-image: radial-gradient(ellipse 90% 95% at 52% 48%, #000 48%, transparent 80%);
+  mask-image: radial-gradient(ellipse 90% 95% at 52% 48%, #000 48%, transparent 80%);
+}
+
+.ev-orbit-hero::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 16%;
+  bottom: 16%;
+  height: 26%;
+  background: radial-gradient(ellipse at center, rgba(11, 11, 13, 0.16) 0%, rgba(11, 11, 13, 0.05) 45%, transparent 74%);
+  pointer-events: none;
+}
+
+.ev-orbit-mobile {
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 50%, transparent 72%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 50%, transparent 72%);
+}
+
+.ev-orbit-mobile::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 14%;
+  height: 30%;
+  background: radial-gradient(ellipse at center, rgba(11, 11, 13, 0.14) 0%, rgba(11, 11, 13, 0.04) 42%, transparent 72%);
+  pointer-events: none;
+}
+
 @keyframes evSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

@@ -70,6 +70,13 @@ class LeadIntakeService:
     # continues either way; this only bounds the extra reassurance layer.
     MAX_REASSURANCE_ATTEMPTS = 3
 
+    # Live sales treats a complete case with a shaky reading as still
+    # operationally usable. Safety, identity, policy, and unintelligible
+    # exhaustion still escalate.
+    _SALES_DEFERRED_HUMAN_REASONS = frozenset({
+        QualificationReasonCode.LOW_CONFIDENCE.value,
+    })
+
     # Live defect (2026-08-23): a message the AI could not interpret used to
     # be re-asked with the EXACT SAME wording as the previous turn (or, before
     # that, a hardcoded generic question) -- either way reading as if the
@@ -294,6 +301,8 @@ class LeadIntakeService:
         case: ProcessCase,
         message: IncomingMessage,
         qualification: QualificationResult,
+        *,
+        advance_on_completeness: bool = True,
     ) -> None:
         if case.current_state is ProcessState.NEEDS_HUMAN:
             return
@@ -302,6 +311,17 @@ class LeadIntakeService:
         if case.current_state is ProcessState.CONTACTED:
             self._transition(case, message, ProcessState.QUALIFYING, "qualifying")
         target = qualification.recommended_next_state
+        if target is ProcessState.QUALIFIED and not advance_on_completeness:
+            # Live sales conversations keep operational completeness as a
+            # side check. QUALIFIED is a process commitment and must not
+            # open from a completed intake form.
+            return
+        if (
+            target is ProcessState.NEEDS_HUMAN
+            and not advance_on_completeness
+            and set(qualification.reason_codes) <= self._SALES_DEFERRED_HUMAN_REASONS
+        ):
+            return
         if target is not ProcessState.QUALIFYING and case.current_state is not target:
             if target is ProcessState.NEEDS_HUMAN and qualification.reason_codes:
                 # Recorded on case.metadata (not just the event log) so a

@@ -30,15 +30,34 @@ OutputT = TypeVar("OutputT", bound=BaseModel)
 
 
 class OpenAIProvider:
-    def __init__(self, *, api_key: str, model: str, timeout_seconds: float) -> None:
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        model: str,
+        timeout_seconds: float,
+        base_url: str | None = None,
+    ) -> None:
         if not api_key.strip():
             raise ValueError("OpenAI API key must not be empty")
         if not model.strip():
             raise ValueError("OpenAI model must not be empty")
         if not 0 < timeout_seconds <= 120:
             raise ValueError("AI timeout must be greater than 0 and at most 120 seconds")
+        if base_url is not None and not (
+            base_url.startswith("https://") or base_url.startswith("http://")
+        ):
+            raise ValueError("OpenAI base URL must be an http(s) URL")
         self.model = model
-        self._client = OpenAI(api_key=api_key, timeout=timeout_seconds, max_retries=0)
+        self.base_url = base_url
+        client_kwargs: dict[str, Any] = {
+            "api_key": api_key,
+            "timeout": timeout_seconds,
+            "max_retries": 0,
+        }
+        if base_url is not None:
+            client_kwargs["base_url"] = base_url
+        self._client = OpenAI(**client_kwargs)
 
     def generate(self, request: AIRequest[OutputT]) -> AIResult[OutputT]:
         started = perf_counter()

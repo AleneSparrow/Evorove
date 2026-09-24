@@ -1,12 +1,14 @@
-# Flywheel — Wave 1 Outreach & Ad Materials
+# Evorove — Wave 1 Outreach & Ad Materials
 
-Solo attorneys, family law / general practice · California and New York · Rewritten August 24, 2026
+Solo attorneys, family law / general practice · California and New York · Updated 7 September 2026
 
-**What changed and why.** The previous version led with compliance — "architecturally incapable of giving legal advice" was the headline in every piece, and the product was called an *AI intake assistant*. Both are wrong by the corrected USP (`product-foundation-goals-and-usp.md`, 22 August): the reason to buy is that the engine carries a lead all the way to a booked consultation; determinism is the reason it is *safe to let near your intake*, which answers a different question. Intake is also the wrong category — it is what SetSmart, Smith.ai, LawDroid and Apex Chat do, and it is the half of the job Flywheel does not stop at.
+Live public copy lives on `/` and `/lawyers`. Use this file for outreach and ads. Do not use `05-wave1-outreach-materials.md` (Atelier / intake-assistant draft).
 
-New hierarchy in every piece: **full cycle first, compliance second, as objection-handling.**
+**Hierarchy in every piece:** automated sales cycle first (inquiry → booked consult). Not a CRM. Not a chatbot you prompt. Compliance second, as objection-handling.
 
-**Guardrails these materials must not break** (from `universal-marketing-strategy.md` §6): never state a lead-to-signed-client conversion percentage — we do not have that data; never say "to payment" — the engine reaches a booked consultation or an accepted quote, a person confirms the money; never mention Pro until multi-staff ships; never promise instant handling of urgent matters until the urgency split ships; never use the words "cold lead" — we do not generate leads, that is a separate product.
+**What not to say:** intake assistant; CRM; chatbot you configure; cold lead; conversion %; “to payment”; Pro; “for lawyers” as the product identity.
+
+**Guardrails** (from `universal-marketing-strategy.md` §6): never state a lead-to-signed-client conversion percentage; never say "to payment" — the engine reaches a booked consultation or an accepted quote; never mention Pro until multi-staff ships; never promise instant handling of urgent matters until the urgency split ships; never use "cold lead" — we do not generate leads.
 
 ---
 
@@ -16,11 +18,11 @@ Two variants, both under LinkedIn's 300-character limit.
 
 **Variant A — the gap, stated plainly:**
 
-> Hi [First Name] — came across your practice in [City]. Most intake tools take a message and hand it to you. I'm building one that qualifies the caller and books the consultation in Flywheel, then hands you a prepared matter. Worth a look?
+> Hi [First Name] — came across your practice in [City]. Most tools take a message and hand it to you. Evorove is an automated sales process: it qualifies, handles objections, follows up, and books the consult. Worth a look?
 
 **Variant B — with the number:**
 
-> Hi [First Name], quick one — a legal lead costs about $649 to generate, and most solo practices lose a chunk of them to voicemail nobody returns. I built something that answers, qualifies, and books the consult 24/7. Open to connecting?
+> Hi [First Name], quick one — a legal lead costs about $649 to generate, and most solo practices lose a chunk of them to voicemail. I built a sales cycle that answers, sells, and books the consult 24/7 — no CRM to update, no prompts to write. Open to connecting?
 
 ---
 
@@ -30,11 +32,11 @@ Two variants, both under LinkedIn's 300-character limit.
 >
 > Quick context. Cost per lead in legal services runs around $649, and solo practices lose a real share of inbound calls to after-hours voicemail that never gets returned. That is marketing money already spent, walking away.
 >
-> Most tools built for this stop at capture — they take a name and a number and put it in your inbox, and the work of qualifying and scheduling still lands on you. Flywheel goes the rest of the way: it answers around the clock, asks your qualifying questions, handles the "how much is this going to cost me" hesitation using only facts you approved, and books the consultation in Flywheel. You get a prepared matter, not a message to return.
+> Most tools stop at capture — a name in your inbox, and you still have to sell. Evorove runs the sale: it answers around the clock, qualifies, handles the "how much is this going to cost me" hesitation using only facts you approved, follows up, and books the consultation. You get a prepared matter, not a message to return. You do not write prompts or drag cards in a CRM.
 >
-> The part that makes it safe to put in front of your clients: the AI never decides what to say. It rewords content you already approved, inside a script you control, so it cannot estimate odds, promise an outcome, or drift into advice. That is how the message pipeline is built, not a line in a prompt. And it identifies itself as AI in every conversation — the disclosure California SB 243 and New York Article 47 already require.
+> Safe to put in front of clients: the agent phrases the sale; it cannot estimate odds, promise an outcome, or drift into advice. That is how the pipeline is built, not a line in a prompt. It identifies itself as AI in every conversation — the disclosure California SB 243 and New York Article 47 already require.
 >
-> $199/month, 7-day trial, live in about 20 minutes with no setup call. Want a 2-minute walkthrough, or is a quick call easier?
+> $199/month, 7-day trial. Want a 2-minute walkthrough, or is a quick call easier?
 
 ---
 
@@ -52,50 +54,50 @@ Two variants, both under LinkedIn's 300-character limit.
 >
 > I'll keep this short. If your cost per lead is anywhere near the legal industry norm — about $649 — then every inbound call that reaches voicemail and never gets returned is money you already spent, gone.
 >
-> Most tools sold to firms for this stop at capture. They take a name and a number and drop it in your inbox. The qualifying, the follow-up, the scheduling — that still lands on you or your assistant, usually the next business day.
+> Most tools sold to firms stop at capture. They take a name and a number and drop it in your inbox. The sale still lands on you.
 >
-> **Flywheel goes the rest of the way.** It answers every inquiry 24/7, asks the qualifying questions you defined, addresses the cost and "do I even need a lawyer" hesitation using only facts you approved, follows up with people who go quiet, and books the consultation in Flywheel. What reaches you is a prepared matter with the details already collected.
+> **Evorove is an automated sales process.** It answers every inquiry 24/7, qualifies, addresses cost and fit objections using only facts you approved, follows up with people who go quiet, and books the consultation. What reaches you is a prepared matter. No prompt to write. Not a CRM.
 >
 > Two things make it safe to put in front of your clients:
 >
-> 1. **The AI never decides what to say.** It rewords content you approved, inside a script you control. It cannot estimate a client's odds, promise a result, or drift into legal advice — that is a hard limit in how outgoing messages are assembled, not a prompt instruction.
-> 2. **It discloses itself as AI in every conversation**, the disclosure California (SB 243) and New York (Article 47) already require — built in from the start, not bolted on.
+> 1. **The agent never decides the commercial or legal claim.** It phrases a move the process already chose. It cannot estimate odds, promise a result, or drift into legal advice.
+> 2. **It discloses itself as AI in every conversation**, the disclosure California (SB 243) and New York (Article 47) already require.
 >
 > $199/month, 7-day trial, no setup call required.
 >
 > Worth 10 minutes to see whether it fits your practice? Happy to send a short walkthrough instead if that's easier.
 >
 > [Your name]
-> Flywheel
+> Evorove
 
 ---
 
 ## 4. Paid Social / Display Ad Copy
 
-For LinkedIn and search ads pointing at the Wave 1 landing page. Specifics-first register, no manifesto language in paid media.
+For LinkedIn and search ads pointing at `/lawyers`. Specifics-first register, no manifesto language in paid media.
 
 **Ad set 1 — the category gap (primary):**
 
-- **Headline:** Most intake tools stop at "we'll get back to you."
-- **Body:** Flywheel qualifies the caller, answers the cost question, and books the consultation in Flywheel. You get a prepared matter, not a message to return.
+- **Headline:** Most tools stop at "we'll get back to you."
+- **Body:** Evorove runs the sale — qualifies, handles objections, follows up, and books the consult. You get a prepared matter, not a CRM card.
 - **CTA:** Start free trial
 
 **Ad set 2 — cost angle:**
 
-- **Headline:** A legal lead costs $649. Voicemail costs you all of them.
-- **Body:** Flywheel answers, qualifies, and books consultations around the clock — for less than a tenth of an intake specialist's salary.
+- **Headline:** A legal lead costs $649. Voicemail costs you the sale.
+- **Body:** Automated sales cycle, 24/7, for less than a tenth of a hire sitting on the same inquiries.
 - **CTA:** See how it works
 
 **Ad set 3 — retargeting after a competitor search:**
 
 - **Headline:** Capture is the easy half.
-- **Body:** Taking a name and a number is where most tools stop. Flywheel carries the matter through qualifying, follow-up, and scheduling — on a script you approved, that the AI cannot improvise past.
+- **Body:** Taking a name is where most tools stop. Evorove carries the inquiry through qualifying, objections, follow-up, and a booked consult. No prompts to write.
 - **CTA:** Start your 7-day trial
 
 **Ad set 4 — compliance, for the skeptical reader only:**
 
 - **Headline:** An AI you can put in front of a client.
-- **Body:** It rewords what you approved and nothing else — it cannot estimate odds, promise outcomes, or give advice. Enforced in the code, not the prompt.
+- **Body:** It phrases an approved sales move and nothing else — it cannot estimate odds, promise outcomes, or give advice. Enforced in the code, not the prompt.
 - **CTA:** See how it works
 
 ---
@@ -104,9 +106,9 @@ For LinkedIn and search ads pointing at the Wave 1 landing page. Specifics-first
 
 For directory listings, LinkedIn company bio, PR mentions, Clio marketplace copy.
 
-**One line:** Flywheel is an AI engine that carries an inquiry through to a booked consultation — answering, qualifying, following up, and scheduling on a script the attorney approves, which the AI can reword but never improvise past.
+**One line:** Evorove is an automated sales process: it takes an inbound inquiry through qualification, objections, follow-up, and a booked consultation — without a CRM to update or prompts to write.
 
-**Two lines (bio length):** Flywheel is an AI engine for solo law practices that carries an inquiry all the way to a booked consultation: it answers around the clock, asks your qualifying questions, addresses cost and fit objections using only facts you approved, follows up with people who go quiet, and schedules the consult in Flywheel. The AI never decides what to say — it rewords approved content inside a script you control, so it cannot give legal advice, estimate odds, or promise an outcome, and it identifies itself as AI in every conversation.
+**Two lines (bio length):** Evorove is a ready-made sales cycle for the inquiries a practice already gets. A trained agent answers around the clock, qualifies, handles cost and fit objections from approved facts, follows up, and books the consult. It is not a CRM and not a chatbot you prompt. The agent cannot give legal advice, estimate odds, or promise an outcome, and it identifies itself as AI in every conversation.
 
 ---
 
@@ -114,14 +116,18 @@ For directory listings, LinkedIn company bio, PR mentions, Clio marketplace copy
 
 Not copy — answers to have ready when a prospect pushes back.
 
-**"How is this different from the chatbot I was already pitched?"** Those capture and hand off. Ask what happens after the form is filled: with most tools, the answer is that it lands in your inbox. With Flywheel the qualifying questions get asked, the cost objection gets addressed with your own facts, and the consult gets booked. The handoff is a prepared matter.
+**"Is this a CRM?"** No. A CRM stores the pipeline. Evorove runs the sale. You can still ping a CRM when a conversation is qualified or won.
 
-**"What if it says something it shouldn't?"** It cannot, structurally. The AI's only job is rewording content that already exists in your configuration. It has no path to generate a claim, a number, or an opinion that you did not put there. Offer to show the disclosure badge and a live transcript.
+**"Do I have to write prompts?"** No. You describe the practice. The sales agent is already trained.
 
-**"Is this even allowed?"** The AI disclosure that California SB 243 and New York Article 47 require is on by default. On unauthorized practice of law: be straight — say the architecture is designed so the assistant never gives advice, and that you recommend they confirm against their own state bar guidance, because that is their professional obligation and not something a vendor can sign off for them.
+**"How is this different from the chatbot I was already pitched?"** Those capture and hand off. Ask what happens after the form is filled: with most tools, it lands in your inbox. With Evorove the qualifying questions get asked, the cost objection gets addressed with your own facts, and the consult gets booked.
 
-**"Does it bring me new clients?"** No, and say so plainly. It works the inquiries you already get. Lead generation is a separate problem and we do not claim to solve it.
+**"What if it says something it shouldn't?"** It cannot, structurally. The agent phrases an approved move from facts you provided. It has no path to generate a claim, a number, or an opinion that you did not put there.
 
-**"What happens with an emergency or a difficult caller?"** It escalates to a person — emergencies, hostility, and any request for advice or an opinion route to a human rather than being handled.
+**"Is this even allowed?"** The AI disclosure that California SB 243 and New York Article 47 require is on by default. On unauthorized practice of law: be straight — the architecture is designed so the assistant never gives advice, and you recommend they confirm against their own state bar guidance.
 
-**"How long to set up?"** About twenty minutes, no setup call, no per-firm configuration. Nothing about the engine is built specifically for law firms; it adapts from what you tell it about your practice.
+**"Does it bring me new clients?"** No, and say so plainly. It works the inquiries you already get. Lead generation is a separate problem.
+
+**"What happens with an emergency or a difficult caller?"** It escalates to a person.
+
+**"How long to set up?"** Describe the practice once. No per-firm engine build. Nothing about the product is built specifically for law firms.

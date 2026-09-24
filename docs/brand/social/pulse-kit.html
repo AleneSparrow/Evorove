@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Evorove Pulse — social kit</title>
+<meta name="note" content="Canonical brand book: ../evorove-pulse-brandbook.html. Full boards: boards.html." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #F7F1E4;
+    --ink: #0B0B0D;
+    --coral: #FF5A36;
+    --lime: #C6FF00;
+    --mute: #6B6459;
+    --clay: #9A8F83;
+    --line: #E4DCCB;
+    --panel: #FFFCF6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #333; font-family: Inter, system-ui, sans-serif; color: var(--ink); }
+  .label { color: #aaa; font-size: 11px; margin: 28px auto 8px; width: fit-content; font-family: ui-monospace, monospace; }
+  .stage { margin: 0 auto; overflow: hidden; position: relative; background: var(--cream); }
+
+  .wordmark { font-family: "Bebas Neue", Impact, sans-serif; font-weight: 400; letter-spacing: 0.06em; }
+  .display { font-family: "Bebas Neue", Impact, sans-serif; letter-spacing: 0.01em; line-height: 0.86; }
+  .sticker {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    background: var(--lime); color: var(--ink); display: inline-block; padding: 6px 12px;
+    transform: rotate(-2deg);
+  }
+  .lockup { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    display: grid; place-items: center; border-radius: 50%;
+    background: var(--coral); color: var(--ink); flex: none;
+  }
+
+  /* Avatar — cream field, same lockup as the product header */
+  #avatar { width: 800px; height: 800px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+  #avatar .badge { width: 280px; height: 280px; }
+  #avatar .word { font-size: 88px; color: var(--ink); }
+
+  /* LinkedIn 1584×396 — hero type + product torus */
+  #linkedin { width: 1584px; height: 396px; display: flex; align-items: center; padding: 0 72px 0 80px; }
+  #linkedin .copy { position: relative; z-index: 2; }
+  #linkedin .display { font-size: 92px; }
+  #linkedin .sub { margin-top: 14px; font-size: 18px; color: var(--mute); max-width: 560px; line-height: 1.4; }
+  #linkedin .torus { position: absolute; right: -40px; top: -90px; height: 560px; width: auto; pointer-events: none; }
+
+  /* X 1500×500 */
+  #xheader { width: 1500px; height: 500px; display: flex; align-items: center; padding: 0 80px; }
+  #xheader .copy { position: relative; z-index: 2; }
+  #xheader .display { font-size: 108px; }
+  #xheader .sub { margin-top: 16px; font-size: 20px; color: var(--mute); }
+  #xheader .torus { position: absolute; right: -60px; top: -40px; height: 620px; width: auto; pointer-events: none; }
+
+  /* Post: landing headline */
+  #inquiry { width: 1200px; height: 675px; padding: 48px 56px; display: flex; flex-direction: column; }
+  #inquiry .badge { width: 40px; height: 40px; }
+  #inquiry .wm { font-size: 26px; }
+  #inquiry .display { font-size: 118px; margin-top: 36px; }
+  #inquiry .line2 { color: var(--coral); }
+  #inquiry .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+  #inquiry .note { font-size: 18px; color: var(--mute); max-width: 520px; line-height: 1.45; }
+
+  /* Post: 01 ANSWER / 02 QUALIFY / 03 BOOK */
+  #cycle { width: 1200px; height: 675px; padding: 40px 40px 32px; display: flex; flex-direction: column; }
+  #cycle .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  #cycle .badge { width: 40px; height: 40px; }
+  #cycle .wm { font-size: 26px; }
+  #cycle .blocks { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex: 1; }
+  #cycle .block { padding: 28px 26px; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
+  #cycle .block .t { font-size: 52px; }
+  #cycle .block p { font-size: 16px; line-height: 1.4; max-width: 240px; }
+  #cycle .ink { background: var(--ink); color: var(--cream); }
+  #cycle .coral { background: var(--coral); color: var(--cream); }
+  #cycle .lime { background: var(--lime); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- Exact 2D mark from web/app/src/brand/BrandLockup.tsx -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="mark" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/>
+    <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+    <path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity="0.45" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<p class="label">avatar 800×800</p>
+<div class="stage" id="avatar">
+  <span class="badge">
+    <svg width="150" height="150" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/>
+      <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+      <path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity="0.45" stroke-linecap="round"/>
+    </svg>
+  </span>
+  <div class="wordmark word">EVOROVE</div>
+</div>
+
+<p class="label">linkedin 1584×396</p>
+<div class="stage" id="linkedin">
+  <img class="torus" src="_pulse-torus.png" alt="" />
+  <div class="copy">
+    <div class="sticker">On your script</div>
+    <h1 class="display" style="margin-top:16px">EVERY LEAD.<br>NO DEAD AIR.</h1>
+    <p class="sub">Answers the inquiry, qualifies against your rules, and books the meeting.</p>
+  </div>
+</div>
+
+<p class="label">x-header 1500×500</p>
+<div class="stage" id="xheader">
+  <img class="torus" src="_pulse-torus.png" alt="" />
+  <div class="copy">
+    <div class="sticker">On your script</div>
+    <h1 class="display" style="margin-top:18px">EVERY LEAD.<br>NO DEAD AIR.</h1>
+    <p class="sub">Inquiry in. Booked job out.</p>
+  </div>
+</div>
+
+<p class="label">post-inquiry 1200×675</p>
+<div class="stage" id="inquiry">
+  <div class="lockup">
+    <span class="badge">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/>
+        <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+        <path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity="0.45" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="wordmark wm">EVOROVE</span>
+  </div>
+  <h1 class="display">EVERY LEAD.<br><span class="line2">NO DEAD AIR.</span></h1>
+  <div class="foot">
+    <p class="note">AI only rewrites what you already approved. The engine decides the next step.</p>
+    <div class="sticker" style="transform:none">On your script</div>
+  </div>
+</div>
+
+<p class="label">post-cycle 1200×675</p>
+<div class="stage" id="cycle">
+  <div class="top">
+    <div class="lockup">
+      <span class="badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="7.2" stroke="currentColor" stroke-width="3.2"/>
+          <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+          <path d="M20.6 8.8 A9 9 0 0 1 21.4 13.2" stroke="currentColor" stroke-width="1.6" opacity="0.45" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="wordmark wm">EVOROVE</span>
+    </div>
+    <div class="sticker">The cycle</div>
+  </div>
+  <div class="blocks">
+    <div class="block ink">
+      <div class="t display">01 ANSWER</div>
+      <p>Same-minute reply on web chat or text. Always on your script.</p>
+    </div>
+    <div class="block coral">
+      <div class="t display">02 QUALIFY</div>
+      <p>Your questions, required details, urgency — the same path every time.</p>
+    </div>
+    <div class="block lime">
+      <div class="t display">03 BOOK</div>
+      <p>A slot on the calendar, or a handoff to you. Never a silent guess.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
