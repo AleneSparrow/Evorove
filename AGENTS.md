@@ -1,8 +1,9 @@
-# Flywheel agent instructions
+# Evorove agent instructions
 
 - Communicate with the product owner in Russian. Product UI and customer-facing copy remain English.
-- `docs/sales-agent-implementation-plan-ru.md` is the source of truth for sales-agent work.
-- Conversion from inquiry to deal is the product task. Do not promise a conversion rate to customers.
+- `FOUNDATION.md` is the product anchor (revised 12 September 2026, clarified 13 September 2026). Every action is checked against the three cycles and the four CRM tabs: Cold → In progress → Offer made → Done. This repository owns cycle 2 only: write cold to a person from the Cold tab and sell until close. Do not search for people here; finding lives in `evorove_lead`. The board and close live in `evorove-crm`.
+- `docs/sales-agent-implementation-plan-ru.md` describes the sales-agent mechanics. It does not override `FOUNDATION.md`.
+- Conversion from the first cold message to a closed deal is the product task. Do not promise a conversion rate to customers.
 - The engine talks to the customer until the deal. Do not create an employee callback or hand a normal sale to a person. Missing business facts may be requested from the owner; the customer conversation stays with the engine.
 - The trained AI is the configured production language model. Do not train a separate foundation model unless the owner explicitly reopens that decision.
 - Read `CLAUDE.md` for the product boundaries and operational rules.
