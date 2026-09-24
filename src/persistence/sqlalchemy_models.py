@@ -159,6 +159,41 @@ class EmailConnectionRow(Base):
     )
 
 
+class OutreachProspectRow(Base):
+    """A person from the CRM Cold tab that cycle 2 writes to first. The draft
+    is generated from the cycle-1 reason and the tenant's Business DNA and is
+    sent only after the owner approves it."""
+
+    __tablename__ = "outreach_prospects"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), primary_key=True
+    )
+    person_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    email: Mapped[str | None] = mapped_column(String(320))
+    phone: Mapped[str | None] = mapped_column(String(64))
+    name: Mapped[str | None] = mapped_column(String(255))
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    reason_source: Mapped[str] = mapped_column(Text, nullable=False)
+    hypothesis_id: Mapped[str | None] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    skip_reason: Mapped[str | None] = mapped_column(String(64))
+    subject: Mapped[str | None] = mapped_column(String(255))
+    body: Mapped[str | None] = mapped_column(Text)
+    outbox_id: Mapped[str | None] = mapped_column(String(128))
+    approved_by: Mapped[str | None] = mapped_column(String(320))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('drafted','approved','sent','skipped','stopped')",
+            name="ck_outreach_prospects_status",
+        ),
+        Index("ix_outreach_prospects_status", "business_id", "status"),
+    )
+
+
 class BillingWebhookEventRow(Base):
     """One row per distinct Lemon Squeezy webhook delivery ever accepted
     (verified signature + a handled event type), keyed by a fingerprint of

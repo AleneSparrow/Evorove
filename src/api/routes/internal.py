@@ -23,7 +23,7 @@ from src.persistence.sales_contextual_follow_up import (
 )
 from src.persistence.sms_service import SmsService
 
-from ..dependencies import ApplicationContainer, get_container
+from ..dependencies import ApplicationContainer, build_outreach_service, get_container
 from ..errors import RequestDataError, UnauthorizedError
 
 router = APIRouter(prefix="/api/v1/internal", tags=["internal"])
@@ -99,6 +99,7 @@ def deliver_integration_outbox(
         container.unit_of_work_factory,
         encryption_key=container.settings.account_security_encryption_key,
     ).deliver_due()
+    build_outreach_service(container).sync_sent()
     parts = (crm, sms, board, email)
     return {key: sum(part[key] for part in parts) for key in ("attempted", "sent", "failed")}
 
@@ -119,7 +120,7 @@ class LeadCommandRequest(BaseModel):
     """What evorove-crm's cycle_command_delivery POSTs for an owner board command."""
 
     command_id: str = Field(min_length=1, max_length=255)
-    action: Literal["discard", "correct_identity", "pause_outreach", "takeover"]
+    action: Literal["discard", "correct_identity", "pause_outreach", "takeover", "cold_assigned"]
     person_id: str | None = Field(default=None, max_length=128)
     payload: dict[str, Any] = Field(default_factory=dict)
     phone: str | None = Field(default=None, max_length=64)
@@ -138,8 +139,26 @@ def apply_lead_command(
     x_internal_task_secret: Annotated[str | None, Header()] = None,
 ) -> dict[str, object]:
     _require_task_secret(container, x_internal_task_secret)
+    outreach = build_outreach_service(container)
+    if body.action == "cold_assigned":
+        if not body.person_id:
+            raise RequestDataError("cold_assigned needs person_id")
+        status = outreach.assign_cold(
+            business_id,
+            person_id=body.person_id,
+            email=body.email,
+            phone=body.phone,
+            name=body.name,
+            reason=str(body.payload.get("reason") or ""),
+            reason_source=str(body.payload.get("reason_source") or ""),
+            hypothesis_id=body.payload.get("hypothesis_id"),
+        )
+        return {"command_id": body.command_id, "action": body.action, "changed": 1, "status": status}
+    stopped = 0
+    if body.action in ("discard", "pause_outreach", "takeover"):
+        stopped = outreach.stop(business_id, email=body.email, phone=body.phone)
     try:
-        changed = apply_board_command(
+        changed = stopped + apply_board_command(
             container.unit_of_work_factory,
             business_id,
             action=body.action,

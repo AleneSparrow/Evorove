@@ -109,6 +109,57 @@ class CrmBoardService:
                 conversation_id,
             )
 
+    def report_touch(
+        self,
+        business_id: str,
+        *,
+        touch_id: str,
+        kind: str,
+        summary: str,
+        identity: dict[str, str],
+        person_id: str | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> None:
+        """Enqueue and try to deliver one touch that is not a web-chat turn
+        (e.g. the first cold email). Idempotent by touch_id. Never raises."""
+        if not self.enabled:
+            return
+        body: dict[str, Any] = {
+            "touch_id": touch_id,
+            "cycle": 2,
+            "kind": kind,
+            "source": "evorove",
+            "summary": summary[:_SUMMARY_LIMIT],
+            "identity": {key: value for key, value in identity.items() if value},
+            "payload": dict(payload or {}),
+        }
+        if person_id:
+            body["person_id"] = person_id
+        try:
+            now = utc_now()
+            with self.unit_of_work_factory() as uow:
+                session = getattr(uow, "session", None)
+                if session is None or session.get(IntegrationOutboxRow, touch_id) is not None:
+                    return
+                session.add(
+                    IntegrationOutboxRow(
+                        id=touch_id,
+                        business_id=business_id,
+                        kind=TOUCH_KIND,
+                        payload=body,
+                        status="PENDING",
+                        attempt_count=0,
+                        next_attempt_at=now,
+                        last_error=None,
+                        created_at=now,
+                        updated_at=now,
+                    )
+                )
+                uow.commit()
+            self.deliver_one(touch_id)
+        except Exception:  # noqa: BLE001
+            LOGGER.exception("crm_board_touch_error business_id=%s touch_id=%s", business_id, touch_id)
+
     def report_case(self, business_id: str, case_id: str) -> None:
         """Report every conversation of one case (inbound SMS knows the case,
         not the conversation). Never raises."""
