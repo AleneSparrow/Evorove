@@ -1,0 +1,2 @@
+{"name":"Riley Chen","email":"riley.e2e@example.com","observed_fact":"Public post asking who does heating and plumbing repair for homeowners nearby.","observed_source":"system e2e fixture","channel":"email"}
+{"name":"Pat Dump","phone":"+15550100999","observed_fact":"Has a phone number in a purchased list.","observed_source":"phone dump","channel":"sms"}
