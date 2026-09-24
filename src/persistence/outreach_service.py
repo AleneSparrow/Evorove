@@ -15,6 +15,7 @@ and approves every message before it goes out. Cold SMS is never sent
 
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
@@ -131,6 +132,8 @@ class OutreachService:
             )
             if not email:
                 row.status, row.skip_reason = "skipped", "no_email_cold_sms_not_allowed"
+            elif self._email.is_suppressed(business_id, email=email, phone=phone):
+                row.status, row.skip_reason = "skipped", "unsubscribed"
             else:
                 draft = draft_first_email(
                     dna_version.configuration if dna_version else None,
@@ -170,6 +173,10 @@ class OutreachService:
                 raise OutreachError(f"only a drafted message can be approved (now {row.status})")
             if uow.session.get(EmailConnectionRow, business_id) is None:
                 raise OutreachError("connect the business mailbox before sending")
+            if not self._email.unsubscribe_ready:
+                raise OutreachError("the unsubscribe link needs PUBLIC_API_BASE_URL on this deployment")
+            if self._email.is_suppressed(business_id, email=row.email, phone=row.phone):
+                raise OutreachError("this person unsubscribed")
             final_subject = (subject if subject is not None else row.subject or "").strip()
             final_body = (body if body is not None else row.body or "").strip()
             check_message_is_safe(final_subject, final_body)
@@ -221,6 +228,31 @@ class OutreachService:
                     stopped += 1
             uow.commit()
         return stopped
+
+    def unsubscribe(self, business_id: str, email: str, *, reason: str = "unsubscribe_link") -> bool:
+        """The person opted out: suppress, stop anything pending, show it on the CRM card."""
+        address = email.strip().casefold()
+        new = self._email.suppress(business_id, address, reason=reason)
+        self.stop(business_id, email=address, phone=None)
+        with self.unit_of_work_factory() as uow:
+            prospect = uow.session.scalars(
+                select(OutreachProspectRow).where(
+                    OutreachProspectRow.business_id == business_id,
+                    OutreachProspectRow.email.is_not(None),
+                )
+            ).all()
+            match = next((row for row in prospect if (row.email or "").casefold() == address), None)
+            person_id, name = (match.person_id, match.name) if match else (None, None)
+        self._board.report_touch(
+            business_id,
+            touch_id=f"evorove:unsubscribed:{hashlib.sha256(address.encode()).hexdigest()[:24]}",
+            kind="stopped",
+            summary="Unsubscribed from email. Nothing more will be sent.",
+            identity={"email": address, "name": name or ""},
+            person_id=person_id,
+            payload={"channel": "email", "reason": reason},
+        )
+        return new
 
     def get(self, business_id: str, person_id: str) -> dict[str, Any]:
         with self.unit_of_work_factory() as uow:

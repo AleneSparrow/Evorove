@@ -15,7 +15,6 @@ from src.domain.models import utc_now
 from src.persistence.commercial_expiry import CommercialExpirySweep
 from src.persistence.crm_board_service import CrmBoardService, apply_board_command
 from src.persistence.crm_webhook_service import CrmWebhookService
-from src.persistence.email_outreach_service import EmailOutreachService
 from src.persistence.follow_up_service import FollowUpSweepResult, PersistentFollowUpRunner
 from src.persistence.sales_contextual_follow_up import (
     PersistentSalesContextualFollowUpRunner,
@@ -23,7 +22,7 @@ from src.persistence.sales_contextual_follow_up import (
 )
 from src.persistence.sms_service import SmsService
 
-from ..dependencies import ApplicationContainer, build_outreach_service, get_container
+from ..dependencies import ApplicationContainer, build_outreach_service, get_container, get_email_outreach_service
 from ..errors import RequestDataError, UnauthorizedError
 
 router = APIRouter(prefix="/api/v1/internal", tags=["internal"])
@@ -95,10 +94,7 @@ def deliver_integration_outbox(
         crm_base_url=container.settings.crm_base_url,
         secret=container.settings.internal_task_secret,
     ).deliver_due()
-    email = EmailOutreachService(
-        container.unit_of_work_factory,
-        encryption_key=container.settings.account_security_encryption_key,
-    ).deliver_due()
+    email = get_email_outreach_service(container).deliver_due()
     build_outreach_service(container).sync_sent()
     parts = (crm, sms, board, email)
     return {key: sum(part[key] for part in parts) for key in ("attempted", "sent", "failed")}

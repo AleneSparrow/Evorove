@@ -188,6 +188,7 @@ def get_email_outreach_service(
     return EmailOutreachService(
         container.unit_of_work_factory,
         encryption_key=container.settings.account_security_encryption_key,
+        public_base_url=container.settings.public_api_base_url,
     )
 
 

@@ -7,12 +7,20 @@ returned. Sending goes through `integration_outbox` (kind `cold_email`) so a
 crash never loses or duplicates a message, and a per-mailbox daily cap with a
 warm-up ramp protects the sender's reputation: day 1 starts at
 WARMUP_START_PER_DAY and grows by WARMUP_STEP_PER_DAY up to the owner's
-daily_limit. Quiet hours and message content belong to the callers (steps 14
-and 15); this module only connects and delivers.
+daily_limit. Message content belongs to the caller (step 14).
+
+Step 15 (CAN-SPAM): every message carries a one-click unsubscribe link and
+List-Unsubscribe headers; an address that unsubscribed -- or whose phone sent
+SMS STOP -- never receives anything again; nothing leaves during the
+business's quiet hours.
 """
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
 import logging
 import re
 import smtplib
@@ -29,8 +37,9 @@ from sqlalchemy import func, select
 
 from src.domain.account_security import SecretBox
 from src.domain.models import utc_now
+from src.engine.sales_contextual_follow_up import in_business_quiet_hours
 
-from .sqlalchemy_models import EmailConnectionRow, IntegrationOutboxRow
+from .sqlalchemy_models import EmailConnectionRow, EmailSuppressionRow, IntegrationOutboxRow, SmsSuppressionRow
 
 if TYPE_CHECKING:
     from .repositories import UnitOfWorkFactory
@@ -43,6 +52,8 @@ WARMUP_STEP_PER_DAY = 5
 _MAX_ATTEMPTS = 5
 _RETRY_BACKOFF = timedelta(minutes=15)
 _CAP_BACKOFF = timedelta(hours=1)
+_QUIET_BACKOFF = timedelta(minutes=30)
+UNSUBSCRIBE_PATH = "/api/v1/public/unsubscribe/"
 _SMTP_TIMEOUT_SECONDS = 15
 _EMAIL_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
@@ -103,6 +114,26 @@ def smtp_send(target: SmtpTarget, message: EmailMessage) -> None:
         client.send_message(message)
 
 
+def unsubscribe_token(key: str, business_id: str, email: str) -> str:
+    body = base64.urlsafe_b64encode(json.dumps([business_id, email.strip().casefold()]).encode()).decode().rstrip("=")
+    return f"{body}.{_sign(key, body)}"
+
+
+def read_unsubscribe_token(key: str | None, token: str) -> tuple[str, str] | None:
+    body, _, signature = token.partition(".")
+    if not key or not body or not hmac.compare_digest(signature, _sign(key, body)):
+        return None
+    try:
+        business_id, email = json.loads(base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)))
+    except (ValueError, TypeError):
+        return None
+    return str(business_id), str(email)
+
+
+def _sign(key: str, body: str) -> str:
+    return hmac.new(f"unsubscribe:{key}".encode(), body.encode(), hashlib.sha256).hexdigest()[:32]
+
+
 def todays_cap(daily_limit: int, warmup_started_at: datetime, now: datetime) -> int:
     if warmup_started_at.tzinfo is None:  # SQLite returns naive UTC values
         warmup_started_at = warmup_started_at.replace(tzinfo=timezone.utc)
@@ -117,10 +148,37 @@ class EmailOutreachService:
         *,
         encryption_key: str | None,
         sender: Sender | None = None,
+        public_base_url: str | None = None,
     ) -> None:
         self.unit_of_work_factory = unit_of_work_factory
         self._encryption_key = encryption_key
         self._sender = sender or smtp_send
+        self._public_base_url = public_base_url.rstrip("/") if public_base_url else None
+
+    @property
+    def unsubscribe_ready(self) -> bool:
+        return bool(self._public_base_url and self._encryption_key)
+
+    def unsubscribe_url(self, business_id: str, email: str) -> str | None:
+        if not self.unsubscribe_ready:
+            return None
+        return f"{self._public_base_url}{UNSUBSCRIBE_PATH}{unsubscribe_token(self._encryption_key, business_id, email)}"
+
+    def is_suppressed(self, business_id: str, *, email: str | None = None, phone: str | None = None) -> bool:
+        with self.unit_of_work_factory() as uow:
+            return _is_suppressed(uow.session, business_id, email, phone)
+
+    def suppress(self, business_id: str, email: str, *, reason: str) -> bool:
+        """Idempotent; True when the address was not suppressed before."""
+        address = email.strip().casefold()
+        with self.unit_of_work_factory() as uow:
+            if uow.session.get(EmailSuppressionRow, (business_id, address)) is not None:
+                return False
+            uow.session.add(
+                EmailSuppressionRow(business_id=business_id, email=address, reason=reason[:64], suppressed_at=utc_now())
+            )
+            uow.commit()
+        return True
 
     def _box(self) -> SecretBox:
         try:
@@ -199,10 +257,19 @@ class EmailOutreachService:
             raise EmailOutreachError("subject and body are required")
         now = utc_now()
         outbox_id = outbox_id or f"cold-email:{uuid4()}"
+        headers = dict(headers or {})
+        link = self.unsubscribe_url(business_id, to_address)
+        if link:
+            headers["List-Unsubscribe"] = f"<{link}>"
+            headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+            if link not in body:
+                body = f"{body.rstrip()}\nUnsubscribe: {link}"
         with self.unit_of_work_factory() as uow:
             session = uow.session
             if session.get(EmailConnectionRow, business_id) is None:
                 raise EmailOutreachError("connect a mailbox before sending")
+            if _is_suppressed(session, business_id, to_address, None):
+                raise EmailOutreachError("this address unsubscribed")
             if session.get(IntegrationOutboxRow, outbox_id) is None:
                 session.add(
                     IntegrationOutboxRow(
@@ -213,7 +280,7 @@ class EmailOutreachService:
                             "to": to_address,
                             "subject": subject,
                             "body": body,
-                            "headers": dict(headers or {}),
+                            "headers": headers,
                             "meta": dict(meta or {}),
                         },
                         status="PENDING",
@@ -265,6 +332,15 @@ class EmailOutreachService:
                 row.status, row.last_error, row.updated_at = "FAILED", "mailbox_not_connected", now
                 uow.commit()
                 return False
+            if _is_suppressed(session, row.business_id, row.payload.get("to"), None):
+                row.status, row.last_error, row.updated_at = "FAILED", "suppressed", now
+                uow.commit()
+                return False
+            dna = uow.business_dna.get_active(row.business_id)
+            if in_business_quiet_hours(now, dna.configuration if dna else None):
+                row.next_attempt_at, row.last_error, row.updated_at = now + _QUIET_BACKOFF, "quiet_hours", now
+                uow.commit()
+                return False
             cap = todays_cap(mailbox.daily_limit, mailbox.warmup_started_at, now)
             if _sent_since(session, row.business_id, _day_start(now)) >= cap:
                 row.next_attempt_at, row.last_error, row.updated_at = now + _CAP_BACKOFF, "daily_cap", now
@@ -293,6 +369,12 @@ class EmailOutreachService:
             row.payload = {**row.payload, "message_id": message["Message-ID"]}
             uow.commit()
             return True
+
+
+def _is_suppressed(session: Any, business_id: str, email: str | None, phone: str | None) -> bool:
+    if email and session.get(EmailSuppressionRow, (business_id, email.strip().casefold())) is not None:
+        return True
+    return bool(phone and session.get(SmsSuppressionRow, (business_id, phone)) is not None)
 
 
 def _build_message(mailbox: EmailConnectionRow, payload: dict[str, Any]) -> EmailMessage:
