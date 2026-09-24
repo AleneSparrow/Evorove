@@ -29,6 +29,7 @@ from src.persistence.business_dna_settings_service import BusinessDNASettingsSer
 from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
 from src.persistence.email_outreach_service import EmailOutreachService
+from src.persistence.outreach_service import OutreachService
 from src.persistence.sms_service import SmsService
 from src.persistence.sms_thread_service import SmsThreadService
 from src.persistence.staff_action_service import StaffActionService
@@ -198,6 +199,20 @@ def get_crm_board_service(
         crm_base_url=container.settings.crm_base_url,
         secret=container.settings.internal_task_secret,
     )
+
+
+def build_outreach_service(container: ApplicationContainer) -> OutreachService:
+    return OutreachService(
+        container.unit_of_work_factory,
+        email=get_email_outreach_service(container),
+        board=get_crm_board_service(container),
+    )
+
+
+def get_outreach_service(
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> OutreachService:
+    return build_outreach_service(container)
 
 
 def get_sms_service(
