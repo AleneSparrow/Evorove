@@ -57,6 +57,10 @@ class Settings:
     # who finds the URL. None (the default) means the endpoint is disabled
     # entirely, not "open" -- see that route for the check.
     internal_task_secret: str | None = field(default=None, repr=False)
+    # Evorove CRM board origin (no trailing slash). With internal_task_secret
+    # set, every cycle-2 touch is reported there (CrmBoardService); unset
+    # means nothing is reported.
+    crm_base_url: str | None = None
     # Required only when the owner enables authenticator-app 2FA. It has no
     # development default: an operator must provide high-entropy key material
     # before the server may retain an encrypted TOTP seed.
@@ -249,6 +253,7 @@ class Settings:
                     public_api_base_url.rstrip("/") if public_api_base_url else None
                 ),
                 internal_task_secret=os.getenv("INTERNAL_TASK_SECRET"),
+                crm_base_url=(os.getenv("CRM_BASE_URL") or "").strip().rstrip("/") or None,
                 account_security_encryption_key=os.getenv("ACCOUNT_SECURITY_ENCRYPTION_KEY"),
                 smtp_host=os.getenv("SMTP_HOST"), smtp_port=smtp_port,
                 smtp_username=os.getenv("SMTP_USERNAME"), smtp_password=os.getenv("SMTP_PASSWORD"),

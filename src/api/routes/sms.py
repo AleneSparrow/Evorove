@@ -26,6 +26,7 @@ from src.domain.auth import StaffUser
 from src.domain.models import utc_now
 from src.domain.qualification import IncomingMessage
 from src.domain.sms_commands import classify_inbound_sms
+from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.errors import WebhookSignatureError
 from src.persistence.lead_intake import PersistentLeadIntakeService
 from src.persistence.sms_service import (
@@ -175,6 +176,12 @@ async def receive_inbound_sms(
             body=result.response.message_text,
             inbound_message_id=message_sid,
         )
+    if getattr(container.settings, "crm_base_url", None):
+        CrmBoardService(
+            container.unit_of_work_factory,
+            crm_base_url=container.settings.crm_base_url,
+            secret=container.settings.internal_task_secret,
+        ).report_case(business_id, result.case_id)
     return Response(content=_EMPTY_TWIML, media_type="application/xml")
 
 

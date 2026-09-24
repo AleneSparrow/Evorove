@@ -26,6 +26,7 @@ from src.persistence.business_provisioning_service import BusinessProvisioningSe
 from src.persistence.lead_intake import PersistentLeadIntakeService
 from src.persistence.conversation_service import ConversationService
 from src.persistence.business_dna_settings_service import BusinessDNASettingsService
+from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
 from src.persistence.sms_service import SmsService
 from src.persistence.sms_thread_service import SmsThreadService
@@ -177,6 +178,16 @@ def get_crm_webhook_service(
     container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> CrmWebhookService:
     return CrmWebhookService(container.unit_of_work_factory)
+
+
+def get_crm_board_service(
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> CrmBoardService:
+    return CrmBoardService(
+        container.unit_of_work_factory,
+        crm_base_url=container.settings.crm_base_url,
+        secret=container.settings.internal_task_secret,
+    )
 
 
 def get_sms_service(

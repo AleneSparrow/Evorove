@@ -7,12 +7,14 @@ from fastapi import APIRouter, Depends, Path, Request
 
 from src.domain.tenancy import Business
 from src.persistence.conversation_service import ConversationService
+from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
 
 from ..dependencies import (
     ApplicationContainer,
     get_container,
     get_conversation_service,
+    get_crm_board_service,
     get_crm_webhook_service,
     get_public_chat_rate_limiter,
     resolve_business,
@@ -148,6 +150,7 @@ def create_conversation(
     limiter: Annotated[RateLimiter, Depends(get_public_chat_rate_limiter)],
     container: Annotated[ApplicationContainer, Depends(get_container)],
     crm_webhook_service: Annotated[CrmWebhookService, Depends(get_crm_webhook_service)],
+    crm_board: Annotated[CrmBoardService, Depends(get_crm_board_service)],
 ) -> PublicConversationResponse:
     _enforce_rate_limit(limiter, f"create:{business.business_id}:{_client_ip(request)}")
     if payload.message is not None:
@@ -165,6 +168,7 @@ def create_conversation(
     request.state.conversation_id = result.internal_conversation_id
     request.state.resulting_state = result.current_state.value if result.current_state else None
     _notify_crm_if_relevant(crm_webhook_service, business.business_id, result)
+    crm_board.report_conversation(business.business_id, result.internal_conversation_id)
     return PublicConversationResponse.from_domain(result)
 
 
@@ -188,6 +192,7 @@ def send_conversation_message(
     limiter: Annotated[RateLimiter, Depends(get_public_chat_rate_limiter)],
     container: Annotated[ApplicationContainer, Depends(get_container)],
     crm_webhook_service: Annotated[CrmWebhookService, Depends(get_crm_webhook_service)],
+    crm_board: Annotated[CrmBoardService, Depends(get_crm_board_service)],
 ) -> PublicConversationResponse:
     token_key = hashlib.sha256(conversation_token.encode("utf-8")).hexdigest()
     _enforce_rate_limit(
@@ -207,6 +212,7 @@ def send_conversation_message(
     request.state.conversation_id = result.internal_conversation_id
     request.state.resulting_state = result.current_state.value if result.current_state else None
     _notify_crm_if_relevant(crm_webhook_service, business.business_id, result)
+    crm_board.report_conversation(business.business_id, result.internal_conversation_id)
     return PublicConversationResponse.from_domain(result)
 
 
