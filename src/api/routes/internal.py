@@ -6,12 +6,14 @@ and commercial expiry. See DEPLOY.md.
 """
 
 import hmac
-from typing import Annotated
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Header
+from pydantic import BaseModel, Field
 
 from src.domain.models import utc_now
 from src.persistence.commercial_expiry import CommercialExpirySweep
+from src.persistence.crm_board_service import CrmBoardService, apply_board_command
 from src.persistence.crm_webhook_service import CrmWebhookService
 from src.persistence.follow_up_service import FollowUpSweepResult, PersistentFollowUpRunner
 from src.persistence.sales_contextual_follow_up import (
@@ -21,7 +23,7 @@ from src.persistence.sales_contextual_follow_up import (
 from src.persistence.sms_service import SmsService
 
 from ..dependencies import ApplicationContainer, get_container
-from ..errors import UnauthorizedError
+from ..errors import RequestDataError, UnauthorizedError
 
 router = APIRouter(prefix="/api/v1/internal", tags=["internal"])
 
@@ -87,10 +89,15 @@ def deliver_integration_outbox(
         public_api_base_url=container.settings.public_api_base_url,
     )
     sms = sms_service.deliver_due()
+    board = CrmBoardService(
+        container.unit_of_work_factory,
+        crm_base_url=container.settings.crm_base_url,
+        secret=container.settings.internal_task_secret,
+    ).deliver_due()
     return {
-        "attempted": crm["attempted"] + sms["attempted"],
-        "sent": crm["sent"] + sms["sent"],
-        "failed": crm["failed"] + sms["failed"],
+        "attempted": crm["attempted"] + sms["attempted"] + board["attempted"],
+        "sent": crm["sent"] + sms["sent"] + board["sent"],
+        "failed": crm["failed"] + sms["failed"] + board["failed"],
     }
 
 
@@ -104,3 +111,40 @@ def expire_due_commercial_items(
 ) -> dict[str, int]:
     _require_task_secret(container, x_internal_task_secret)
     return CommercialExpirySweep(container.unit_of_work_factory).run(utc_now())
+
+
+class LeadCommandRequest(BaseModel):
+    """What evorove-crm's cycle_command_delivery POSTs for an owner board command."""
+
+    command_id: str = Field(min_length=1, max_length=255)
+    action: Literal["discard", "correct_identity", "pause_outreach", "takeover"]
+    person_id: str | None = Field(default=None, max_length=128)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    phone: str | None = Field(default=None, max_length=64)
+    email: str | None = Field(default=None, max_length=320)
+    name: str | None = Field(default=None, max_length=255)
+
+
+@router.post(
+    "/businesses/{business_id}/lead-commands",
+    summary="Apply an owner command from the CRM board to cycle 2",
+)
+def apply_lead_command(
+    business_id: str,
+    body: LeadCommandRequest,
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+    x_internal_task_secret: Annotated[str | None, Header()] = None,
+) -> dict[str, object]:
+    _require_task_secret(container, x_internal_task_secret)
+    try:
+        changed = apply_board_command(
+            container.unit_of_work_factory,
+            business_id,
+            action=body.action,
+            phone=body.phone,
+            email=body.email,
+            corrected={key: body.payload.get(key) for key in ("name", "phone", "email") if body.payload.get(key)},
+        )
+    except ValueError as exc:
+        raise RequestDataError(str(exc)) from exc
+    return {"command_id": body.command_id, "action": body.action, "changed": changed}

@@ -16,11 +16,13 @@ from fastapi import APIRouter, Depends, Query, status
 from src.domain.auth import StaffUser
 from src.domain.models import utc_now
 from src.domain.states import ProcessState
+from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.staff_action_service import StaffActionService
 
 from ..dependencies import (
     BusinessIdPath,
     UnitOfWorkFactory,
+    get_crm_board_service,
     get_staff_action_service,
     get_unit_of_work_factory,
     require_active_subscription,
@@ -405,8 +407,10 @@ def reply_to_conversation(
     user: Annotated[StaffUser, Depends(require_own_business)],
     staff_actions: Annotated[StaffActionService, Depends(get_staff_action_service)],
     unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+    crm_board: Annotated[CrmBoardService, Depends(get_crm_board_service)],
 ) -> StaffActionResponse:
     result = staff_actions.reply(business_id, conversation_id, user, body.message)
+    crm_board.report_conversation(business_id, conversation_id)
     return _staff_action_response(unit_of_work_factory, business_id, result)
 
 
