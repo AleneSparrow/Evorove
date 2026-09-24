@@ -22,7 +22,13 @@ from src.persistence.sales_contextual_follow_up import (
 )
 from src.persistence.sms_service import SmsService
 
-from ..dependencies import ApplicationContainer, build_outreach_service, get_container, get_email_outreach_service
+from ..dependencies import (
+    ApplicationContainer,
+    build_email_inbox_service,
+    build_outreach_service,
+    get_container,
+    get_email_outreach_service,
+)
 from ..errors import RequestDataError, UnauthorizedError
 
 router = APIRouter(prefix="/api/v1/internal", tags=["internal"])
@@ -94,6 +100,7 @@ def deliver_integration_outbox(
         crm_base_url=container.settings.crm_base_url,
         secret=container.settings.internal_task_secret,
     ).deliver_due()
+    build_email_inbox_service(container).poll_all()  # replies first, so answers go out in this sweep
     email = get_email_outreach_service(container).deliver_due()
     build_outreach_service(container).sync_sent()
     parts = (crm, sms, board, email)
