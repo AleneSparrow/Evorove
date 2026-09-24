@@ -240,7 +240,11 @@ def test_callback_reason_is_used_when_both_callback_and_deferral_exist(uow_facto
     sent = [event for event in events if event.event_type == EventType.SALES_FOLLOW_UP_SENT]
     assert len(sent) == 1
     assert sent[0].payload["reason"] == FollowUpReason.CALLBACK_REQUESTED.value
-    assert "call" in sms.send_calls[0][2].casefold()
+    # Spec 0.1: a callback request is our own follow-up in the same channel,
+    # never a promise that a person will phone the customer.
+    text = sms.send_calls[0][2].casefold()
+    assert "following up as you asked" in text
+    assert "call" not in text
 
 
 def test_stalled_lead_runner_does_not_also_nudge_a_sales_owned_pause(uow_factory) -> None:

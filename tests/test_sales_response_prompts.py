@@ -94,6 +94,7 @@ def test_prompt_content_hash_is_pinned_to_its_version() -> None:
     expected_digest_by_version = {
         "2026-09-06.v2": "820f77e9ed7a3709d2c874b8ea276c45e55730d45a98eb7881ef8e98a1cb5e2f",
         "2026-09-06.v4": "8e20442ced0d7624f141f0d665c2c43ddb7c2ddc3e5df4bed3b7646d03537e10",
+        "2026-09-07.v5": "7ccedfed12992e7ac5464901e322cc926bdf74ab3cd20b2650967fc9fe84c426",
     }
     assert SALES_RESPONSE_PROMPT_VERSION in expected_digest_by_version, (
         f"no pinned hash recorded for prompt version {SALES_RESPONSE_PROMPT_VERSION} -- "

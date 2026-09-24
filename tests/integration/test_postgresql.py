@@ -403,7 +403,9 @@ def test_concurrent_distinct_followups_are_ordered_and_consistent(pg_factory) ->
         list(executor.map(send_followup, followups))
 
     restored = service.get(business_id, created.conversation_token)
-    assert restored.current_state is ProcessState.QUALIFIED
+    # Sales-led intake: a complete form does not open QUALIFIED without an
+    # explicit commitment (sales-agent spec section 12).
+    assert restored.current_state is ProcessState.QUALIFYING
     assert len(restored.messages) == 6
     with pg_factory() as uow:
         rows = tuple(uow.session.scalars(
@@ -473,7 +475,7 @@ def test_concurrent_conversations_cannot_claim_same_contact_identity(pg_factory)
         results = list(executor.map(create_with_same_phone, ("Ada", "Grace")))
 
     assert {result.current_state for result in results} == {
-        ProcessState.QUALIFIED,
+        ProcessState.QUALIFYING,
         ProcessState.NEEDS_HUMAN,
     }
     with pg_factory() as uow:

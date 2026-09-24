@@ -69,7 +69,11 @@ from src.domain.sales import SalesMove
 #     never actually accepted. No validator change; this only makes the
 #     prompt stop asking for something the validator was always going to
 #     reject.
-SALES_RESPONSE_PROMPT_VERSION = "2026-09-06.v4"
+#   2026-09-07.v5 -- owner decision 2026-09-06: objections are answered from
+#     trained language plus listed business facts; a missing knowledge card no
+#     longer forces the safe fallback. New worked example 2, fallback only when
+#     there are no business facts and no knowledge; later examples renumbered.
+SALES_RESPONSE_PROMPT_VERSION = "2026-09-07.v5"
 
 
 # Server-controlled IDs only -- never a customer quote, never free text.
