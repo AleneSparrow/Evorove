@@ -128,6 +128,37 @@ class SmsConnectionRow(Base):
     )
 
 
+class EmailConnectionRow(Base):
+    """One outreach mailbox per business: cycle 2 writes cold email from the
+    business's own work address. The password is stored only encrypted
+    (SecretBox) and never returned by any API."""
+
+    __tablename__ = "email_connections"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), primary_key=True
+    )
+    from_address: Mapped[str] = mapped_column(String(320), nullable=False)
+    from_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    postal_address: Mapped[str] = mapped_column(String(500), nullable=False)
+    smtp_host: Mapped[str] = mapped_column(String(255), nullable=False)
+    smtp_port: Mapped[int] = mapped_column(Integer, nullable=False)
+    smtp_security: Mapped[str] = mapped_column(String(16), nullable=False)
+    smtp_username: Mapped[str] = mapped_column(String(320), nullable=False)
+    password_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
+    imap_host: Mapped[str | None] = mapped_column(String(255))
+    imap_port: Mapped[int | None] = mapped_column(Integer)
+    daily_limit: Mapped[int] = mapped_column(Integer, nullable=False)
+    warmup_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("smtp_security IN ('ssl','starttls')", name="ck_email_connections_security"),
+        CheckConstraint("daily_limit BETWEEN 1 AND 500", name="ck_email_connections_daily_limit"),
+    )
+
+
 class BillingWebhookEventRow(Base):
     """One row per distinct Lemon Squeezy webhook delivery ever accepted
     (verified signature + a handled event type), keyed by a fingerprint of
