@@ -166,6 +166,14 @@ def cadence_from_config(
     return cadence, maximum_attempts, quiet
 
 
+def in_business_quiet_hours(now: datetime, business_dna: Mapping[str, object] | None) -> bool:
+    """The business's own quiet hours (DNA communication.quiet_hours) in its timezone."""
+    if not business_dna:
+        return False
+    quiet = _quiet_hours_from(_mapping(business_dna, "communication"))
+    return _in_quiet_hours(now, timezone_from_sources(None, business_dna), quiet)
+
+
 def timezone_from_sources(
     customer_timezone: str | None,
     business_dna: Mapping[str, object],

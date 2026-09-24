@@ -159,6 +159,19 @@ class EmailConnectionRow(Base):
     )
 
 
+class EmailSuppressionRow(Base):
+    """Addresses (lower-cased) that must not receive cold email from this business."""
+
+    __tablename__ = "email_suppressions"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), primary_key=True
+    )
+    email: Mapped[str] = mapped_column(String(320), primary_key=True)
+    reason: Mapped[str] = mapped_column(String(64), nullable=False)
+    suppressed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class OutreachProspectRow(Base):
     """A person from the CRM Cold tab that cycle 2 writes to first. The draft
     is generated from the cycle-1 reason and the tenant's Business DNA and is

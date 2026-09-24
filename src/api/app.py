@@ -47,6 +47,7 @@ from .routes import (
     public_conversations,
     sales,
     sms,
+    unsubscribe,
 )
 
 
@@ -204,6 +205,7 @@ def create_app(
     application.include_router(business_dna.router)
     application.include_router(integrations.router)
     application.include_router(outreach.router)
+    application.include_router(unsubscribe.router)
     application.include_router(billing.router)
     application.include_router(billing.webhook_router)
     application.include_router(lead_intake.router)
