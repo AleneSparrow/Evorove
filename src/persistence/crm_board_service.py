@@ -24,7 +24,7 @@ from collections.abc import Callable
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 
 from src.domain.models import utc_now
 
@@ -32,6 +32,7 @@ from .sqlalchemy_models import (
     ConversationMessageRow,
     ConversationRow,
     IntegrationOutboxRow,
+    OutreachProspectRow,
     LeadRow,
     ProcessCaseRow,
     SalesProfileRow,
@@ -218,6 +219,19 @@ class CrmBoardService:
                 .order_by(ConversationMessageRow.sequence_number.asc())
             ).all()
             prefix = f"evorove:{conversation_id}"
+            # A reply to a cold email belongs to the person cycle 1 found; the
+            # first email itself was already put on that card when it was sent.
+            prospect = (
+                session.scalars(
+                    select(OutreachProspectRow).where(
+                        OutreachProspectRow.business_id == business_id,
+                        func.lower(OutreachProspectRow.email) == lead.email.casefold(),
+                    )
+                ).first()
+                if lead.email
+                else None
+            )
+            messages = [message for message in messages if not (message.external_message_id or "").startswith("cold:")]
 
             def add(outbox_id: str, kind: str, payload: dict[str, Any]) -> None:
                 if session.get(IntegrationOutboxRow, outbox_id) is not None:
@@ -251,6 +265,7 @@ class CrmBoardService:
                         "summary": summary[:_SUMMARY_LIMIT],
                         "identity": identity,
                         "payload": {"conversation_id": conversation_id, "case_id": case.id, **(extra or {})},
+                        **({"person_id": prospect.person_id} if prospect is not None else {}),
                     },
                 )
 

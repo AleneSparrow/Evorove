@@ -28,6 +28,7 @@ from src.persistence.conversation_service import ConversationService
 from src.persistence.business_dna_settings_service import BusinessDNASettingsService
 from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
+from src.persistence.email_inbox_service import EmailInboxService
 from src.persistence.email_outreach_service import EmailOutreachService
 from src.persistence.outreach_service import OutreachService
 from src.persistence.sms_service import SmsService
@@ -207,6 +208,16 @@ def build_outreach_service(container: ApplicationContainer) -> OutreachService:
         container.unit_of_work_factory,
         email=get_email_outreach_service(container),
         board=get_crm_board_service(container),
+    )
+
+
+def build_email_inbox_service(container: ApplicationContainer) -> EmailInboxService:
+    return EmailInboxService(
+        container.unit_of_work_factory,
+        email=get_email_outreach_service(container),
+        outreach=build_outreach_service(container),
+        board=get_crm_board_service(container),
+        intake=get_intake_service(container),
     )
 
 

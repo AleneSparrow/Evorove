@@ -216,7 +216,7 @@ class OutreachService:
             for row in uow.session.scalars(
                 select(OutreachProspectRow).where(
                     OutreachProspectRow.business_id == business_id,
-                    OutreachProspectRow.status.in_(("drafted", "approved")),
+                    OutreachProspectRow.status.in_(("drafted", "approved", "sent")),
                 )
             ).all():
                 if (email and (row.email or "").casefold() == email.casefold()) or (phone and row.phone == phone):

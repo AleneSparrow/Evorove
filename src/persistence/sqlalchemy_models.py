@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -148,6 +149,7 @@ class EmailConnectionRow(Base):
     password_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     imap_host: Mapped[str | None] = mapped_column(String(255))
     imap_port: Mapped[int | None] = mapped_column(Integer)
+    imap_last_uid: Mapped[int | None] = mapped_column(BigInteger)
     daily_limit: Mapped[int] = mapped_column(Integer, nullable=False)
     warmup_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
