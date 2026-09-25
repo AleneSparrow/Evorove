@@ -12,6 +12,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Conversation from "./pages/Conversation";
+import Board from "./pages/Board";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
 import Account from "./pages/Account";
@@ -68,6 +69,7 @@ export default function App() {
           <Route element={<RequireSubscribedApp />}>
             <Route path="/app" element={<Dashboard />} />
             <Route path="/app/conversations" element={<Conversation />} />
+            <Route path="/app/people" element={<Board />} />
           </Route>
           <Route
             path="/app/account"

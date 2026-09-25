@@ -35,6 +35,7 @@ from .observability import configure_logging, log_event
 from .routes import (
     auth,
     billing,
+    board,
     business_dna,
     businesses,
     dashboard,
@@ -205,6 +206,7 @@ def create_app(
     application.include_router(business_dna.router)
     application.include_router(integrations.router)
     application.include_router(outreach.router)
+    application.include_router(board.router)
     application.include_router(unsubscribe.router)
     application.include_router(billing.router)
     application.include_router(billing.webhook_router)
