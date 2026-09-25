@@ -7,6 +7,7 @@ import { useAuth, describeError } from "../auth/AuthContext";
 import { API_BASE, api, type BusinessDNASettings, type CommercialPath, type CrmWebhookStatus, type ReportingSettings, type SmsStatus } from "../api/client";
 import { StatisticsPanel } from "../components/StatisticsPanel";
 import { SalesPlaybookSettings } from "../components/SalesPlaybookSettings";
+import { MaterialsPanel } from "../components/MaterialsPanel";
 
 // Grouped by the task a business owner actually has, not by which Business
 // DNA schema section a field happens to live in -- "Services" and "Booking"
@@ -16,17 +17,15 @@ import { SalesPlaybookSettings } from "../components/SalesPlaybookSettings";
 // "how the engine should handle the conversation." Four stops instead of
 // seven the owner has to click through to find anything.
 const SETTINGS_TABS = [
-  { key: "widget", label: "Install widget" },
   { key: "basics", label: "Basics" },
   { key: "services", label: "Services & booking" },
   { key: "conversation", label: "Conversation" },
   { key: "playbook", label: "Sales Playbook" },
-  // The key stays "reporting" so existing ?tab=reporting links keep working;
-  // only what the owner reads changes. The tab holds actions on the numbers,
-  // and "Statistics" says that where "Reporting" did not.
+  { key: "materials", label: "Materials" },
   { key: "reporting", label: "Statistics" },
   { key: "sms", label: "SMS" },
-  { key: "crm", label: "CRM" },
+  { key: "widget", label: "Site chat" },
+  { key: "crm", label: "Webhooks" },
 ] as const;
 
 const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
@@ -115,7 +114,7 @@ const COMMERCIAL_PATH_OPTIONS: { value: CommercialPath; label: string }[] = [
   { value: "booking", label: "Book online" },
   { value: "quote", label: "Send a price quote" },
   { value: "direct_step", label: "Send next steps" },
-  { value: "human_review", label: "Always hand off to you" },
+  { value: "human_review", label: "Stop — watch only" },
 ];
 
 interface ObjectionResponseState {
@@ -161,8 +160,8 @@ const TONE_PRESETS: { label: string; desc: string; copy: string }[] = [
  * `intent.urgency.value in business_dna["human_escalation"]["triggers"]` directly, so
  * these two checkboxes are the actual, live escalation switches, not illustrative ones. */
 const ESCALATION_OPTIONS: [keyof SettingsState["escalation"], string, string][] = [
-  ["highUrgency", "Customer describes it as high urgency", "Hands off to you instead of letting the engine keep qualifying on its own."],
-  ["emergency", "Customer describes it as an emergency", "Always hands off immediately — no automated next step at all."],
+  ["highUrgency", "Customer describes it as high urgency", "Stops the engine instead of letting qualification continue. You watch. You do not hop in to close."],
+  ["emergency", "Customer describes it as an emergency", "Always stops immediately — no automated next step."],
 ];
 
 let clientKeySeq = 0;
@@ -235,7 +234,7 @@ export default function Settings() {
   // instead of always resetting to "business".
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const tab: TabKey = isTabKey(tabParam) ? tabParam : "widget";
+  const tab: TabKey = isTabKey(tabParam) ? tabParam : "basics";
   const setTab = (next: TabKey) => {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
@@ -536,7 +535,7 @@ export default function Settings() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/app")}
-              aria-label="Back to Overview"
+              aria-label="Back to CRM"
               className="md:hidden -ml-1.5 p-1.5 rounded-lg shrink-0"
               style={{ color: "#6B6459" }}
           >
@@ -617,9 +616,9 @@ export default function Settings() {
                         <MessageSquare size={18} />
                       </span>
                       <div>
-                        <h2 className="text-lg font-semibold">Put Evorove on your website</h2>
+                        <h2 className="text-lg font-semibold">Add a chat channel to your site</h2>
                         <p className="text-sm text-mute mt-1 leading-relaxed">
-                          Copy this code and paste it into your website just before <code>&lt;/body&gt;</code>. Once published, customers can start a conversation from any page.
+                          Paste this on your website just before <code>&lt;/body&gt;</code>. People who write in talk with the sales agent. This is a conversation channel — not lead search, and not how Evorove finds people.
                         </p>
                       </div>
                     </div>
@@ -786,7 +785,7 @@ export default function Settings() {
                     </div>
                   </label>
 
-                  <Field label="What happens once a lead qualifies for each service?" hint="Book online offers a real slot. Send a price quote gives an automatic fixed price. Send next steps replies with instructions instead of a price or a slot. Always hand off to you sends every qualified lead your way.">
+                  <Field label="What happens once a lead qualifies for each service?" hint="Book online offers a real slot. Send a price quote gives an automatic fixed price. Send next steps replies with instructions instead of a price or a slot. Stop — watch only means the engine does not auto-book or auto-quote; you still do not hop in to close a normal sale.">
                     <div className="flex flex-col gap-4">
                       {state.services.length === 0 && <span className="text-xs text-clay">Add a service above first.</span>}
                       {state.services.map((s) => (
@@ -1092,8 +1091,20 @@ export default function Settings() {
                 <SalesPlaybookSettings token={token} businessId={businessId} />
               )}
 
+              {tab === "materials" && token && businessId && (
+                <div>
+                  <p className="text-sm text-mute mb-6">
+                    Same packet as CRM → Advertising materials. Drafts stay off the engine until you press Refresh.
+                  </p>
+                  <MaterialsPanel token={token} businessId={businessId} />
+                </div>
+              )}
+
               {tab === "reporting" && (
                 <div>
+                  <p className="text-sm text-mute mb-6">
+                    Full statistics — numbers, Visualization, and lead filters — live on the CRM board. This tab still holds the reporting baseline for this business.
+                  </p>
                   {reporting?.test_mode_enabled && (
                     <div className="rounded-2xl border p-4 mb-5 flex flex-wrap items-center gap-x-3 gap-y-1" style={{ borderColor: "#E8CFAF", backgroundColor: "#FFF8EE" }}>
                       <span className="text-sm font-medium text-[#8A561B]">Test mode is on.</span>
@@ -1103,7 +1114,7 @@ export default function Settings() {
                         onClick={() => setTab("widget")}
                         className="text-sm font-medium text-ink underline"
                     >
-                        Change it in Install widget
+                        Change it in Site chat
                       </button>
                     </div>
                   )}
@@ -1124,7 +1135,8 @@ export default function Settings() {
                 <div>
                   <p className="text-sm text-mute mb-6">
                     Give leads a phone number that texts straight into your engine — the same qualification and
-                    booking logic that runs on your website runs here too.
+                    booking logic that runs on your website runs here too. WhatsApp, when it is on, uses Evorove’s
+                    own number — you do not connect Instagram or a personal WhatsApp Business login.
                   </p>
                   {smsLoading && (
                     <div className="flex items-center gap-2 text-sm text-mute py-6">
@@ -1178,8 +1190,8 @@ export default function Settings() {
               {tab === "crm" && (
                 <div>
                   <p className="text-sm text-mute mb-6">
-                    Send a public HTTPS ping to Zapier, Make, or your CRM when a conversation becomes qualified or won.
-                    The saved URL is treated as a secret and is never shown again after you save it.
+                    Optional ping to Zapier, Make, or another tool when a conversation becomes qualified or won.
+                    This is not the Evorove board — that lives under CRM. The saved URL is treated as a secret and is never shown again after you save it.
                   </p>
                   {crmLoading && (
                     <div className="flex items-center gap-2 text-sm text-mute py-6">

@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 
+import pytest
 from src.domain.auth import StaffUser
 from src.domain.conversations import ConversationStatus, MessageDirection
 from src.domain.models import Lead, ProcessCase, utc_now
@@ -13,6 +14,7 @@ from src.domain.qualification import (
 )
 from src.domain.states import ProcessState
 from src.domain.tenancy import Business
+from src.persistence.errors import StaffSaleTakeoverForbidden
 from src.persistence.sms_thread_service import SMS_CHANNEL, SmsThreadService
 from src.persistence.staff_action_service import StaffActionService
 from src.persistence.sqlalchemy_models import Base
@@ -150,7 +152,7 @@ def test_staff_reply_on_sms_thread_enqueues_outbound(tmp_path) -> None:
     engine.dispose()
 
 
-def test_staff_reply_takes_over_an_ai_active_sms_thread(tmp_path) -> None:
+def test_staff_reply_cannot_take_over_an_ai_active_sms_thread(tmp_path) -> None:
     factory, engine = _factory(tmp_path)
     threads = SmsThreadService(factory)
     threads.sync_from_intake(
@@ -177,14 +179,15 @@ def test_staff_reply_takes_over_an_ai_active_sms_thread(tmp_path) -> None:
         NOW,
         ("tenant-a",),
     )
-    StaffActionService(factory, sms_service=None).reply(
-        "tenant-a", conversation_id, staff, "I'll take this from here."
-    )
-    assert threads.is_paused("tenant-a", "+15551234567")
+    with pytest.raises(StaffSaleTakeoverForbidden):
+        StaffActionService(factory, sms_service=None).reply(
+            "tenant-a", conversation_id, staff, "I'll take this from here."
+        )
+    assert not threads.is_paused("tenant-a", "+15551234567")
     with factory() as uow:
         conversation = uow.conversations.get("tenant-a", conversation_id)
         assert conversation is not None
-        assert conversation.status is ConversationStatus.HUMAN_TAKEOVER_ACTIVE
+        assert conversation.status is ConversationStatus.AI_ACTIVE
     engine.dispose()
 
 

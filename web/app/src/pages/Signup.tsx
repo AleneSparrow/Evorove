@@ -22,8 +22,8 @@ export default function Signup() {
       setError("Please agree to the Terms of Service and Privacy Policy.");
       return;
     }
-    if (password.length < 8) {
-      setError("Password needs to be at least 8 characters.");
+    if (password.length < 12) {
+      setError("Password needs to be at least 12 characters.");
       return;
     }
     if (password !== confirmPassword) {
@@ -45,13 +45,13 @@ export default function Signup() {
     <AuthShell>
       <div className="bg-white rounded-2xl border border-line p-7">
         <h1 className="ev-display text-5xl mb-2">Create your account</h1>
-        <p className="text-sm text-mute mb-6">Sets up your login. Next you describe the business — the sales agent is already trained.</p>
+        <p className="text-sm text-mute mb-6">Creates the login. Next you describe the business. Then you watch the board — Cold through Done.</p>
         <form onSubmit={handleSubmit}>
           <Field label="Work email">
             <input type="email" required autoFocus className={inputCls} placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </Field>
-          <Field label="Password" hint="At least 8 characters">
-            <input type="password" required minLength={8} className={inputCls} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Field label="Password" hint="At least 12 characters">
+            <input type="password" required minLength={12} className={inputCls} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
           <Field label="Confirm password">
             <input type="password" required className={inputCls} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />

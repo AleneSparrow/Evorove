@@ -1,6 +1,9 @@
 (function () {
   "use strict";
 
+  // Website chat is a conversation channel for the sale (cycle 2).
+  // It is not lead generation and does not find people.
+
   const script = document.currentScript || document.querySelector("script[src*='widget.js'][data-business-id]");
   if (!script) return;
   const businessId = script.dataset.businessId;

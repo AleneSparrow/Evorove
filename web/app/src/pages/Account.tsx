@@ -63,7 +63,7 @@ export default function Account() {
           <div className="mb-9">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">Personal account</p>
             <h1 className="text-3xl font-semibold tracking-tight mt-2">Your account</h1>
-            <p className="text-sm text-mute mt-2">Manage your personal details and account security.</p>
+            <p className="text-sm text-mute mt-2">Login, password, privacy, and the subscription for this business.</p>
           </div>
 
           <form onSubmit={saveProfile} className="max-w-2xl border border-line bg-white rounded-xl p-5 sm:p-6 mb-10">
@@ -83,6 +83,25 @@ export default function Account() {
           </form>
 
           {token && <AccountSecurityPanel token={token} />}
+
+          <section className="max-w-2xl border border-line bg-white rounded-xl p-5 sm:p-6 mb-10">
+            <h2 className="text-lg font-semibold">Privacy</h2>
+            <p className="text-sm text-mute mt-1 mb-4">How we handle account data and your customers' conversations.</p>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <a href="/privacy" className="underline">Privacy Policy</a>
+              <a href="/dpa" className="underline">DPA</a>
+              <a href="/terms" className="underline">Terms</a>
+              <a href="/subprocessors" className="underline">Subprocessors</a>
+            </div>
+          </section>
+
+          <section className="max-w-2xl border border-line bg-white rounded-xl p-5 sm:p-6 mb-10">
+            <h2 className="text-lg font-semibold">Subscription</h2>
+            <p className="text-sm text-mute mt-1 mb-4">Plan, trial, invoices, and cancellation live on Billing for the business currently selected in the sidebar.</p>
+            <button type="button" onClick={() => navigate("/app/billing")} className="px-4 py-2 rounded-lg text-sm text-white" style={{ backgroundColor: "#0B0B0D" }}>
+              Manage subscription
+            </button>
+          </section>
 
           <section className="max-w-2xl border-t border-line mt-10 pt-8">
             <h2 className="text-lg font-semibold">Sign out</h2>

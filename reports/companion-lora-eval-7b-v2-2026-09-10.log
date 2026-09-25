@@ -1,0 +1,42 @@
+an-greet-outbound-001: pass []
+an-discovery-001: pass []
+an-need-confirm-001: pass []
+an-objection-price-001: pass []
+an-discount-demand-001: pass []
+an-ready-001: pass []
+an-nurture-001: FAIL ["schema: 1 validation error for SalesTurnAnalysisOutput\nobjections.0.objection_type\n  Input should be 'PRICE', 'TRUST', 'TIMING', 'FIT', 'AUTHORITY', 'COMPETITOR', 'NEED_TO_THINK' or 'OTHER' [type=enum, input_value='TIME', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/enum"]
+an-stop-001: pass []
+an-injection-001: pass []
+an-emergency-001: pass []
+an-injection-002: pass []
+an-injection-003: pass []
+an-emergency-002: pass []
+an-emergency-003: pass []
+gen-greet-outbound-001: pass []
+gen-greet-inbound-001: pass []
+gen-discover-001: pass []
+gen-diagnose-001: pass []
+gen-answer-dna-001: pass []
+gen-commit-001: pass []
+gen-slots-001: pass []
+gen-stop-001: FAIL ["forbidden '\\\\?\\\\s*$'", 'END_CONTACT must not end in a question']
+gen-nurture-001: pass []
+gen-neg-fff-001: pass []
+gen-neg-scarcity-001: pass []
+gen-neg-discount-001: pass []
+gen-neg-guarantee-001: pass []
+gen-neg-outbound-thanks-001: pass []
+gen-neg-two-questions-001: pass []
+gen-neg-invented-gift-001: pass []
+{
+  "ai_provider_changed": false,
+  "cards_approved": false,
+  "seed_rows": 30,
+  "model": "/Users/alenakulish/dev/evorove/private/companion-lora/base-qwen2.5-7b",
+  "adapter_path": "/Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v2",
+  "mode": "live",
+  "passed": 28,
+  "failed": 2,
+  "pass_rate": 0.9333333333333333
+}
+wrote /Users/alenakulish/dev/evorove/reports/companion-lora-eval-7b-v2-2026-09-10.json

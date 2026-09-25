@@ -69,11 +69,11 @@ from src.domain.sales import SalesMove
 #     never actually accepted. No validator change; this only makes the
 #     prompt stop asking for something the validator was always going to
 #     reject.
-#   2026-09-07.v5 -- owner decision 2026-09-06: objections are answered from
-#     trained language plus listed business facts; a missing knowledge card no
-#     longer forces the safe fallback. New worked example 2, fallback only when
-#     there are no business facts and no knowledge; later examples renumbered.
-SALES_RESPONSE_PROMPT_VERSION = "2026-09-07.v5"
+#   2026-09-06.v4 -- prior wording/contract tightening (pinned hash in tests).
+#   2026-09-07.r2 -- slice D step 10: empty CUSTOMER_CONTENT is a first outbound
+#     GREET; still forbid "thanks for reaching out" / "you reached out".
+#   2026-09-12.c2-1 -- outbound GREET is Evorove for {business}, not the salon account.
+SALES_RESPONSE_PROMPT_VERSION = "2026-09-12.c2-1"
 
 
 # Server-controlled IDs only -- never a customer quote, never free text.

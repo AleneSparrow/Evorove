@@ -1,0 +1,2727 @@
+[
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "gautrey-dirty-tricks",
+    "knowledge_ids": [],
+    "source": {
+      "title": "21 Dirty Tricks at Work",
+      "author": "Colin Gautrey",
+      "location": "Colin Gautrey — 21 Dirty Tricks at Work How to Beat the Game of Office Politics.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "trick": 1,
+        "office": 5
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "knowledge_ids": [],
+    "source": {
+      "title": "HBR on Sales",
+      "author": "Harvard Business Review",
+      "location": "Harvard Business Review (HBR) — Продажи.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "продаж": 2,
+        "клиент": 4
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Exceptional Customer Service",
+      "author": "Tony Hsieh",
+      "location": "Tony Hsieh — Exceptional Customer service.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "service": 1,
+        "customer": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "give-and-take",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Give and Take",
+      "author": "Adam Grant",
+      "location": "Адам_Грант_Брать_или_отдавать_Новый_взгляд_на_психологию_отнош.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "отдавать": 1,
+        "брать": 1,
+        "giver": 362
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "dyak-phone-sales",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Техника продаж для новичков",
+      "author": "Alexander Dyak",
+      "location": "Александр Дьяк — Техника продаж для новичков. Основы телефонных переговоров.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "телефон": 1,
+        "новичк": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "bankin-content",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Контент-маркетинг для роста продаж",
+      "author": "Alexander Bankin",
+      "location": "Александр Михайлович Банкин — Контент-маркетинг для роста продаж.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "контент": 1,
+        "воронк": 7
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "verchinsky-sales",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Продажи и переговоры",
+      "author": "Anatoly Verchinsky",
+      "location": "Анатолий Николаевич Верчинский — Продажи и переговоры смотрите, как надо продава.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "переговор": 1,
+        "продаж": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "traindl-retail-brand",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Мастерство ритейл-брендинга",
+      "author": "Arndt Traindl",
+      "location": "Арндт Трайндл — Мастерство ритейл-брендинга.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "бренд": 1,
+        "ритейл": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "eat-that-frog",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Eat That Frog!",
+      "author": "Brian Tracy",
+      "location": "Брайан_Трейси_Оставьте_брезгливость,_съешьте_лягушку!.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "лягушк": 1,
+        "приоритет": 12,
+        "самое важное": 28
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "thinking-fast-slow",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "location": "Даниэль Канеман   Thinking, Fast and Slow.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "system 1": 4
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "knowledge_ids": [
+      "candidate-followup-cadence-multitouch-005"
+    ],
+    "source": {
+      "title": "Fanatical Prospecting",
+      "author": "Jeb Blount",
+      "location": "Джеб_Блаунт_Фанатичные_продажи_Принципы_экстремально_быстрого.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "prospecting": 1,
+        "фанатичн": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "crossing-the-chasm",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Crossing the Chasm",
+      "author": "Geoffrey A. Moore",
+      "location": "Джеффри А. Мур — Преодоление пропасти. Маркетинг и продажа хайтек-товаров массов.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "пропаст": 1,
+        "chasm": 3,
+        "ранние последователи": 9
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Agile Selling",
+      "author": "Jill Konrath",
+      "location": "Джил Конрат   Гибкие продажи.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "agile": 1,
+        "гибкие продажи": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Selling to Big Companies",
+      "author": "Jill Konrath",
+      "location": "Джил_Конрат_Продажи_большим_компаниям.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "большим компаниям": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "what-every-body-is-saying",
+    "knowledge_ids": [],
+    "source": {
+      "title": "What Every BODY is Saying",
+      "author": "Joe Navarro and Marvin Karlins",
+      "location": "Джо_Наварро,_Марвин_Карлинс_Я_вижу,_о_чём_вы_думаете.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "жест": 2,
+        "базов": 22,
+        "кластер": 23
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "potapov-sales-marketing",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Маркетинг продаж",
+      "author": "Dmitry Potapov",
+      "location": "Дмитрий Потапов — Маркетинг продаж.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "маркетинг": 1,
+        "продаж": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Marketing Made Simple",
+      "author": "Donald Miller and Dr. J.J. Peterson",
+      "location": "Дональд_Миллер,_Джей_Джей_Питерсон_Воронки_продаж_по_методу_St.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "воронк": 1,
+        "storybrand": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Building a StoryBrand 2.0",
+      "author": "Donald Miller",
+      "location": "Дональд_Миллер_Метод_StoryBrand_2_0_Расскажите_о_своем_бренде.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "storybrand": 1,
+        "герой": 11,
+        "проводник": 21
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Building a StoryBrand",
+      "author": "Donald Miller",
+      "location": "Дональд_Миллер_Метод_StoryBrand_Расскажите_о_своем_бренде_так,.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "storybrand": 2,
+        "герой": 5,
+        "проводник": 8
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "knowledge_ids": [],
+    "source": {
+      "title": "The Sandler Rules",
+      "author": "David Mattson",
+      "location": "Дэвид Мэттсон   49 законов продаж.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "закон": 1,
+        "sandler": 33
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "predictably-irrational",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Predictably Irrational",
+      "author": "Dan Ariely",
+      "location": "Дэн_Ариели_Предсказуемая_иррациональность_Скрытые_силы,_опред.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "иррационал": 1,
+        "бесплатн": 14,
+        "якорь": 38
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Библия продаж XXI века",
+      "author": "Yaniv Zaid",
+      "location": "Йанив Заид — Библия продаж XXI века. Секреты маркетинга, переговоров и убеждения.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "убежден": 1,
+        "переговор": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "nordfalt-retail",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Ритейл-маркетинг",
+      "author": "Jens Nordfält",
+      "location": "Йенс Нордфальт — Ритейл-маркетинг.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "ритейл": 1,
+        "полк": 4
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-eat-alone",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Never Eat Alone",
+      "author": "Keith Ferrazzi",
+      "location": "Кейт_Феррацци_Никогда_не_ешьте_в_одиночку_и_другие_правила_нет.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "сеть": 1,
+        "завтрак": 3,
+        "щедрость": 5
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "knowledge_ids": [
+      "candidate-objection-diagnostic-question-voss-004"
+    ],
+    "source": {
+      "title": "Never Split the Difference",
+      "author": "Chris Voss and Tahl Raz",
+      "location": "Крис_Восс_Никаких_компромиссов_Веди_переговоры_так,_словно_от.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "никаких компромиссов": 1,
+        "labeling": 275
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "learned-optimism",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Learned Optimism",
+      "author": "Martin E. P. Seligman",
+      "location": "Мартин_Э_П_Селигман_Как_научиться_оптимизму_Измените_взгляд.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "оптимизм": 1,
+        "выученн": 2,
+        "беспомощн": 2
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "knowledge_ids": [
+      "candidate-presentation-challenger-teaching-002"
+    ],
+    "source": {
+      "title": "The Challenger Sale",
+      "author": "Matthew Dixon and Brent Adamson",
+      "location": "Мэттью_Диксон,_Брент_Адамсон_Чемпионы_продаж.epub",
+      "provenance_confidence": "deposited-copy",
+      "marker_pages": {}
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Активные продажи",
+      "author": "Nikolay Rysev",
+      "location": "Николай Юрьевич Рысев — Активные продажи 3.4 Стратегии переговоров.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "активн": 1,
+        "переговор": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "knowledge_ids": [
+      "candidate-discovery-spin-001"
+    ],
+    "source": {
+      "title": "SPIN Selling",
+      "author": "Neil Rackham",
+      "location": "Нил Рекхэм   СПИН-продажи.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "situation question": 13,
+        "ситуационн": 13,
+        "implication question": 16,
+        "извлекающ": 16,
+        "need-payoff": 19,
+        "направляющ": 19
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "nudge",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Nudge",
+      "author": "Richard H. Thaler and Cass R. Sunstein",
+      "location": "Ричард_Талер,_Касс_Р_Санстейн_Nudge_Архитектура_выбора.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "архитектур": 1,
+        "выбор": 1,
+        "подталкиван": 7
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "knowledge_ids": [
+      "candidate-objection-price-cialdini-reciprocity-003a",
+      "candidate-objection-price-cialdini-consistency-003b",
+      "candidate-general-cialdini-scarcity-003e"
+    ],
+    "source": {
+      "title": "Influence: The Psychology of Persuasion",
+      "author": "Robert Cialdini",
+      "location": "Роберт_Бено_Чалдини_Influence_The_Psychology_of_Persuasion.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "social proof": 3,
+        "scarcity": 3,
+        "reciprocity": 23
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "knowledge_ids": [
+      "candidate-objection-price-cialdini-reciprocity-003a",
+      "candidate-objection-price-cialdini-consistency-003b",
+      "candidate-general-cialdini-scarcity-003e"
+    ],
+    "source": {
+      "title": "Influence: The Psychology of Persuasion",
+      "author": "Robert Cialdini",
+      "location": "Роберт_Бено_Чалдини_Психология_согласия_Революционная_методик.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "социальное доказательство": 15,
+        "дефицит": 15,
+        "взаимность": 167,
+        "reciprocity": 317
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Getting to Yes",
+      "author": "Roger Fisher, William Ury, and Bruce Patton",
+      "location": "Роджер_Фишер,_Уильям_Юри,_Брюс_Паттон_Переговоры_без_поражения.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "интересы": 2,
+        "позиции": 5
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "azimov-sales-practice",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Продажи, переговоры. Практика, примеры",
+      "author": "Sergey Azimov",
+      "location": "Сергей Аширович Азимов — Продажи, переговоры. Практика, примеры.epub",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "переговор": 1,
+        "практик": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zhdanova-lazy-marketing",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Ленивый маркетинг",
+      "author": "Tamara Zhdanova",
+      "location": "Тамара Сергеевна Жданова — Ленивый маркетинг. Принципы пассивных продаж.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "пассивн": 1,
+        "ленив": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "presence",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Presence",
+      "author": "Amy Cuddy",
+      "location": "Эми_Кадди_Присутствие_духа_Как_направить_силы_своей_личност.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "присутствие": 1,
+        "уверенность": 2,
+        "поза": 38
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "knowledge_ids": [],
+    "source": {
+      "title": "Email Persuasion / Продающие рассылки",
+      "author": "Ian Brody",
+      "location": "Ян Броди — Продающие рассылки. Повышаем продажи, используя email-маркетинг.fb2",
+      "provenance_confidence": "page-located",
+      "marker_pages": {
+        "рассылк": 1,
+        "email": 1
+      }
+    },
+    "note": "Overlay only. Do not import or approve. Spec 0.4 still binds.",
+    "posture_0_4": "scarcity stays negative without a DNA slot fact; Feel-Felt-Found is never a positive"
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-too-many-situation",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 13,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a situation dump instead of a problem",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-problem-question",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 14,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Smooths over whether a problem exists",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-implication",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 16,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names a problem without its cost",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-need-payoff",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 19,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "States the payoff in their own words",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-close-hammer",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 31,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Considering without a hard no",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-not-just-rapport",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Treats rapport as the whole sale",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-constructive-tension",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 23,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the current buying frame left untouched",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-reframe-needs-dna",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 23,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Uses an unverified industry norm as the frame",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-reciprocity-needs-dna",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 23,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for an invented gift in exchange for starting",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-consistency-small-yes",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Restates the already-agreed problem",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-social-proof-invented",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 15,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for proof we may not have as a fact",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-unity-not-tribe",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 22,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Treats sameness as a reason to skip the problem",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-no-split",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks to split a number instead of naming the cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-mirror",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 22,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Objects on timing without a cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-label",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 275,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names a feeling, not the cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-thats-right",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 126,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the diagnosis in their words",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-not-only-social",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Hides in social instead of a real follow-up path",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-phone-still-counts",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a single weak channel",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-rejection-not-pressure",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects without a STOP",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-pain-before-pitch",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a pitch before the pain is named",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-equal-stature",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 5,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Puts the seller in a subservient dump role",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-money-decision",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "No money or decision path yet",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-people-vs-problem",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Mixes the person with the overnight-lead problem",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-options",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 11,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Locks a single position",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-objective-criteria",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 12,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a listed fact after the cause is named",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-no-fake-batna",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 11,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Mentions an alternative",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-trigger-not-deck",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a reason, not a brochure",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-busy-voice",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Signals a frazzled buyer",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-learn-fast",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Protects learning bandwidth",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-practice",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 26,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a usable next step",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-customer-hero",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Puts the brand as hero",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-clear-cta",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for one call to action",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-stakes-not-scare",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 5,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for stakes",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-villain-is-the-problem",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 18,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names a competitor as the villain",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-clarity",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 13,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Lacked clarity",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-guide-plan-cta",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 21,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a guide's plan",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-one-asset",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for the whole funnel at once",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-nurture-letter",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants light nurture, not a dump",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-free-pdf-needs-dna",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for an unauthorized free asset",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-one-question",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a pitch script instead of naming the problem",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-no-pressure-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Considering without a hard no",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-confirm-the-need",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 4,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the problem in their words",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-no-org-dump",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a process dump instead of a listed fact",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-one-cta",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for the next written step",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-no-blast-pack",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a blast pack instead of one step",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-diagnose-first",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Objects to price before the cause is clear",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-no-hard-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Pauses without a hard no",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-warm-without-gift",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks if this is the right help",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-no-invented-wow",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for an invented wow extra",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-outbound-greet",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Does not know who wrote and did not start the thread",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-stop-ends-cadence",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Revokes consent; cadence loses",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-reflect-pain",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names the overnight-lead mess in their words",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-answer-listed-price",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 4,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Named the cause and wants a listed fact",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-check-landed",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 12,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Signals the diagnosis landed, not yet a booking yes",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-offer-listed-slots",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready to pick a listed hour",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-no-silent-book",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready to pick a time",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-nurture-door",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Defers without asking to stop contact",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-confirm-overnight",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "States the payoff in their words",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-competitor-not-brand",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names a competitor without the cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-fact-not-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a brand dump",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-reflect-mess",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names the missed-reply mess",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-confirm-same-night",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the need in their words",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-need-to-think",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 4,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for time without a cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-check-after-fact",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 4,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Signals the listed fact landed",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-confirm-owner",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms ownership of the overnight reply as the need",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-timing-not-ghost",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Pushes timing without a STOP",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-one-fact",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants one listed change, not homework",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-confirm-trigger",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the trigger in their words",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-answer-after-cause",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Cause is named; wants a listed fact",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-one-next-step",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 21,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for one next step",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-diagnose-status-quo",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 23,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Defends the status quo without a cause",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-think-not-fake-yes",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Pushes back on a fake small-yes",
+    "maps_to_move": "DIAGNOSE_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-check-pain-named",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the pain landed",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-one-question-first",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a dump instead of a problem",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-confirm-hero",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms they are the hero of the problem",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-greet-not-course",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants to know if this is homework or the missed-lead mess",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-followup-once",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 26,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Went quiet; rejects a homework pile",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-skip-pretty-words",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 13,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the problem, not a slogan",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-hold-thursday",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 21,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready to pick a listed hour",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-confirm-one-letter",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms one asset, not a kit",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-what-dies",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a kit; wants the problem",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-one-ping-quiet",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 10,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Caps follow-up at one note",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-answer-listed-not-mid",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Cause named; rejects a split",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-next-not-split",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 126,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Agrees and asks for one step",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-confirm-sitting-leads",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 23,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Confirms the status-quo cost",
+    "maps_to_move": "CONFIRM_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-ask-not-teach",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a lecture; allows one question",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-payoff-as-fact",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 19,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for a listed change, not a close",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-one-listed-change",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 5,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a pitch treat; wants a DNA fact",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-quiet-week-one-ping",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Went quiet; rejects a blast",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-what-happens-overnight",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the problem before warmth",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-answer-after-cash",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Cause named; wants a listed fact, not a close",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-listed-not-script",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a script; wants a DNA fact",
+    "maps_to_move": "PRESENT_RELEVANT_VALUE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-who-owns-reply",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 2,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the problem owner, not a process dump",
+    "maps_to_move": "ASK_DISCOVERY_QUESTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-proof-stays-verified",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Asks for verifiable proof, not a claim",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-proof-not-invented",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Tests whether the proof offered is real or invented",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-callback-upfront-terms",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 22,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a vague callback with no terms",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-callback-no-terms",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 22,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Avoids a concrete callback term",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-implied-to-explicit-need",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 97,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names the problem but not yet the explicit need",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-lock-the-slot-dont-drift",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 17,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready but drifting toward a vague later",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-warmth-without-push",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 20,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants care without being pushed toward a decision",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-last-impression-clean-exit",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 18,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Declines clearly and asks to end contact",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-objective-standard-not-claim",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 93,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Challenges whether the proof is a neutral standard or a sales trick",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-insight-not-script",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 36,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Tests whether the pitch is a generic script or a grounded insight",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-planned-cadence-not-random",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 75,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects random, unplanned pings",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-joint-check-against-standard",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 96,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a shared, objective check, not just the seller's say-so",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-confirmed-not-pencilled",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 17,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a soft, unconfirmed slot that risks a no-show",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-know-the-walk-away",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 107,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Signals they have alternatives and does not want pressure",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-tailor-gap-not-same-blast",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 81,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the pace tailored to how long they were quiet, not a generic repeat",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-customer-is-the-hero",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 18,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants to be treated as the one facing the problem, not a sales target",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-moment-of-truth-plain-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 19,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ends the thread plainly, not asking for anything further",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-agree-the-channel-first",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 31,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Leaves the channel for the next call undefined",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-proof-limited-to-the-case",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 3,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Pushes for a universal guarantee disguised as proof",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-influence-credential-relevance-not-title",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "influence",
+    "source": {
+      "chunk": 261,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Checks relevance of the proof, not the label attached to it",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-agile-selling-quantified-client-reported-result",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "agile-selling",
+    "source": {
+      "chunk": 47,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants a client-reported, quantified result, not a vibe",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-real-testimonial-not-staged",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 303,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Checks whether the testimonial is genuine or staged",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-challenger-sale-named-case-not-generic-claim",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "challenger-sale",
+    "source": {
+      "chunk": 40,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a vague claim, wants a specific named example",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-cadence-not-one-off-ping",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Expects a loose, unplanned single ping instead of a real cadence",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-name-the-next-conversation-time",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 28,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Leaves the next conversation time unnamed",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-silence-worse-than-no",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 119,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Prefers silence over a clear no",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-sequence-not-scattered-pings",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 76,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects scattered, repetitive outreach",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-check-shared-understanding",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 59,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants to confirm shared understanding before moving on",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-resolved-by-standard-not-by-me",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 90,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Agrees to the diagnosed cause, open to a shared standard of resolution",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-stay-open-to-reasonable-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 99,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Open to a reasoned resolution rather than holding a position",
+    "maps_to_move": "CHECK_OBJECTION_RESOLUTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-funnel-direct-ask-to-close",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-funnel",
+    "source": {
+      "chunk": 18,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready but waiting for a direct next step, not a hint",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-paperwork-drift-kills-deals",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 18,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Lets the slot drift behind paperwork instead of locking it",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-lets-make-it-concrete",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 26,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ready and wants a simple, concrete next step",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-spin-selling-benefit-answers-explicit-need",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "spin-selling",
+    "source": {
+      "chunk": 115,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Checks whether the stated need is the actual explicit need",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-guide-not-another-friend",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand",
+    "source": {
+      "chunk": 17,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants to be understood on the problem, not just liked",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-cant-lose-what-you-never-had",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 65,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Worries the seller will react with pressure or guilt if declined",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-alternatives-without-urgency",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 108,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants room to weigh alternatives without urgency pressure",
+    "maps_to_move": "NURTURE_WITHOUT_PRESSURE",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-sandler-rules-fear-of-loss-not-the-driver",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "sandler-rules",
+    "source": {
+      "chunk": 80,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Declines firmly, wary of a fear-of-loss pitch",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-point-elsewhere-not-ghost",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 267,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Ends the thread on a clean not-a-fit note",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-fanatical-prospecting-cadence-ends-clean-after-no",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "fanatical-prospecting",
+    "source": {
+      "chunk": 1,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the cadence to end cleanly after a repeated no",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-keep-the-door-not-burned",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 109,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Declines for now while leaving room for later",
+    "maps_to_move": "END_CONTACT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-never-split-the-difference-how-am-i-supposed-to-price",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "never-split-the-difference",
+    "source": {
+      "chunk": 204,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Cause named; turns the price objection into a calibrated how-question",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hbr-sales-answer-across-the-buying-group",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hbr-sales",
+    "source": {
+      "chunk": 16,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names the authority gap across the buying group, not just themselves",
+    "maps_to_move": "ANSWER_OBJECTION",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-zaid-sales-bible-warm-not-corporate-greeting",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "zaid-sales-bible",
+    "source": {
+      "chunk": 85,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Tests whether the greeting is personal or corporate-scripted",
+    "maps_to_move": "GREET_AND_SET_CONTEXT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-interested-is-not-a-commitment",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 15,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Signals interest without an actual commitment ask",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "negative",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-brody-email-blend-sequence-and-broadcast",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "brody-email",
+    "source": {
+      "chunk": 83,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects a generic blast instead of a tailored follow-up",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-rysev-active-sales-planned-touch-not-random",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "rysev-active-sales",
+    "source": {
+      "chunk": 27,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Rejects unplanned, scattershot touches",
+    "maps_to_move": "SEND_CONTEXTUAL_FOLLOW_UP",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-storybrand-2-hero-in-the-pit",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "storybrand-2",
+    "source": {
+      "chunk": 31,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Names feeling stuck, not yet the explicit way out",
+    "maps_to_move": "REFLECT_CUSTOMER_NEED",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-worth-the-hour-not-a-favor",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 28,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Doubts whether the booked hour is worth the time, not the idea itself",
+    "maps_to_move": "OFFER_BOOKING_SLOTS",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-getting-to-yes-know-your-own-bottom-line",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "getting-to-yes",
+    "source": {
+      "chunk": 104,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants the seller to ask plainly instead of circling",
+    "maps_to_move": "ASK_FOR_COMMITMENT",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-selling-to-big-companies-dont-wait-for-their-callback",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "selling-to-big-companies",
+    "source": {
+      "chunk": 6,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Leaves the next contact to their own initiative, which tends to never happen",
+    "maps_to_move": "SCHEDULE_CALLBACK",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  },
+  {
+    "knowledge_id": "candidate-rule-hsieh-service-customer-defines-the-proof",
+    "status": "candidate",
+    "version": 0,
+    "catalog_id": "hsieh-service",
+    "source": {
+      "chunk": 26,
+      "provenance_confidence": "page-located"
+    },
+    "principle": "Wants proof defined by the customer, not by the seller's own claim",
+    "maps_to_move": "PROVIDE_APPROVED_PROOF",
+    "polarity": "positive",
+    "note": "Paraphrase only. Do not import or approve. Spec 0.4 binds."
+  }
+]

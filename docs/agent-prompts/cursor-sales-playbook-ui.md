@@ -12,7 +12,7 @@ schemas, generated contracts, Business DNA schema, or backend tests. If an API
 field needed by the UI does not exist, stop and report the missing contract;
 do not invent it in frontend code.
 
-Build the first Sales Playbook UI using the existing Flywheel design system:
+Build the first Sales Playbook UI using the existing Evorove design system:
 1. Settings → Sales Playbook navigation and page shell.
 2. Read-only overview of active playbook version and status.
 3. Knowledge-card list with status, source, applicable condition and version.

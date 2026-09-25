@@ -33,12 +33,16 @@ from src.engine.sales_owner_facts import owner_listed_facts
 
 
 _SAFE_DISCOVERY_FALLBACK = (
-    "Thanks for sharing that. What problem are you trying to solve, "
-    "and what would a good outcome look like?"
+    "Got it — what's the problem, and what would good look like?"
 )
+_INBOUND_ONLY_GREET = re.compile(
+    r"thanks for reaching out|thank you for reaching out|you reached out|got your message",
+    re.IGNORECASE,
+)
+_EVOROVE_FOR = re.compile(r"evorove\s+for\s+", re.IGNORECASE)
 _MOVE_PHRASES: dict[SalesMove, str] = {
     SalesMove.GREET_AND_SET_CONTEXT: (
-        "Thanks for reaching out. What are you hoping to get help with?"
+        "Hey — what's the thing you want help with?"
     ),
     SalesMove.ASK_DISCOVERY_QUESTION: (
         "What problem are you trying to solve, and what would a good outcome look like?"
@@ -47,13 +51,16 @@ _MOVE_PHRASES: dict[SalesMove, str] = {
         "It sounds like that is what you want help with. Did I understand that correctly?"
     ),
     SalesMove.CONFIRM_CUSTOMER_NEED: (
-        "Just to make sure I have this right — is that the main thing you want help with?"
+        "So that's the main thing you want help with — did I catch it?"
     ),
     SalesMove.PRESENT_RELEVANT_VALUE: (
-        "We can help with that. This is the kind of request the business is set up to handle."
+        "That's the kind of work this business is set up to do. Want me to walk through how it usually goes?"
     ),
     SalesMove.ASK_FOR_COMMITMENT: (
-        "When you are ready, would you like to take the next step?"
+        "If that sounds right, want to take the next step?"
+    ),
+    SalesMove.OFFER_BOOKING_SLOTS: (
+        "You're in. Next is the hour itself — not another round of questions."
     ),
     SalesMove.NURTURE_WITHOUT_PRESSURE: (
         "No rush. I can follow up when the timing is better."
@@ -325,10 +332,9 @@ def booking_available_for_live_turn(
     profile: CustomerSalesProfile,
     analysis: SalesTurnAnalysis,
 ) -> bool:
-    """Commercial next step requires operational fit, a late sales stage, and an explicit ready signal."""
+    """Ready-to-book is a sales signal. Zone, forms, and the hour are cycle 3."""
 
-    if not operationally_qualified_for_commitment(qualification):
-        return False
+    del qualification
     if analysis.commitment_level is not CommitmentLevel.READY_FOR_NEXT_STEP:
         return False
     return profile.stage in _COMMITMENT_STAGES
@@ -339,19 +345,13 @@ def discovery_prompt(
     qualification: QualificationResult,
     dna: Mapping[str, Any],
 ) -> str:
+    """Discovery is the problem and the outcome. Zone and forms are not the sale."""
+
+    del qualification, dna
     if not profile.current_problem:
-        return "What problem are you trying to solve right now?"
+        return "What's getting in the way right now?"
     if not profile.desired_outcome:
-        return "What would a good outcome look like?"
-    questions = dna.get("customer_information", {})
-    field_questions = questions.get("field_questions", {}) if isinstance(questions, Mapping) else {}
-    if isinstance(field_questions, Mapping):
-        for field in qualification.missing_fields:
-            prompt = field_questions.get(field)
-            if isinstance(prompt, str) and prompt.strip():
-                return prompt.strip()
-    if qualification.unanswered_questions:
-        return qualification.unanswered_questions[0]
+        return "What would good look like if this actually got solved?"
     return _MOVE_PHRASES[SalesMove.ASK_DISCOVERY_QUESTION]
 
 
@@ -384,11 +384,12 @@ def combined_business_facts(
     dna: Mapping[str, Any],
     service_id: str | None,
     profile: CustomerSalesProfile | None = None,
+    extra: tuple[tuple[str, str], ...] = (),
 ) -> tuple[tuple[str, str], ...]:
     facts = listed_business_facts(dna, service_id)
-    if profile is None:
-        return facts
-    return facts + owner_listed_facts(profile)
+    if profile is not None:
+        facts = facts + owner_listed_facts(profile)
+    return facts + extra
 
 
 def business_facts_available(
@@ -403,6 +404,45 @@ def phrase_approved_move(move: SalesMove, *, safe_fallback: str) -> str:
     if move is SalesMove.HANDOFF_TO_HUMAN:
         return safe_fallback
     return _MOVE_PHRASES.get(move, _SAFE_DISCOVERY_FALLBACK)
+
+
+def evorove_acting_for(business_name: str | None) -> str:
+    """Customer-facing mouth: Evorove writing for the named business, not the salon account."""
+
+    name = (business_name or "").strip() or "this business"
+    return f"Evorove for {name}"
+
+
+def ensure_evorove_acting_for(text: str, *, business_name: str | None) -> str:
+    """Stamp first-touch copy so the lead can see who is writing."""
+
+    if _EVOROVE_FOR.search(text or "") is not None:
+        return text
+    actor = evorove_acting_for(business_name)
+    body = (text or "").strip()
+    if not body:
+        return f"Hey — this is {actor}. What's the thing you want help with?"
+    return f"{body} — {actor}."
+
+
+def phrase_outbound_greet(*, business_name: str | None, offer: str | None) -> str:
+    """First hello from Evorove acting for the business. Must not assume they already wrote in."""
+
+    actor = evorove_acting_for(business_name)
+    offer_text = (offer or "").strip()
+    if offer_text:
+        text = (
+            f"Hey — this is {actor}. We help with {offer_text}. "
+            "Does that match what you're up against?"
+        )
+    else:
+        text = (
+            f"Hey — this is {actor}. We might be able to help with "
+            "what you're dealing with. What's going on?"
+        )
+    if _INBOUND_ONLY_GREET.search(text) is not None:
+        text = f"Hey — this is {actor}. What's the thing you want help with?"
+    return text
 
 
 def _callback_from_message(source_message_id: str, customer_message: str) -> SalesSignal | None:

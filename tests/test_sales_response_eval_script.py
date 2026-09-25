@@ -591,8 +591,8 @@ def test_run_counts_provider_errors_against_success(monkeypatch: pytest.MonkeyPa
 
 def test_run_treats_invalid_shape_as_a_provider_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """A FakeAIProvider outcome that fails SalesResponseOutput validation
-    (e.g. PROVIDE_APPROVED_PROOF, still knowledge-required after the
-    2026-09-06 objection decision, with neither knowledge_ids nor
+    (a knowledge-required move -- PROVIDE_APPROVED_PROOF, the only entry in
+    KNOWLEDGE_REQUIRED_MOVES -- with neither knowledge_ids nor
     used_safe_fallback) surfaces as an AIInvalidOutputError from the fake
     provider itself -- caught by run() the same way any other
     AIProviderError is, landing in provider_errors, not silently skipped."""
@@ -600,7 +600,7 @@ def test_run_treats_invalid_shape_as_a_provider_error(monkeypatch: pytest.Monkey
         [
             {
                 "move": "PROVIDE_APPROVED_PROOF",
-                "message_text": "An improvised proof with nothing approved behind it.",
+                "message_text": "An improvised answer with nothing approved behind it.",
                 "knowledge_ids": [],
                 "business_fact_ids": [],
                 "customer_evidence_ids": [],

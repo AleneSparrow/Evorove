@@ -10,14 +10,14 @@ const PLANS: { id: BillingPlan; name: string; price: string; desc: string; featu
     id: "starter",
     name: "Starter",
     price: "$199/mo",
-    desc: "For a single owner-operated business getting its first automated leads live.",
-    features: ["Full lead-to-sale automation", "Unlimited conversations", "Email support"],
+    desc: "For a single owner-operated business. Watch Cold through Done. The engine writes.",
+    features: ["Find · sell · close on the board", "Unlimited conversations", "Email support"],
   },
   {
     id: "pro",
     name: "Pro",
     price: "$499/mo",
-    desc: "For a growing team that wants priority support as volume ramps up.",
+    desc: "Same product, priority support when volume is high. Not a closer team.",
     features: ["Everything in Starter", "Priority support", "Early access to new features"],
   },
 ];

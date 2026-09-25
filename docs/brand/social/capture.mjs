@@ -87,16 +87,22 @@ const browser = await puppeteer.launch({
 
 try {
   const page = await browser.newPage();
-  await page.setViewport({ width: 2560, height: 1920, deviceScaleFactor: 1 });
   const only = new Set(process.argv.slice(2));
   for (const [id, filename] of BOARDS) {
     if (only.size && !only.has(id) && !only.has(filename)) continue;
     const dest = join(ROOT, filename);
+    await page.setViewport({ width: 2560, height: 1920, deviceScaleFactor: 1 });
     await page.goto(`${origin}/social/boards.html?board=${id}`, { waitUntil: "networkidle0", timeout: 60000 });
     await page.evaluate(() => document.fonts.ready);
-    await new Promise((r) => setTimeout(r, 400));
     const board = await page.$(".board.is-on");
     if (!board) throw new Error(`missing board ${id}`);
+    const size = await board.evaluate((el) => ({ w: el.offsetWidth, h: el.offsetHeight }));
+    await page.setViewport({
+      width: Math.max(800, Math.ceil(size.w)),
+      height: Math.max(600, Math.ceil(size.h)),
+      deviceScaleFactor: 1,
+    });
+    await new Promise((r) => setTimeout(r, 400));
     await board.screenshot({ path: dest, type: "png", omitBackground: false });
     const box = await board.boundingBox();
     console.log(`wrote ${filename}  ${Math.round(box.width)}×${Math.round(box.height)}`);

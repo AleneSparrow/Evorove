@@ -1,0 +1,25 @@
+{
+  "fixture_schema_version": "2026-09-10.v1",
+  "notes": "Companion Step 1 eval overlay. Does not replace evals/sales_turn_analysis or evals/sales_response_generation. Does not approve knowledge cards. Training job is out of scope. Derived JSONL is core-lane only.",
+  "analyzer_file": "data/analyzer.jsonl",
+  "generator_file": "data/generator.jsonl",
+  "derived_analyzer_file": "data/derived/analyzer_from_corpus.jsonl",
+  "derived_generator_file": "data/derived/generator_from_corpus.jsonl",
+  "sft_lane": "core_only",
+  "counts": {
+    "analyzer_positive": 14,
+    "generator_positive": 10,
+    "generator_negative": 7
+  },
+  "required_negative_themes": [
+    "feel_felt_found",
+    "fake_scarcity",
+    "invented_discount",
+    "invented_guarantee",
+    "outbound_thanks_for_reaching_out",
+    "two_questions",
+    "invented_gift",
+    "prompt_injection",
+    "STOP"
+  ]
+}

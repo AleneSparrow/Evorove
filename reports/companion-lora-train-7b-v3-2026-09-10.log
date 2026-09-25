@@ -1,0 +1,22 @@
+Loading pretrained model
+Loading datasets
+Training
+Trainable parameters: 0.151% (11.534M/7615.617M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/1 [00:00<?, ?it/s]Calculating loss...: 100%|██████████| 1/1 [00:02<00:00,  2.03s/it]Calculating loss...: 100%|██████████| 1/1 [00:02<00:00,  2.04s/it]
+Iter 1: Val loss 2.586, Val took 2.984s
+Iter 10: Train loss 2.432, Learning Rate 1.000e-05, It/sec 0.249, Tokens/sec 18.519, Trained Tokens 745, Peak mem 5.292 GB
+Iter 20: Train loss 1.149, Learning Rate 1.000e-05, It/sec 0.144, Tokens/sec 11.818, Trained Tokens 1565, Peak mem 5.292 GB
+Iter 30: Train loss 1.078, Learning Rate 1.000e-05, It/sec 0.158, Tokens/sec 12.063, Trained Tokens 2330, Peak mem 5.292 GB
+Iter 40: Train loss 0.646, Learning Rate 1.000e-05, It/sec 0.220, Tokens/sec 15.296, Trained Tokens 3025, Peak mem 5.292 GB
+Iter 50: Train loss 0.800, Learning Rate 1.000e-05, It/sec 0.212, Tokens/sec 17.941, Trained Tokens 3870, Peak mem 5.292 GB
+Iter 50: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v3/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v3/0000050_adapters.safetensors.
+Iter 60: Train loss 0.648, Learning Rate 1.000e-05, It/sec 0.221, Tokens/sec 15.978, Trained Tokens 4594, Peak mem 5.328 GB
+Iter 70: Train loss 0.621, Learning Rate 1.000e-05, It/sec 0.197, Tokens/sec 14.409, Trained Tokens 5324, Peak mem 5.338 GB
+Iter 80: Train loss 0.573, Learning Rate 1.000e-05, It/sec 0.227, Tokens/sec 16.403, Trained Tokens 6047, Peak mem 5.338 GB
+Iter 90: Train loss 0.558, Learning Rate 1.000e-05, It/sec 0.161, Tokens/sec 12.832, Trained Tokens 6846, Peak mem 5.338 GB
+Iter 100: Train loss 0.367, Learning Rate 1.000e-05, It/sec 0.168, Tokens/sec 13.660, Trained Tokens 7657, Peak mem 5.338 GB
+Iter 100: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v3/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v3/0000100_adapters.safetensors.
+Iter 110: Train loss 0.474, Learning Rate 1.000e-05, It/sec 0.209, Tokens/sec 16.637, Trained Tokens 8454, Peak mem 5.338 GB
+Iter 120: Train loss 0.481, Learning Rate 1.000e-05, It/sec 0.230, Tokens/sec 18.354, Trained Tokens 9251, Peak mem 5.338 GB
+Iter 130: Train loss 0.395, Learning Rate 1.000e-05, It/sec 0.220, Tokens/sec 17.564, Trained Tokens 10051, Peak mem 5.338 GB

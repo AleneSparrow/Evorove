@@ -40,19 +40,19 @@
   #avatar .badge { width: 280px; height: 280px; }
   #avatar .word { font-size: 88px; color: var(--ink); }
 
-  /* LinkedIn 1584×396 — hero type + product torus */
-  #linkedin { width: 1584px; height: 396px; display: flex; align-items: center; padding: 0 72px 0 80px; }
+  /* LinkedIn — type starts after the company logo overlap */
+  #linkedin { width: 1584px; height: 396px; display: flex; align-items: center; padding: 0 72px 0 460px; }
   #linkedin .copy { position: relative; z-index: 2; }
-  #linkedin .display { font-size: 92px; }
-  #linkedin .sub { margin-top: 14px; font-size: 18px; color: var(--mute); max-width: 560px; line-height: 1.4; }
+  #linkedin .display { font-size: 64px; }
+  #linkedin .sub { margin-top: 8px; font-size: 16px; color: var(--mute); max-width: 640px; line-height: 1.3; }
   #linkedin .torus { position: absolute; right: -40px; top: -90px; height: 560px; width: auto; pointer-events: none; }
 
-  /* X 1500×500 */
-  #xheader { width: 1500px; height: 500px; display: flex; align-items: center; padding: 0 80px; }
+  /* X — type right of the avatar, above the bottom overlap */
+  #xheader { width: 1500px; height: 500px; display: flex; align-items: flex-start; padding: 64px 80px 150px 400px; }
   #xheader .copy { position: relative; z-index: 2; }
-  #xheader .display { font-size: 108px; }
-  #xheader .sub { margin-top: 16px; font-size: 20px; color: var(--mute); }
-  #xheader .torus { position: absolute; right: -60px; top: -40px; height: 620px; width: auto; pointer-events: none; }
+  #xheader .display { font-size: 88px; }
+  #xheader .sub { margin-top: 12px; font-size: 20px; color: var(--mute); }
+  #xheader .torus { position: absolute; right: 80px; top: 80px; height: 340px; width: auto; pointer-events: none; }
 
   /* Post: landing headline */
   #inquiry { width: 1200px; height: 675px; padding: 48px 56px; display: flex; flex-direction: column; }
@@ -104,9 +104,9 @@
 <div class="stage" id="linkedin">
   <img class="torus" src="_pulse-torus.png" alt="" />
   <div class="copy">
-    <div class="sticker">On your script</div>
-    <h1 class="display" style="margin-top:16px">EVERY LEAD.<br>NO DEAD AIR.</h1>
-    <p class="sub">Answers the inquiry, qualifies against your rules, and books the meeting.</p>
+    <div class="sticker">Building in public</div>
+    <h1 class="display" style="margin-top:10px">EVOROVE</h1>
+    <p class="sub">Find the person. Sell until they’re ready. Book the hour.</p>
   </div>
 </div>
 
@@ -114,9 +114,9 @@
 <div class="stage" id="xheader">
   <img class="torus" src="_pulse-torus.png" alt="" />
   <div class="copy">
-    <div class="sticker">On your script</div>
-    <h1 class="display" style="margin-top:18px">EVERY LEAD.<br>NO DEAD AIR.</h1>
-    <p class="sub">Inquiry in. Booked job out.</p>
+    <div class="sticker">Building in public</div>
+    <h1 class="display" style="margin-top:12px">EVOROVE</h1>
+    <p class="sub">Find. Sell. Book the hour.</p>
   </div>
 </div>
 

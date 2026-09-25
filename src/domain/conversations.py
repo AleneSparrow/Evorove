@@ -149,10 +149,8 @@ class Conversation:
         allowed = {
             ConversationStatus.AI_ACTIVE: {
                 ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
-                # Staff jumped in from Conversations before the engine
-                # asked for a human. Same destination as answering a
-                # takeover request: the next customer message must not
-                # keep talking to the model.
+                # Engine HANDOFF (STOP / emergency / policy) may jump here.
+                # StaffActionService must not take this path on a normal sale.
                 ConversationStatus.HUMAN_TAKEOVER_ACTIVE,
                 ConversationStatus.CLOSED,
             },

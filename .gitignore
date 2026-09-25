@@ -11,3 +11,9 @@ _to_delete/
 _incoming/
 .env.bak*
 .claude/
+private/sales-corpus/**
+!private/sales-corpus/README.md
+!private/sales-corpus/incoming/
+!private/sales-corpus/incoming/.gitkeep
+private/companion-lora/**
+!private/companion-lora/README.md

@@ -121,15 +121,15 @@ function TorusEngine({
     if (!group.current) return;
     group.current.rotation.y += delta * 0.12 * intensity;
     if (followPointer) {
-      group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, 0.2 + pointer.current.y * 0.12, 0.04);
-      group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, pointer.current.x * 0.08, 0.04);
+      group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, 0.18 + pointer.current.y * 0.06, 0.04);
+      group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, pointer.current.x * 0.04, 0.04);
     }
     group.current.position.y = Math.sin(state.clock.elapsedTime * 0.4) * 0.03 * intensity;
     if (ring.current) ring.current.rotation.y -= delta * 0.28 * intensity;
   });
 
   return (
-    <group ref={group} rotation={[0.2, 0.55, 0]} scale={compact ? 0.72 : 1}>
+    <group ref={group} rotation={[0.16, 0.4, 0]} scale={compact ? 0.82 : 0.9}>
       <mesh rotation={[Math.PI / 2.35, 0, 0]}>
         <torusGeometry args={compact ? [1.12, 0.38, 32, 96] : [1.12, 0.38, 64, 180]} />
         {compact ? (
@@ -166,7 +166,7 @@ function TorusEngine({
 export function OrbitScene({ variant = "hero" }: { variant?: Variant }) {
   const hero = variant === "hero";
   const reduced = useMedia("(prefers-reduced-motion: reduce)");
-  const compact = useMedia("(max-width: 767px), (pointer: coarse)");
+  const compact = useMedia("(max-width: 767px)");
   const finePointer = useMedia("(hover: hover) and (pointer: fine)");
 
   const intensity = reduced ? 0 : hero ? 1 : 0.35;
@@ -175,8 +175,8 @@ export function OrbitScene({ variant = "hero" }: { variant?: Variant }) {
   return (
     <Canvas
       camera={{
-        position: hero ? (compact ? [0, 0.06, 5.6] : [0.12, 0.22, 4.6]) : [1.4, 0.28, 5.6],
-        fov: compact ? 30 : 34,
+        position: hero ? (compact ? [0, 0.06, 5.4] : [0, 0.04, 5.2]) : [1.4, 0.28, 5.8],
+        fov: 36,
       }}
       dpr={compact ? [1, 1.25] : [1, 1.5]}
       gl={{

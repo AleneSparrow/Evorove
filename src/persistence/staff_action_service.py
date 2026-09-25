@@ -12,9 +12,10 @@ just a staff member approving that exact pending transition, submitted as a
 `DecisionType.HUMAN` decision with `approved_by` set to their email -- the
 same mechanism the engine already validates and audits, not a new one.
 
-A staff reply on an `AI_ACTIVE` thread is an explicit takeover: the
-conversation moves to `HUMAN_TAKEOVER_ACTIVE` so inbound SMS and the widget
-stop running the engine on that session.
+A staff reply is allowed only after a risk handoff (`HUMAN_TAKEOVER_REQUESTED`
+or already `HUMAN_TAKEOVER_ACTIVE`). A reply on `AI_ACTIVE` is a forbidden
+sale takeover: it spoils conversion stats. STOP still ends contact in the
+engine; this service does not weaken it.
 """
 
 from collections.abc import Callable
@@ -41,6 +42,7 @@ from .errors import (
     ConversationClosedError,
     ConversationNotLinkedError,
     StaffConversationNotFoundError,
+    StaffSaleTakeoverForbidden,
 )
 from .repositories import UnitOfWork
 from .sms_service import SmsService
@@ -77,6 +79,11 @@ class StaffActionService:
                 raise StaffConversationNotFoundError("Conversation was not found")
             if conversation.status is ConversationStatus.CLOSED:
                 raise ConversationClosedError("This conversation is already closed")
+            if conversation.status not in {
+                ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
+                ConversationStatus.HUMAN_TAKEOVER_ACTIVE,
+            }:
+                raise StaffSaleTakeoverForbidden()
 
             expected_version = conversation.version
             occurred_at = utc_now()
@@ -92,10 +99,7 @@ class StaffActionService:
                 created_at=occurred_at,
                 metadata={"staff_user_id": staff_user.user_id},
             ))
-            if conversation.status in {
-                ConversationStatus.AI_ACTIVE,
-                ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
-            }:
+            if conversation.status is ConversationStatus.HUMAN_TAKEOVER_REQUESTED:
                 conversation.set_status(ConversationStatus.HUMAN_TAKEOVER_ACTIVE, occurred_at)
             else:
                 conversation.touch(occurred_at)

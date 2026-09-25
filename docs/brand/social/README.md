@@ -1,6 +1,6 @@
 # Evorove social kit
 
-Pulse system. Tokens match `web/app/src/brand/theme.ts`: cream `#F7F1E4`, ink `#0B0B0D`, coral `#FF5A36`, lime `#C6FF00`. Mark is the torus (not the five-spoke wheel). Wordmark Bebas Neue, body Inter. Line: **From inquiry to a deal.**
+Pulse system. Tokens match `web/app/src/brand/theme.ts`: cream `#F7F1E4`, ink `#0B0B0D`, coral `#FF5A36`, lime `#C6FF00`. Mark is the torus (not the five-spoke wheel). Wordmark Bebas Neue, body Inter. Line: **Find. Sell. Book the hour.**
 
 **Brand book:** `docs/brand/evorove-pulse-brandbook.html`  
 **Source boards:** `boards.html` (re-render with `NODE_PATH=… node capture.mjs`)
@@ -23,12 +23,16 @@ Round crop eats wordmarks. Default profile is **mark only**.
 
 ## Banners
 
-| File | Size | Use |
-| --- | --- | --- |
-| `evorove-linkedin-banner.png` | 1584×396 | LinkedIn company cover — 3D torus |
-| `evorove-x-header.png` | 1500×500 | X header |
-| `evorove-youtube-banner.png` | 2560×1440 | YouTube channel art |
-| `evorove-og.png` | 1200×630 | Link unfurl / Open Graph |
+Avatars sit **on top of** LinkedIn and X covers. Type is never in that overlap, and never in the crop LinkedIn/YouTube actually show.
+
+| File | Size | Safe type box | Use |
+| --- | --- | --- | --- |
+| `evorove-linkedin-banner.png` | 4200×700 (6:1) | Company cover. Not the personal 1584×396. Left empty for the logo. No wordmark — LinkedIn already prints the name | LinkedIn company cover |
+| `evorove-x-header.png` | 1500×500 | Right of the avatar, above the bottom overlap (x ≥ 400, y ≤ 340). Inset from both sides for mobile crop | X header |
+| `evorove-youtube-banner.png` | 2560×1440 | Center title-safe 1546×423 | YouTube channel art |
+| `evorove-og.png` | 1200×630 | Full frame (no avatar overlay) | Link unfurl / Open Graph |
+
+Line on these files: **Find. Sell. Book the hour.** Do not put “inbound inquiry” or “not lead gen” on a cover. Preview `boards.html` draws the avatar/crop ghosts; capture mode strips them.
 
 ## Feed posters (1200×675)
 

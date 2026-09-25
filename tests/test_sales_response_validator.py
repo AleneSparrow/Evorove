@@ -40,6 +40,40 @@ def test_valid_grounded_candidate_passes_without_fallback() -> None:
     assert result.used_fallback is False
 
 
+def test_verbatim_book_quote_is_rejected_with_fallback() -> None:
+    """Step 2.5 (12 September 2026): whichever generator writes
+    message_text, quoting a depositied sales book verbatim to a customer
+    must fail this validator, not just the companion eval path. Skips
+    cleanly (nothing to assert) on a checkout with no private corpus --
+    same degrade-to-false behavior as `_verbatim_book_quote` itself.
+    """
+    from src.companion_corpus.rag import cached_core_chunks
+
+    chunks = cached_core_chunks()
+    long_chunk = next((c for c in chunks if len(c.text.split()) >= 20), None)
+    if long_chunk is None:
+        pytest.skip("no depositied private sales corpus on this checkout")
+    quote = " ".join(long_chunk.text.split()[:10])
+    result = SalesPolicyValidator().validate(candidate(message_text=f"Here's the thing: {quote}."), context())
+    assert result.valid is False
+    assert "verbatim_book_quote" in result.violations
+    assert result.used_fallback is True
+
+
+def test_safe_fallback_text_is_never_flagged_as_a_quote() -> None:
+    """A fallback/handoff candidate is server-controlled exact copy --
+    even if it happens to overlap a depositied book's wording, it must not
+    be rejected: `used_safe_fallback=True` candidates are exempt from the
+    verbatim-quote check by design.
+    """
+    fallback_text = "I’ll have someone follow up with you."
+    result = SalesPolicyValidator().validate(
+        candidate(message_text=fallback_text, used_safe_fallback=True, knowledge_ids=(), customer_evidence_ids=()),
+        context(),
+    )
+    assert "verbatim_book_quote" not in result.violations
+
+
 @pytest.mark.parametrize(
     ("changed", "violation"),
     (

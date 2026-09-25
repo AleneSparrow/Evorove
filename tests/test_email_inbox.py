@@ -144,12 +144,12 @@ def test_paused_person_is_shown_but_not_answered(world) -> None:
     assert [(p["kind"], p["summary"]) for p in posts] == [("message", "Customer: Can you call me?")]
 
 
-def test_owner_takeover_stops_auto_answers(world) -> None:
+def test_owner_pause_stops_auto_answers(world) -> None:
     client, inbox, fake, smtp, posts, _ = world
     fake.messages.append(_reply(101, "Tell me more"))
     inbox.poll("tenant-a")
     smtp.sent.clear()
-    body = {"command_id": "t1", "action": "takeover", "email": PROSPECT, "payload": {}}
+    body = {"command_id": "t1", "action": "pause_outreach", "email": PROSPECT, "payload": {}}
     assert client.post("/api/v1/internal/businesses/tenant-a/lead-commands", json=body,
                        headers={"X-Internal-Task-Secret": SECRET}).status_code == 200
     fake.messages.append(_reply(102, "Hello? When can we talk?"))

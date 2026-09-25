@@ -373,6 +373,9 @@ COMMAND_CONVERSATION_STATUS = {
     "takeover": "human_takeover_active",
     "discard": "closed",
 }
+# A normal sale stays with the engine; the owner can take over only a
+# conversation the engine itself handed off on risk.
+_TAKEOVER_FROM = "human_takeover_requested"
 
 
 def apply_board_command(
@@ -423,6 +426,8 @@ def apply_board_command(
                         ConversationRow.lead_id.in_(lead_ids),
                     )
                 ).all():
+                    if action == "takeover" and conversation.status != _TAKEOVER_FROM:
+                        continue
                     if conversation.status != target:
                         conversation.status = target
                         conversation.updated_at = now

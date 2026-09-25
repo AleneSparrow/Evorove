@@ -143,10 +143,19 @@ def test_sales_led_sms_cycle_books_only_after_commitment(tmp_path) -> None:
         )
         assert offered.current_state is ProcessState.QUALIFIED
         assert offered.response is not None
-        assert "Choose an appointment time" in offered.response.message_text
+        assert "Choose an appointment time" not in offered.response.message_text
+        assert "you're in" in offered.response.message_text.casefold()
+
+        slots = intake.receive(
+            _message("sms-6", "I am ready for times", phone=phone, case_id=first.case_id),
+            sales_led_conversation=True,
+        )
+        assert slots.current_state is ProcessState.QUALIFIED
+        assert slots.response is not None
+        assert "Choose an appointment time" in slots.response.message_text
 
         booked = intake.receive(
-            _message("sms-6", "The second option works", phone=phone, case_id=first.case_id),
+            _message("sms-7", "The second option works", phone=phone, case_id=first.case_id),
             sales_led_conversation=True,
         )
         assert booked.current_state is ProcessState.BOOKED
@@ -242,7 +251,7 @@ def test_sales_led_requests_owner_fact_instead_of_handing_off(tmp_path) -> None:
         )
         assert presented.current_state is ProcessState.QUALIFYING
         assert presented.response is not None
-        assert "set up to handle" in presented.response.message_text.casefold()
+        assert "kind of work" in presented.response.message_text.casefold()
         with factory() as uow:
             profile = uow.sales_profiles.get("acme-home-services", first.case_id)
             assert profile is not None

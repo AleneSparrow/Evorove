@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-ai_process_engine}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_development_only}
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "${POSTGRES_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -40,8 +40,11 @@ services:
       PUBLIC_CONVERSATION_TOKEN_TTL_HOURS: ${PUBLIC_CONVERSATION_TOKEN_TTL_HOURS:-720}
       PUBLIC_CHAT_MESSAGE_MAX_CHARS: ${PUBLIC_CHAT_MESSAGE_MAX_CHARS:-2000}
       MAX_REQUEST_BODY_BYTES: ${MAX_REQUEST_BODY_BYTES:-65536}
+      INTERNAL_TASK_SECRET: ${INTERNAL_TASK_SECRET:-local_development_only}
+      # From this container, CRM on the Mac is the published host port.
+      CRM_BASE_URL: http://host.docker.internal:${CRM_HOST_PORT:-8000}
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_PORT:-8001}:8000"
     depends_on:
       postgres:
         condition: service_healthy

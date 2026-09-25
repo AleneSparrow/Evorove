@@ -33,6 +33,7 @@ from src.domain.states import ProcessState
 from src.engine.lead_intake import LeadIntakeService
 from src.persistence.commercial_service import CommercialWorkflowService
 from src.persistence.lead_intake import PersistentLeadIntakeService
+from src.persistence.owner_materials import merge_active_owner_materials
 from src.persistence.repositories import ClaimStatus, UnitOfWork
 from src.persistence.sales_live_turn import SalesLiveTurnService
 from src.persistence.sms_thread_service import SMS_CHANNEL
@@ -63,6 +64,7 @@ class SalesLedIntakeService:
             response_generator=intake.sales_response_generator,  # type: ignore[arg-type]
             commercial=self.commercial,
             process_engine=intake.process_engine,
+            crm_touch_publisher=intake.crm_touch_publisher,
         )
 
     def receive(self, message: IncomingMessage) -> LeadIntakeResult:
@@ -83,6 +85,14 @@ class SalesLedIntakeService:
             case = uow.cases.get(message.business_id, conversation.case_id)
             if case is not None and case.current_state in _COMMERCIAL_STATES:
                 return self._continue_commercial(
+                    uow, message, conversation, case, occurred_at,
+                )
+            if (
+                case is not None
+                and isinstance(conversation.metadata, dict)
+                and conversation.metadata.get("outbound_first_touch")
+            ):
+                return self._continue_open_sale(
                     uow, message, conversation, case, occurred_at,
                 )
 
@@ -228,6 +238,81 @@ class SalesLedIntakeService:
         )
         return result
 
+    def _continue_open_sale(
+        self,
+        uow: UnitOfWork,
+        message: IncomingMessage,
+        conversation: Conversation,
+        case: ProcessCase,
+        occurred_at: datetime,
+    ) -> LeadIntakeResult:
+        """Same SalesLiveTurn as web chat. Does not open a second case."""
+
+        fingerprint = PersistentLeadIntakeService.fingerprint(message)
+        channel = message.channel.casefold()
+        claim_status, claim = uow.idempotency.claim(
+            message.business_id, channel, message.external_message_id, fingerprint,
+        )
+        if claim_status is ClaimStatus.COMPLETED:
+            if claim.result is None or claim.case_id is None:
+                raise RuntimeError("completed outbound sale message has no persisted result")
+            return PersistentLeadIntakeService._deserialize_result(
+                claim.result, duplicate=True,
+            )
+
+        dna = self._active_dna(uow, message.business_id)
+        expected_version = conversation.version
+        prior = uow.conversation_messages.list_for_conversation(
+            conversation.business_id,
+            conversation.conversation_id,
+            limit=_CONTEXT_MESSAGE_LIMIT,
+        )
+        inbound = self._record_inbound(uow, conversation, message, occurred_at)
+        live = self.sales_live.run(
+            uow,
+            conversation,
+            case,
+            dna,
+            _open_sale_qualification(case),
+            source_message_id=inbound.message_id,
+            customer_text=message.raw_text,
+            prior_messages=prior,
+            occurred_at=occurred_at,
+        )
+        response = CustomerResponse(
+            message_text=live.message_text,
+            channel=message.channel,
+            reason=live.reason,
+            related_case_id=case.case_id,
+            requires_human=live.requires_human,
+        )
+        result = LeadIntakeResult(
+            case.case_id,
+            case.lead.lead_id,
+            live.process_state,
+            _open_sale_qualification(case),
+            response,
+            False,
+        )
+        self._record_outbound(
+            uow, conversation, message, response.message_text, occurred_at,
+        )
+        conversation.metadata["current_state"] = live.process_state.value
+        if live.requires_human or live.process_state is ProcessState.NEEDS_HUMAN:
+            conversation.set_status(
+                ConversationStatus.HUMAN_TAKEOVER_REQUESTED, occurred_at,
+            )
+        conversation.touch(occurred_at)
+        uow.conversations.save(conversation, expected_version)
+        uow.idempotency.complete(
+            message.business_id,
+            channel,
+            message.external_message_id,
+            case.case_id,
+            PersistentLeadIntakeService._serialize_result(result),
+        )
+        return result
+
     def _lock_existing_conversation(
         self,
         uow: UnitOfWork,
@@ -351,9 +436,12 @@ class SalesLedIntakeService:
 
     @staticmethod
     def _session_id(message: IncomingMessage) -> str | None:
-        if message.channel.casefold() == SMS_CHANNEL and message.phone:
-            return message.phone
+        channel = message.channel.casefold()
         phone = LeadIntakeService._normalize_phone(message.phone)
+        if channel == "whatsapp" and phone:
+            return f"wa:{phone}"
+        if channel == SMS_CHANNEL and (message.phone or phone):
+            return phone or message.phone
         if phone:
             return phone
         return LeadIntakeService._normalize_email(message.email)
@@ -363,7 +451,32 @@ class SalesLedIntakeService:
         version = uow.business_dna.get_active(business_id)
         if version is None:
             raise RuntimeError(f"business has no active Business DNA: {business_id}")
-        return PersistentLeadIntakeService._plain_json(version.configuration)
+        return merge_active_owner_materials(
+            uow,
+            business_id,
+            PersistentLeadIntakeService._plain_json(version.configuration),
+        )
+
+
+def _open_sale_qualification(case: ProcessCase) -> QualificationResult:
+    ready = bool(case.metadata.get("sales_ready_to_book"))
+    service_id = case.lead.attributes.get("service_requested")
+    if not isinstance(service_id, str) or not service_id.strip():
+        service_id = None
+    return QualificationResult(
+        qualified=ready,
+        reasons=("Outbound sale is in progress",),
+        reason_codes=(
+            QualificationReasonCode.QUALIFIED if ready else QualificationReasonCode.MISSING_INFORMATION,
+        ),
+        missing_fields=(),
+        unanswered_questions=(),
+        confidence=1.0,
+        recommended_next_state=ProcessState.QUALIFIED if ready else ProcessState.QUALIFYING,
+        requires_human=False,
+        booking_allowed=ready,
+        service_id=service_id,
+    )
 
 
 def _commercial_qualification(case: ProcessCase) -> QualificationResult:

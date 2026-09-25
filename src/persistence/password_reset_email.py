@@ -30,8 +30,8 @@ class SmtpPasswordResetEmailSender:
 
     def send(self, *, recipient_email: str, reset_url: str) -> None:
         message = EmailMessage()
-        message["From"], message["To"], message["Subject"] = self._from_email, recipient_email, "Reset your Flywheel password"
-        message.set_content(f"Reset your Flywheel password:\n{reset_url}\n\nThis link expires in 30 minutes and works once. If you did not request it, ignore this email.")
+        message["From"], message["To"], message["Subject"] = self._from_email, recipient_email, "Reset your Evorove password"
+        message.set_content(f"Reset your Evorove password:\n{reset_url}\n\nThis link expires in 30 minutes and works once. If you did not request it, ignore this email.")
         with smtplib.SMTP(self._host, self._port, timeout=10) as client:
             if self._use_tls:
                 client.starttls(context=ssl.create_default_context())
