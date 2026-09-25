@@ -85,7 +85,6 @@ export function MarketingFooter({ extra }: { extra?: ReactNode }) {
               {item.label}
             </Link>
           ))}
-          <Link to="/lawyers" className="hover:text-ink transition-colors">For practices</Link>
           <Link to="/faq" className="hover:text-ink transition-colors">FAQ</Link>
         </div>
       </div>
