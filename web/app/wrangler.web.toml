@@ -1,10 +1,17 @@
 name = "evorove-web"
+main = "worker.js"
 compatibility_date = "2026-09-06"
 workers_dev = true
 
+[vars]
+# The engine's Railway address; the browser never sees it.
+API_ORIGIN = "https://ai-business-process-engine-production.up.railway.app"
+
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/widget/*"]
 
 [[routes]]
 pattern = "evorove.com"
