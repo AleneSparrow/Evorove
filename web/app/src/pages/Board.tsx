@@ -26,6 +26,9 @@ function searchMessage(search: LeadSearchStatus | null): string {
   if (search.status === "not_set_up") return "People search isn't connected yet.";
   if (SEARCH_ACTIVE.has(search.status)) return "Searching from your site… new people will appear on Cold.";
   if (search.status === "failed") return "The last search didn't finish. Try again.";
+  if (search.status === "need_presence") return "We couldn't read your website. Check the address and try again.";
+  if (search.status === "offer_incomplete") return "Your website doesn't say clearly enough what you sell. Add your services to Settings → Materials and try again.";
+  if (search.status === "search_unconnected") return "People search isn't connected yet.";
   const when = search.last_run_at ? new Date(search.last_run_at).toLocaleString("en-US") : "";
   if (search.cold > 0) return `Last search found ${search.cold} new ${search.cold === 1 ? "person" : "people"}${when ? ` · ${when}` : ""}.`;
   return `Last search found nobody new who fits${when ? ` · ${when}` : ""}. We search again every day.`;
