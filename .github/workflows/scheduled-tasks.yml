@@ -1,0 +1,76 @@
+# Roadmap step 8: the internal sweeps on a schedule (engine + CRM + cycle 1).
+#
+# Needs one repository secret, INTERNAL_TASK_SECRET, with the same value as
+# the INTERNAL_TASK_SECRET variable on the Railway services. Without it the
+# job fails loudly instead of silently doing nothing.
+#
+#  - every 10 min: integrations/deliver on the engine (cold email, replies,
+#    CRM board touches) and on the CRM (commands back to the engine)
+#  - hourly:       follow-up/run and commercial/expire on both
+#  - daily 15:00 UTC: cycle 1 re-searches every remembered site (via the CRM,
+#    cycle 1 has no public address)
+name: Scheduled tasks
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+    - cron: "7 * * * *"
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "deliver | hourly | daily"
+        required: true
+        default: deliver
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-tasks-${{ github.event.schedule || inputs.task }}
+  cancel-in-progress: false
+
+env:
+  ENGINE_URL: https://api.evorove.com
+  CRM_URL: https://evorove-crm-production.up.railway.app
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Pick the task
+        id: pick
+        run: |
+          case "${{ github.event.schedule || '' }}:${{ inputs.task || '' }}" in
+            "*/10 * * * *:"|":deliver") echo "task=deliver" >> "$GITHUB_OUTPUT" ;;
+            "7 * * * *:"|":hourly")     echo "task=hourly"  >> "$GITHUB_OUTPUT" ;;
+            "0 15 * * *:"|":daily")     echo "task=daily"   >> "$GITHUB_OUTPUT" ;;
+            *) echo "unknown task"; exit 1 ;;
+          esac
+      - name: Call the sweeps
+        env:
+          SECRET: ${{ secrets.INTERNAL_TASK_SECRET }}
+          TASK: ${{ steps.pick.outputs.task }}
+        run: |
+          if [ -z "$SECRET" ]; then
+            echo "INTERNAL_TASK_SECRET repository secret is not set"; exit 1
+          fi
+          call() {
+            echo "POST $1"
+            curl --fail-with-body --silent --show-error --max-time 300 \
+              -X POST -H "X-Internal-Task-Secret: $SECRET" "$1"
+            echo
+          }
+          case "$TASK" in
+            deliver)
+              call "$ENGINE_URL/api/v1/internal/integrations/deliver"
+              call "$CRM_URL/api/v1/internal/integrations/deliver" ;;
+            hourly)
+              call "$ENGINE_URL/api/v1/internal/follow-up/run"
+              call "$ENGINE_URL/api/v1/internal/commercial/expire"
+              call "$CRM_URL/api/v1/internal/follow-up/run"
+              call "$CRM_URL/api/v1/internal/commercial/expire" ;;
+            daily)
+              call "$CRM_URL/api/v1/internal/lead-searches/run-due" ;;
+          esac
