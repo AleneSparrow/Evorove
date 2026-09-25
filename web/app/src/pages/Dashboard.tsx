@@ -180,7 +180,7 @@ export default function Dashboard() {
             {([
               ["board", "Board"],
               ["statistics", "Statistics"],
-              ["materials", "Advertising materials"],
+              ["materials", "Materials"],
             ] as const).map(([key, label]) => (
               <button
                 key={key}
@@ -262,7 +262,7 @@ export default function Dashboard() {
                   <p className="px-5 py-2 text-xs text-mute border-b border-line">{CRM_TAB_META[crmTab].hint}</p>
                   {decorated.length === 0 ? (
                     <p className="px-5 py-12 text-center text-sm text-mute">
-                      The board is empty. After you subscribe and the packet is in, cycle 1 places people on Cold. Cycle 2 writes from there.
+                      The board is empty. After you subscribe and set up the business, the engine finds people and puts them on Cold. Then it writes to them.
                     </p>
                   ) : filtered.length === 0 ? (
                     <p className="px-5 py-12 text-center text-sm text-mute">No leads on this tab match the search.</p>
@@ -319,7 +319,7 @@ export default function Dashboard() {
                           <div className="text-sm text-mute flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Opening thread…</div>
                         )}
                         {!threadLoading && threadMissing && (
-                          <p className="text-sm text-mute">No conversation yet. Cold stays quiet until cycle 2 writes.</p>
+                          <p className="text-sm text-mute">No conversation yet. Cold stays quiet until the engine writes.</p>
                         )}
                         {thread?.messages.map((message) => (
                           <div key={message.message_id} className={`flex flex-col ${message.direction === "inbound" ? "items-start" : "items-end"}`}>

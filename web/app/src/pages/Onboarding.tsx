@@ -79,7 +79,7 @@ const INDUSTRY_SUGGESTIONS = [
  * directly, so these are the actual, live escalation switches. The previous
  * three-checkbox version of this step was never sent to the backend at all. */
 const ESCALATION_OPTIONS: [keyof EscalationState, string, string][] = [
-  ["highUrgency", "Stop the moment high urgency is detected", "Off by default: the engine finishes qualifying, then flags urgency on the board. Turn on only if you want the cycle stopped immediately. You still do not hop in to close."],
+  ["highUrgency", "Stop the moment high urgency is detected", "Off by default: the engine finishes qualifying, then flags urgency on the board. Turn on only if you want the process stopped immediately. You still do not hop in to close."],
   ["emergency", "Customer describes it as an emergency", "Always stops immediately — no automated next step."],
 ];
 
@@ -200,7 +200,7 @@ export default function Onboarding() {
               <EvoroveMark size={16} />
             </div>
             <span className="ev-wordmark text-[20px] tracking-[0.06em]">
-              {user && user.business_ids.length > 0 ? "Setting up another business" : "Setting up your Business DNA"}
+              {user && user.business_ids.length > 0 ? "Setting up another business" : "Setting up your business"}
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -226,7 +226,7 @@ export default function Onboarding() {
                 {step === 0 && (
                   <>
                     <h2 className="ev-display text-4xl mb-1.5">Tell us about your business</h2>
-                    <p className="text-sm text-mute mb-7">This packet is the brief for finding people and selling. It is not a list of leads.</p>
+                    <p className="text-sm text-mute mb-7">This is what the engine uses to find people and sell. It is not a list of leads.</p>
                     <Field label="Business name">
                       <input className={inputCls} placeholder="e.g. Acme Studio" value={business.name} onChange={(e) => setBusiness({ ...business, name: e.target.value })} />
                       {attemptedContinue && !business.name.trim() && <p className="text-xs mt-1.5" style={{ color: "#B4483A" }}>Give it a name to continue.</p>}
@@ -271,7 +271,7 @@ export default function Onboarding() {
                         onChange={(e) => setBusiness({ ...business, offer: e.target.value })}
                       />
                       <p className="text-xs mt-1.5 text-mute">
-                        If you have one, put it here. Photos and extra files go on Advertising materials after launch — press Refresh so the engine uses them.
+                        If you have one, put it here. Photos and extra files go on Materials after launch — press Refresh so the engine uses them.
                       </p>
                     </Field>
                     <Field label="How should it sound to customers?">
@@ -317,7 +317,7 @@ export default function Onboarding() {
                 {step === 2 && (
                   <>
                     <h2 className="ev-display text-4xl mb-1.5">Who can you serve?</h2>
-                    <p className="text-sm text-mute mb-7">This is part of the brief: who you can serve when cycle 1 hunts and when cycle 2 closes.</p>
+                    <p className="text-sm text-mute mb-7">This tells the engine who you can serve when it looks for people and when it closes.</p>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <AreaOption
                         icon={Globe}
@@ -414,7 +414,7 @@ export default function Onboarding() {
                 {step === 5 && (
                   <>
                     <h2 className="ev-display text-4xl mb-1.5">Ready to go live</h2>
-                    <p className="text-sm text-mute mb-7">Here's the Business DNA your engine will run on.</p>
+                    <p className="text-sm text-mute mb-7">Here's what your engine will run on.</p>
                     <div className="rounded-xl bg-cream border border-line p-5 flex flex-col gap-4 text-sm">
                       <div className="flex justify-between"><span className="text-mute">Business</span><span className="font-medium">{business.name || "Untitled business"} · {business.industry}</span></div>
                       <div className="flex justify-between"><span className="text-mute">Voice</span><span className="font-medium">{business.tone}</span></div>
@@ -473,7 +473,7 @@ export default function Onboarding() {
               <h2 className="ev-display text-4xl mb-2">
                 {business.name || "Your business"} is live.
               </h2>
-              <p className="text-sm text-mute mb-7 max-w-sm">The packet is live. Open CRM and watch: cycle 1 fills Cold when it finds people; cycle 2 writes from there. You do not hop in to close a normal sale.</p>
+              <p className="text-sm text-mute mb-7 max-w-sm">Your business is live. Open CRM and watch: the engine finds people, puts them on Cold, then writes to them. You do not hop in to close a normal sale.</p>
               <button
                 onClick={() => navigate("/app")}
                 className="text-sm font-medium text-white px-5 py-2.5 rounded-lg flex items-center gap-1.5"

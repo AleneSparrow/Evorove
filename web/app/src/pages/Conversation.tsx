@@ -234,7 +234,7 @@ export default function Conversation() {
                 {conversations === null
                   ? "Loading…"
                   : requestedCaseMissing
-                    ? "No conversation is linked to this lead yet. Cold stays quiet until cycle 2 writes."
+                    ? "No conversation is linked to this lead yet. Cold stays quiet until the engine writes."
                     : "Safety stops only. Open a lead from CRM to watch a normal sale."}
               </div>
             ) : !detail ? (

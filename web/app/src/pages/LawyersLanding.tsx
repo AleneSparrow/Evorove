@@ -52,7 +52,7 @@ export default function LawyersLanding() {
         homeTo="/lawyers"
         ctaLabel="Start free trial"
         links={[
-          { href: "#cycle", label: "The cycle" },
+          { href: "#cycle", label: "How it works" },
           { href: "#pricing", label: "Pricing" },
           { href: "#faq", label: "FAQ" },
         ]}
@@ -66,7 +66,7 @@ export default function LawyersLanding() {
           Cold on the board.<br />Consult already sold.
         </h1>
         <p className="text-base md:text-lg text-mute leading-relaxed mb-8 max-w-2xl mx-auto">
-          Subscribe. Describe the practice. Evorove studies the packet, finds people in the open web,
+          Subscribe. Describe the practice. Evorove studies your setup, finds people in the open web,
           puts them on Cold, then sells until Done — a booked consult hour. The board moves as it happens. Open a person to read the dialogue.
           You do not hop in to close. Hard limits: no legal advice, no promised outcome.
         </p>
@@ -79,7 +79,7 @@ export default function LawyersLanding() {
             Start your 7-day free trial <ArrowRight size={15} />
           </button>
           <a href="#cycle" className="text-sm font-medium px-5 py-3 rounded-full border border-ink">
-            See the cycle
+            See how it works
           </a>
         </div>
         <span className="block text-xs text-clay mt-4">$199/mo after trial · card required, no charge until trial ends</span>
@@ -94,11 +94,11 @@ export default function LawyersLanding() {
       <section id="cycle" className="max-w-4xl mx-auto px-6 py-16 md:py-20">
         <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "#FF5A36" }}>Find · sell · close</span>
         <h2 className="ev-display text-4xl md:text-5xl mt-2 mb-5">
-          Law is a door. The product is the three cycles.
+          Law is a door. The product is find, sell, close.
         </h2>
         <p className="text-base text-mute leading-relaxed max-w-2xl mb-8">
           A consult hour still costs real marketing money if you only wait for people who already
-          found the site. Cycle 1 looks in the open field. Cycle 2 writes first. Done is the hour
+          found the site. It looks in the open field. It writes first. Done is the hour
           on the calendar — CRM, not a voicemail you return.
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -171,7 +171,7 @@ export default function LawyersLanding() {
           The sale runs until they are ready to book.
         </h2>
         <ul className="flex flex-col gap-3.5 max-w-lg">
-          <DoesItem text="Studies your packet — practice, materials, commercial offer — before it hunts" />
+          <DoesItem text="Studies your setup — practice, materials, commercial offer — before it hunts" />
           <DoesItem text="Places matching people on Cold, then writes first. A website chat is only a channel, never the source of Cold" />
           <DoesItem text="Handles cost and fit objections from facts you approved, then sends the offer when they are ready" />
           <DoesItem text="Closes to a real consult hour on Done. You watch. You do not hop in to close a normal sale" />
@@ -235,7 +235,7 @@ export default function LawyersLanding() {
             />
             <FaqItem
               q="Do people already have to write in?"
-              a="No. Cold is people found in the open web after the packet is analyzed — not visitors who filled a form. A chat widget on your site is only a conversation channel if someone already there wants to talk."
+              a="No. Cold is people found in the open web after your setup is analyzed — not visitors who filled a form. A chat widget on your site is only a conversation channel if someone already there wants to talk."
             />
             <FaqItem
               q="Is this actually compliant with my state's bar rules?"
@@ -245,7 +245,7 @@ export default function LawyersLanding() {
               q="Can the AI give legal advice by accident?"
               a="No — and that's the point. The agent phrases an approved sales move. It has no path to invent legal analysis, estimate outcomes, or promise results, because that capability isn't built into the message pipeline at all."
             />
-            <FaqItem q="How long does setup take?" a="About 20 minutes for a single-attorney practice. No developer needed. Advertising materials can be added later — press Refresh so the engine uses them." />
+            <FaqItem q="How long does setup take?" a="About 20 minutes for a single-attorney practice. No developer needed. Materials can be added later — press Refresh so the engine uses them." />
             <FaqItem
               q="What if I want more than one attorney on the account?"
               a="Multi-attorney support is on our roadmap — reach out and we'll let you know when it's ready for your firm."

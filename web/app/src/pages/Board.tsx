@@ -190,7 +190,7 @@ export default function Board() {
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
         <header className="px-6 md:px-8 py-4 border-b border-line">
-          <h1 className="text-xl font-semibold">People</h1>
+          <h1 className="text-xl font-semibold">Find people</h1>
           <p className="text-sm text-mute mt-0.5">
             Every touch from search and sale lands here. Tomorrow stays the booked hours.
           </p>
@@ -296,7 +296,7 @@ export default function Board() {
                   {detail.touches.map((touch) => (
                     <li key={touch.touch_id} className="border-l-2 border-line pl-3">
                       <div className="text-xs uppercase tracking-wide text-clay">
-                        Cycle {touch.cycle} · {touch.kind.replace(/_/g, " ")}
+                        {touch.cycle === 1 ? "Find" : "Sell"} · {touch.kind.replace(/_/g, " ")}
                       </div>
                       <div className="text-sm mt-0.5">{touch.summary}</div>
                     </li>

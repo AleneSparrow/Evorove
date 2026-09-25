@@ -1172,7 +1172,7 @@ export default function Settings() {
               {tab === "materials" && token && businessId && (
                 <div>
                   <p className="text-sm text-mute mb-6">
-                    Same packet as CRM → Advertising materials. Drafts stay off the engine until you press Refresh.
+                    Same materials as CRM. Drafts stay off the engine until you press Refresh.
                   </p>
                   <MaterialsPanel token={token} businessId={businessId} />
                 </div>

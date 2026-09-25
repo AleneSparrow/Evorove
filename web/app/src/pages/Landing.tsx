@@ -65,8 +65,8 @@ export default function Landing() {
             </div>
           ) : null}
           <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">
-            Subscribe. Tell Evorove the business. It studies the packet, finds people in the open web,
-            drops them on Cold, then sells until the deal is done — a booked hour, or money in your account.
+            Subscribe. Tell Evorove the business. It studies your setup, finds people in the open web,
+            puts them on Cold, then sells until the deal is done — a booked hour, or money in your account.
             You watch the board. You do not hop in to close.
           </p>
           <div className="flex flex-wrap items-center gap-3 mb-12">
@@ -78,7 +78,7 @@ export default function Landing() {
               Start free trial <ArrowRight size={15} />
             </button>
             <a href="#how" className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full" style={{ background: "#0B0B0D", color: "#F7F1E4" }}>
-              See the cycle
+              See how it works
             </a>
           </div>
           <div className="flex gap-10">
@@ -100,19 +100,19 @@ export default function Landing() {
 
       <section id="how" className="max-w-6xl mx-auto px-6 pb-6">
         <div className="grid md:grid-cols-3 gap-2.5">
-          <Block n="01" title="FIND" tone="ink" body="After your packet: product, audience, channels. Then public data where that audience lives. Fit the portrait — then Cold. Not your website form." />
-          <Block n="02" title="SELL" tone="coral" body="Cycle 2 writes first. A model trained on sales books works objections, names value, sends your offer when they are ready. You do not prompt it. You do not hop on to close." />
+          <Block n="01" title="FIND" tone="ink" body="After you describe the business: what you sell, who it's for, how you reach them. Then it finds your audience in public places. Fit the profile — then Cold. Not your website form." />
+          <Block n="02" title="SELL" tone="coral" body="It writes first. A model trained on sales books works objections, names value, sends your offer when they are ready. You do not prompt it. You do not hop on to close." />
           <Block n="03" title="DONE" tone="lime" body="Offline: a real hour for the service you sell. Online: they buy, money hits your account. CRM moves them to Done." />
         </div>
       </section>
 
       <section id="features" className="max-w-6xl mx-auto px-6 py-20 md:py-28">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-coral mb-3">How the three cycles fit</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-coral mb-3">How it fits together</p>
         <h2 className="ev-display text-6xl md:text-7xl mb-10">Subscribe.<br />Then the board fills itself.</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {[
-            ["You connect once", "Pay the subscription. Fill in the business, multimedia, and the commercial offer if you have one. That packet is the brief — not a list of leads."],
-            ["Then it thinks, then it hunts", "Hypotheses, marketing analysis, public data, a second pass against the portrait. Only then does a person land in Cold."],
+            ["You connect once", "Pay the subscription. Fill in the business, multimedia, and the commercial offer if you have one. That's the setup — not a list of leads."],
+            ["Then it thinks, then it hunts", "It studies your offer, looks at public data, and checks each person twice against what you described. Only then does a person land in Cold."],
             ["Then it sells", "Each Cold lead gets a live conversation. Objections, techniques, your offer at the right moment. The engine talks until Done."],
             ["The board moves as it happens", "Cold, In progress, Offer made, Done — each step shows up when it happens. Open a person and the dialogue is there. Do not jump in to close a normal sale."],
           ].map(([title, body]) => (

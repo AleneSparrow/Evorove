@@ -10,7 +10,7 @@ export function MarketingHeader({
   homeTo = "/",
   ctaLabel,
   links = [
-    { href: "/#how", label: "Cycle" },
+    { href: "/#how", label: "How it works" },
     { href: "/#features", label: "How it sells" },
     { href: "/faq", label: "FAQ" },
   ],

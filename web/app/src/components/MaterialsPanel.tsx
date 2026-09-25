@@ -70,7 +70,7 @@ export function MaterialsPanel({ token, businessId }: { token: string; businessI
         </p>
         {packet?.guidance && (
           <p className="text-xs text-mute mt-3" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-            Live packet · revision {packet.guidance.revision} · {new Date(packet.guidance.activated_at).toLocaleString("en-US")}
+            Live materials · revision {packet.guidance.revision} · {new Date(packet.guidance.activated_at).toLocaleString("en-US")}
           </p>
         )}
         {packet?.pending && (
@@ -79,7 +79,7 @@ export function MaterialsPanel({ token, businessId }: { token: string; businessI
         <button
           type="button"
           disabled={busy || !packet}
-          onClick={() => void run(() => api.activateMarketingPacket(token, businessId), "Live. The next presentation picks one fact from this packet.")}
+          onClick={() => void run(() => api.activateMarketingPacket(token, businessId), "Live. The next presentation picks one fact from these materials.")}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white disabled:opacity-50"
           style={{ backgroundColor: "#0B0B0D" }}
         >
@@ -113,7 +113,7 @@ export function MaterialsPanel({ token, businessId }: { token: string; businessI
           <textarea className={`${inputCls} min-h-[120px] resize-y`} value={body} required maxLength={20000} onChange={(event) => setBody(event.target.value)} />
         </Field>
         <button disabled={busy} className="px-4 py-2 rounded-lg text-sm text-white disabled:opacity-50" style={{ backgroundColor: "#0B0B0D" }}>
-          Add to packet
+          Add to materials
         </button>
       </form>
 
@@ -135,7 +135,7 @@ export function MaterialsPanel({ token, businessId }: { token: string; businessI
       </div>
 
       <div className="rounded-2xl border border-line bg-white overflow-hidden">
-        <div className="px-5 py-3 border-b border-line text-sm font-semibold">In this packet ({packet?.assets.length ?? 0})</div>
+        <div className="px-5 py-3 border-b border-line text-sm font-semibold">In these materials ({packet?.assets.length ?? 0})</div>
         {!packet ? (
           <div className="px-5 py-8 text-sm text-mute flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Loading…</div>
         ) : packet.assets.length === 0 ? (

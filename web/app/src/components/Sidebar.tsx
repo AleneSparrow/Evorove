@@ -212,7 +212,7 @@ function MobileNav({
               <nav className="flex flex-col gap-1">
                 <NavItem icon={LayoutGrid} label="CRM" to="/app" end onClick={() => setOpen(false)} />
                 <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" onClick={() => setOpen(false)} />
-                <NavItem icon={Users} label="People" to="/app/people" onClick={() => setOpen(false)} />
+                <NavItem icon={Users} label="Find people" to="/app/people" onClick={() => setOpen(false)} />
                 <NavItem icon={Workflow} label="Settings" to="/app/settings" onClick={() => setOpen(false)} />
                 <NavItem icon={CreditCard} label="Billing" to="/app/billing" onClick={() => setOpen(false)} />
                 <NavItem icon={Plus} label="Add another business" to="/onboarding" onClick={() => setOpen(false)} />
@@ -323,7 +323,7 @@ export function Sidebar() {
           <nav className="flex flex-col gap-1">
             <NavItem icon={LayoutGrid} label="CRM" to="/app" end />
             <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" />
-            <NavItem icon={Users} label="People" to="/app/people" />
+            <NavItem icon={Users} label="Find people" to="/app/people" />
             <NavItem icon={Workflow} label="Settings" to="/app/settings" />
             <NavItem icon={CreditCard} label="Billing" to="/app/billing" />
             <NavItem icon={Plus} label="Add another business" to="/onboarding" />
