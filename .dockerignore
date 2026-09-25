@@ -9,3 +9,7 @@ __pycache__
 .DS_Store
 .idea
 .vscode
+# The SPA is rebuilt inside the Dockerfile (stage 1); local artifacts would
+# only bloat the context and shadow the fresh build.
+web/app/node_modules
+web/app/dist

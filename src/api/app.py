@@ -5,7 +5,8 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -231,7 +232,36 @@ def create_app(
         StaticFiles(directory=Path(__file__).parents[2] / "web" / "widget", html=True),
         name="widget",
     )
+    _mount_spa(application)
     return application
+
+
+def _mount_spa(application: FastAPI) -> None:
+    """Serve the built SPA from the same origin as the API (one site, one domain).
+
+    Only when the frontend has actually been built (web/app/dist exists) --
+    tests and local dev run without a build, so this stays a no-op there.
+    Registered after every API router and the /widget mount, so those win;
+    the catch-all serves index.html for client-side routes (React Router) and
+    404s anything under /api or /widget that no real route claimed.
+    """
+    dist_dir = Path(__file__).parents[2] / "web" / "app" / "dist"
+    if not (dist_dir / "index.html").is_file():
+        return
+    application.mount(
+        "/assets",
+        StaticFiles(directory=dist_dir / "assets"),
+        name="spa-assets",
+    )
+
+    @application.get("/{full_path:path}", include_in_schema=False)
+    def _spa_fallback(full_path: str) -> FileResponse:
+        if full_path.startswith(("api/", "widget/")):
+            raise HTTPException(status_code=404, detail="Not found")
+        candidate = dist_dir / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(dist_dir / "index.html")
 
 
 app = create_app()

@@ -1,3 +1,15 @@
+# Stage 1 — build the SPA (web/app) so the backend can serve it directly.
+# One site, one origin: the browser talks to this backend for /api and for
+# every page; no separate frontend host, no proxy, no Cloudflare Worker.
+FROM node:20-slim AS frontend
+WORKDIR /frontend
+COPY web/app/package.json web/app/package-lock.json ./
+RUN npm ci
+COPY web/app/ ./
+# Same-origin API: relative paths, the browser hits this very backend.
+ENV VITE_API_BASE=""
+RUN npm run build
+
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -22,6 +34,7 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin appuser
 
 COPY --chown=appuser:appuser . .
+COPY --from=frontend --chown=appuser:appuser /frontend/dist /app/web/app/dist
 
 USER appuser
 
