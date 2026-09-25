@@ -8,7 +8,13 @@ from types import SimpleNamespace
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.dependencies import get_container, get_intake_service, get_sms_service, get_sms_thread_service
+from src.api.dependencies import (
+    get_container,
+    get_intake_service,
+    get_sms_service,
+    get_sms_thread_service,
+    get_whatsapp_mouth,
+)
 from src.api.routes.sms import INBOUND_SMS_WEBHOOK_PATH, public_router
 from src.config import Settings
 
@@ -123,10 +129,27 @@ def _client(sms, intake, threads=None):
         twilio_auth_token=auth_token,
         public_api_base_url=public_base,
     )
-    application.dependency_overrides[get_container] = lambda: SimpleNamespace(settings=settings)
+
+    class _EmptyUow:
+        def __enter__(self):
+            self.conversations = SimpleNamespace(
+                find_open_by_channel_session=lambda *args, **kwargs: None,
+            )
+            return self
+
+        def __exit__(self, *exc: object) -> bool:
+            return False
+
+    application.dependency_overrides[get_container] = lambda: SimpleNamespace(
+        settings=settings,
+        unit_of_work_factory=lambda: _EmptyUow(),
+    )
     application.dependency_overrides[get_sms_service] = lambda: sms
     application.dependency_overrides[get_intake_service] = lambda: intake
     application.dependency_overrides[get_sms_thread_service] = lambda: threads
+    application.dependency_overrides[get_whatsapp_mouth] = lambda: SimpleNamespace(
+        send_outbound=lambda *args, **kwargs: None,
+    )
     return TestClient(application), auth_token, public_base, threads
 
 
@@ -207,3 +230,23 @@ def test_paused_thread_does_not_run_intake() -> None:
     assert intake.received_ids == []
     assert sms.outbound_calls == []
     assert threads.appended == [("+15551234567", "still waiting", "SM_paused")]
+
+
+def test_unknown_whatsapp_inbound_does_not_invent_a_sale() -> None:
+    sms = _FakeSmsService()
+    intake = _FakeIntakeService()
+    client, auth_token, public_base, _threads = _client(sms, intake)
+    form = {
+        "From": "whatsapp:+15551234567",
+        "To": "whatsapp:+15005550006",
+        "Body": "hello",
+        "MessageSid": "SM_wa_unknown",
+    }
+    signature = _signature(auth_token, f"{public_base}{INBOUND_SMS_WEBHOOK_PATH}", form)
+    with client:
+        response = client.post(
+            INBOUND_SMS_WEBHOOK_PATH, data=form, headers={"X-Twilio-Signature": signature},
+        )
+    assert response.status_code == 200
+    assert intake.received_ids == []
+    assert sms.outbound_calls == []

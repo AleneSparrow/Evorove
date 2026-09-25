@@ -1,0 +1,562 @@
+{
+  "updated_at": "2026-09-12T07:06:46+00:00",
+  "note": "No book text. Hashes, page counts, marker page hits only.",
+  "deposits": [
+    {
+      "filename": "Adam Lashinsky — Inside Apple How America's Most Admired--and Secretive--Company.epub",
+      "sha256": "ec717656913b4e349ba950400b85af6673741e750f67b237d4cc31f3306d4b40",
+      "page_count": 24,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Aliza Sherman, Danielle Elliott Smith — Social Media Engagement For Dummies®.epub",
+      "sha256": "c82416c8c0e76c6f0311f27b2c3f2d3cef854cbf291caf54fcaff280c3e45995",
+      "page_count": 29,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Barbara Joanne Winter — Making a Living Without a Job Winning Ways for Creating .fb2",
+      "sha256": "29f92fd5d76c9c83bdc013ebabd09570a975ab77f2c718a73e45a567bd3889e6",
+      "page_count": 290,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Colin Gautrey — 21 Dirty Tricks at Work How to Beat the Game of Office Politics.epub",
+      "sha256": "dd0ac4ddbac7e478a430b3b5cc6c75a2cd0bb2be37c1e7aaf7a289e0eb87419d",
+      "page_count": 17,
+      "catalog_id": "gautrey-dirty-tricks",
+      "lane": "archive",
+      "marker_pages": {
+        "trick": 1,
+        "office": 5
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Ellen E. Schultz — Retirement Heist how companies plunder and profit from the ne.fb2",
+      "sha256": "ee0b1ae2392969735ebb07da9852782c4f5c33ebb4907480b52804e19ac571dd",
+      "page_count": 257,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Harvard Business Review (HBR) — Продажи.epub",
+      "sha256": "13d5d9dfbeff3306c2cab39f42067b1cf6d568fa7c1e07c76679f4667088101d",
+      "page_count": 21,
+      "catalog_id": "hbr-sales",
+      "lane": "core",
+      "marker_pages": {
+        "продаж": 2,
+        "клиент": 4
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Jan Zimmerman, Deborah Ng — Social Media Marketing All-in-One For Dummies®.epub",
+      "sha256": "ae40007c226a599124679a25861b7d0824d7e8c7bd023cb2d95521157990c951",
+      "page_count": 58,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Javier Blas, Jack Farchy — Мир на продажу. Деньги, власть и торговцы, которые об.fb2",
+      "sha256": "9f1e2a0aa1a2da33e6b693de642ac9eb5f7f835e4900e1886f8a7a65de1f2996",
+      "page_count": 377,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Mitsuyuki Masatsugu — The Modern Samurai Society Duty and Dependence in Contempo.fb2",
+      "sha256": "60dfafbb8207bc3fe097836cf448a4000a217220e2ae4b4cabf1f9747886ad03",
+      "page_count": 233,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Richard Nelson Bolles — What Color Is Your Parachute.fb2",
+      "sha256": "40fc026176301912d72e457495105c98aa8deca91f296f0dead97715c3ffd910",
+      "page_count": 346,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Smart Reading — Ключевые идеи книги Оффер на $100 миллионов. Как делать предложе.epub",
+      "sha256": "ba16fd23182936d2de5e55f76f2f8e32a3bd34b68ba807684e4499923988a5ab",
+      "page_count": 4,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Smart Reading — Убеждай и продавай. 11 лучших книг для успешных продаж в одной.epub",
+      "sha256": "0b29a55ac3bef98af402fa3febebc9868815d1805f6f40954fa8e49f5bb6a7b7",
+      "page_count": 46,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Tony Hsieh — Exceptional Customer service.epub",
+      "sha256": "e4ea91b3aaaa1e3c717e7a5135bd6adf89fa66fa41e2de997b7b040124ac436b",
+      "page_count": 33,
+      "catalog_id": "hsieh-service",
+      "lane": "core",
+      "marker_pages": {
+        "service": 1,
+        "customer": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Адам_Грант_Брать_или_отдавать_Новый_взгляд_на_психологию_отнош.fb2",
+      "sha256": "9a5dee26fc81613b422fcf3fcf8ccf2ea7fc641955334e9ea5eaeac8b3064413",
+      "page_count": 388,
+      "catalog_id": "give-and-take",
+      "lane": "archive",
+      "marker_pages": {
+        "отдавать": 1,
+        "брать": 1,
+        "giver": 362
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Александр Дьяк — Техника продаж для новичков. Основы телефонных переговоров.fb2",
+      "sha256": "f3132c8a2a714c6b1874c859c05c99ce6e59e1a5eaa69cf69d16a0a30e0d7291",
+      "page_count": 2,
+      "catalog_id": "dyak-phone-sales",
+      "lane": "archive",
+      "marker_pages": {
+        "телефон": 1,
+        "новичк": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Александр Михайлович Банкин — Контент-маркетинг для роста продаж.fb2",
+      "sha256": "75e8db1f63cf0e1fe504ee48e8de47baaf3aa0144e961ac972b103e9a336f764",
+      "page_count": 216,
+      "catalog_id": "bankin-content",
+      "lane": "archive",
+      "marker_pages": {
+        "контент": 1,
+        "воронк": 7
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Анатолий Николаевич Верчинский — Продажи и переговоры смотрите, как надо продава.epub",
+      "sha256": "78a6dd103d7549fd84dfbb88668082738a00214a3a09653945fc7a4b2239bb87",
+      "page_count": 53,
+      "catalog_id": "verchinsky-sales",
+      "lane": "archive",
+      "marker_pages": {
+        "переговор": 1,
+        "продаж": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Арндт Трайндл — Мастерство ритейл-брендинга.fb2",
+      "sha256": "9317063b54e338cada44f8a78bcc53b74e7578586b49b56242c68cb29e36647f",
+      "page_count": 113,
+      "catalog_id": "traindl-retail-brand",
+      "lane": "archive",
+      "marker_pages": {
+        "бренд": 1,
+        "ритейл": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Брайан_Трейси_Оставьте_брезгливость,_съешьте_лягушку!.fb2",
+      "sha256": "4147a180f19b680bc579a0ed884509ad9db105afc56075682429db8e2bc37655",
+      "page_count": 83,
+      "catalog_id": "eat-that-frog",
+      "lane": "archive",
+      "marker_pages": {
+        "лягушк": 1,
+        "приоритет": 12,
+        "самое важное": 28
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Даниэль Канеман   Thinking, Fast and Slow.epub",
+      "sha256": "7ab87a6441aa3b5b924cff64db32f51396d4fc4f904398f8b983e0c38163566a",
+      "page_count": 71,
+      "catalog_id": "thinking-fast-slow",
+      "lane": "archive",
+      "marker_pages": {
+        "system 1": 4
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Джеб_Блаунт_Фанатичные_продажи_Принципы_экстремально_быстрого.epub",
+      "sha256": "7877b0b7501fa753722d29f6f20282162817da283582901f18842ed22f57261f",
+      "page_count": 62,
+      "catalog_id": "fanatical-prospecting",
+      "lane": "core",
+      "marker_pages": {
+        "prospecting": 1,
+        "фанатичн": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Джеффри А. Мур — Преодоление пропасти. Маркетинг и продажа хайтек-товаров массов.fb2",
+      "sha256": "9b5dd3e11793383ba4df0c999a81f213b45367cb5b0be9abd6fbfc23bdc2c340",
+      "page_count": 274,
+      "catalog_id": "crossing-the-chasm",
+      "lane": "archive",
+      "marker_pages": {
+        "пропаст": 1,
+        "chasm": 3,
+        "ранние последователи": 9
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Джил Конрат   Гибкие продажи.fb2",
+      "sha256": "33ef42940b3101776f7479aefce219a2d6e424477a62be6c4a95eff42fd86e7f",
+      "page_count": 160,
+      "catalog_id": "agile-selling",
+      "lane": "core",
+      "marker_pages": {
+        "agile": 1,
+        "гибкие продажи": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Джил_Конрат_Продажи_большим_компаниям.fb2",
+      "sha256": "5560eb6029d8df13050f34bdd3aa568cf48d043cd730eba7d95c940d26c06da1",
+      "page_count": 50,
+      "catalog_id": "selling-to-big-companies",
+      "lane": "core",
+      "marker_pages": {
+        "большим компаниям": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Джо_Наварро,_Марвин_Карлинс_Я_вижу,_о_чём_вы_думаете.fb2",
+      "sha256": "46a3a330353f390ea6423695bfa03b488e9c2ec3f0217c500a3bcc974405338f",
+      "page_count": 245,
+      "catalog_id": "what-every-body-is-saying",
+      "lane": "archive",
+      "marker_pages": {
+        "жест": 2,
+        "базов": 22,
+        "кластер": 23
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дмитрий Потапов — Маркетинг продаж.fb2",
+      "sha256": "3327ac4859a0c697bd64621f69f05c1d2e58b31fa1d784161c2135fdd27a9b23",
+      "page_count": 29,
+      "catalog_id": "potapov-sales-marketing",
+      "lane": "archive",
+      "marker_pages": {
+        "маркетинг": 1,
+        "продаж": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дональд_Миллер,_Джей_Джей_Питерсон_Воронки_продаж_по_методу_St.epub",
+      "sha256": "3a84ee7e3b9a32d12b74563fb2335fa4e1b8a88fffb90f9819203d5d1e419582",
+      "page_count": 21,
+      "catalog_id": "storybrand-funnel",
+      "lane": "core",
+      "marker_pages": {
+        "воронк": 1,
+        "storybrand": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дональд_Миллер_Метод_StoryBrand_2_0_Расскажите_о_своем_бренде.fb2",
+      "sha256": "84b5239ebe49981f7109c2837c39a0503f056b9a63179abb76fdf52e22f67a34",
+      "page_count": 197,
+      "catalog_id": "storybrand-2",
+      "lane": "core",
+      "marker_pages": {
+        "storybrand": 1,
+        "герой": 11,
+        "проводник": 21
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дональд_Миллер_Метод_StoryBrand_Расскажите_о_своем_бренде_так,.epub",
+      "sha256": "7d93b7220e6b3c3d0278c3ae95bd3cd0a7eda273a25bb651e34c824267814928",
+      "page_count": 23,
+      "catalog_id": "storybrand",
+      "lane": "core",
+      "marker_pages": {
+        "storybrand": 2,
+        "герой": 5,
+        "проводник": 8
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дэвид Мэттсон   49 законов продаж.fb2",
+      "sha256": "022de4d49fe4ae546a0b4f098301c2a256ed1e6d4c823c078ef72a733e51e9f5",
+      "page_count": 132,
+      "catalog_id": "sandler-rules",
+      "lane": "core",
+      "marker_pages": {
+        "закон": 1,
+        "sandler": 33
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Дэн_Ариели_Предсказуемая_иррациональность_Скрытые_силы,_опред.fb2",
+      "sha256": "1cad6c7ece97b5ddf0fcfb8f86056984d1f2a91b7924e4d88e2dd3ae899a4664",
+      "page_count": 269,
+      "catalog_id": "predictably-irrational",
+      "lane": "archive",
+      "marker_pages": {
+        "иррационал": 1,
+        "бесплатн": 14,
+        "якорь": 38
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Йанив Заид — Библия продаж XXI века. Секреты маркетинга, переговоров и убеждения.fb2",
+      "sha256": "cb0bb91f7c617d77de9954d3ab45168c5f17523ce333b03fab73005616c16742",
+      "page_count": 318,
+      "catalog_id": "zaid-sales-bible",
+      "lane": "core",
+      "marker_pages": {
+        "убежден": 1,
+        "переговор": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Йенс Нордфальт — Ритейл-маркетинг.fb2",
+      "sha256": "7dddf8699bbf8f7865e34190a5e320aa7a5c237efd1ca192934004fe1d3b1eb8",
+      "page_count": 606,
+      "catalog_id": "nordfalt-retail",
+      "lane": "archive",
+      "marker_pages": {
+        "ритейл": 1,
+        "полк": 4
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Кейт_Феррацци_Никогда_не_ешьте_в_одиночку_и_другие_правила_нет.fb2",
+      "sha256": "1fefdff892d4267454590ad8ecd5feedb0529708892dec7c45387440a6dfb5cd",
+      "page_count": 372,
+      "catalog_id": "never-eat-alone",
+      "lane": "archive",
+      "marker_pages": {
+        "сеть": 1,
+        "завтрак": 3,
+        "щедрость": 5
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Крис_Восс_Никаких_компромиссов_Веди_переговоры_так,_словно_от.fb2",
+      "sha256": "eb34e5678759097c16145ff4d4c947d86173e88d30087c62a5017c4867ed9b7f",
+      "page_count": 276,
+      "catalog_id": "never-split-the-difference",
+      "lane": "core",
+      "marker_pages": {
+        "никаких компромиссов": 1,
+        "labeling": 275
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Мартин_Э_П_Селигман_Как_научиться_оптимизму_Измените_взгляд.fb2",
+      "sha256": "95f5475314c29665097974e18971a41b75a7ebd7bf998b25889afc3cdcce0cdd",
+      "page_count": 379,
+      "catalog_id": "learned-optimism",
+      "lane": "archive",
+      "marker_pages": {
+        "оптимизм": 1,
+        "выученн": 2,
+        "беспомощн": 2
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Мэттью_Диксон,_Брент_Адамсон_Чемпионы_продаж.epub",
+      "sha256": "5b19b1a4306fb0362ff429c2c5791192c4f35b803ebd67b55bf179f1bfb40061",
+      "page_count": 97,
+      "catalog_id": "challenger-sale",
+      "lane": "core",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Николай Юрьевич Рысев — Активные продажи 3.4 Стратегии переговоров.fb2",
+      "sha256": "4eb26e8b4e778a62e226ec66ad32e19c36a792aa3b1cc7d92b07be6ae98ca5e5",
+      "page_count": 84,
+      "catalog_id": "rysev-active-sales",
+      "lane": "core",
+      "marker_pages": {
+        "активн": 1,
+        "переговор": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Нил Рекхэм   СПИН-продажи.fb2",
+      "sha256": "fb94653df3a16e84e4c909d081e02c404be609af5f53e56b1d88ea308a4232d9",
+      "page_count": 152,
+      "catalog_id": "spin-selling",
+      "lane": "core",
+      "marker_pages": {
+        "situation question": 13,
+        "ситуационн": 13,
+        "implication question": 16,
+        "извлекающ": 16,
+        "need-payoff": 19,
+        "направляющ": 19
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Ричард_Талер,_Касс_Р_Санстейн_Nudge_Архитектура_выбора.fb2",
+      "sha256": "69083a782c02439020dae3e8aa051c19326ba8adff5b744c995c55b20d05bd95",
+      "page_count": 269,
+      "catalog_id": "nudge",
+      "lane": "archive",
+      "marker_pages": {
+        "архитектур": 1,
+        "выбор": 1,
+        "подталкиван": 7
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Роберт_Бено_Чалдини_Influence_The_Psychology_of_Persuasion.fb2",
+      "sha256": "9af456843bfbb8e4d3755ee008b3ff20271badca223a895f756c583e127338ab",
+      "page_count": 350,
+      "catalog_id": "influence",
+      "lane": "core",
+      "marker_pages": {
+        "social proof": 3,
+        "scarcity": 3,
+        "reciprocity": 23
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Роберт_Бено_Чалдини_Психология_согласия_Революционная_методик.fb2",
+      "sha256": "6483c21e045a42102b7b7022b2ac2a64c372b7b9901b913c8c1471c72d089633",
+      "page_count": 347,
+      "catalog_id": "influence",
+      "lane": "core",
+      "marker_pages": {
+        "социальное доказательство": 15,
+        "дефицит": 15,
+        "взаимность": 167,
+        "reciprocity": 317
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Роджер_Фишер,_Уильям_Юри,_Брюс_Паттон_Переговоры_без_поражения.fb2",
+      "sha256": "1fd2944983cc102bce86aaf33c381f0c2c824a7bc4f528ffc998494f1f884fa4",
+      "page_count": 206,
+      "catalog_id": "getting-to-yes",
+      "lane": "core",
+      "marker_pages": {
+        "интересы": 2,
+        "позиции": 5
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Сергей Аширович Азимов — Продажи, переговоры. Практика, примеры.epub",
+      "sha256": "660f84cdaa7ba7dfb10aae1713935376e5e2ae5574e93b92a30ec3f0a2d0d564",
+      "page_count": 1,
+      "catalog_id": "azimov-sales-practice",
+      "lane": "archive",
+      "marker_pages": {
+        "переговор": 1,
+        "практик": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Тамара Сергеевна Жданова — Ленивый маркетинг. Принципы пассивных продаж.fb2",
+      "sha256": "2690bbd3132d8c90a2b9c14d9e790938e3d084f590020f5f0f3d836682e74f78",
+      "page_count": 135,
+      "catalog_id": "zhdanova-lazy-marketing",
+      "lane": "archive",
+      "marker_pages": {
+        "пассивн": 1,
+        "ленив": 1
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Эван Хантер — Сбытчик.fb2",
+      "sha256": "fc6518bf31e5af6185c9786072f8af6ffe4801886e4c5dbd8d83e713fc4ef92a",
+      "page_count": 560,
+      "catalog_id": null,
+      "lane": "archive",
+      "marker_pages": {},
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Эми_Кадди_Присутствие_духа_Как_направить_силы_своей_личност.fb2",
+      "sha256": "6a73e1ed3c2d043c358745d5fd890e0cac12dcd957abf85e292e084f265d79e8",
+      "page_count": 355,
+      "catalog_id": "presence",
+      "lane": "archive",
+      "marker_pages": {
+        "присутствие": 1,
+        "уверенность": 2,
+        "поза": 38
+      },
+      "licence": "my-copy"
+    },
+    {
+      "filename": "Ян Броди — Продающие рассылки. Повышаем продажи, используя email-маркетинг.fb2",
+      "sha256": "ae2e98ccd8e35009d1eb3482ae2536a9e0a7a7fd466c8092e18c96a481ee5d1f",
+      "page_count": 115,
+      "catalog_id": "brody-email",
+      "lane": "core",
+      "marker_pages": {
+        "рассылк": 1,
+        "email": 1
+      },
+      "licence": "my-copy"
+    }
+  ]
+}

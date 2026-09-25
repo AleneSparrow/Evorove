@@ -11,7 +11,7 @@
  *   GET  /api/v1/businesses/{id}/cases/{case_id}                (Milestone 8 slice 2)
  *   GET  /api/v1/businesses/{id}/conversations                  (Milestone 8 slice 2)
  *   GET  /api/v1/businesses/{id}/conversations/{conversation_id} (Milestone 8 slice 2)
- *   POST /api/v1/businesses/{id}/conversations/{conversation_id}/reply   (staff reply)
+ *   POST /api/v1/businesses/{id}/conversations/{conversation_id}/reply   (risk/policy only; not a sale close)
  *   POST /api/v1/businesses/{id}/conversations/{conversation_id}/resolve (staff resolve)
  *   GET  /api/v1/businesses/{id}/dna                            (live Business DNA settings)
  *   PUT  /api/v1/businesses/{id}/dna                            (live Business DNA settings)
@@ -89,6 +89,28 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
     throw new ApiError(response.status, errorPayload);
   }
 
+  return body as T;
+}
+
+async function requestMultipart<T>(path: string, form: FormData, token: string): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+  } catch {
+    throw new ApiError(0, { code: "network_error", message: "Couldn't reach the server. Check your connection and try again." });
+  }
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const errorPayload: ApiErrorPayload = body?.error ?? {
+      code: "unknown_error",
+      message: "Something went wrong. Please try again.",
+    };
+    throw new ApiError(response.status, errorPayload);
+  }
   return body as T;
 }
 
@@ -204,6 +226,8 @@ export interface DashboardLead {
   name: string | null;
   email: string | null;
   phone: string | null;
+  gender: string | null;
+  region: string | null;
 }
 
 export interface DashboardCaseSummary {
@@ -228,6 +252,8 @@ export interface DashboardAnalytics {
   booked_cases: number;
   escalated_cases: number;
   lost_cases: number;
+  human_review_cases: number;
+  conversion_eligible_cases: number;
   booking_conversion_rate: number;
   escalation_rate: number;
   lost_rate: number;
@@ -255,6 +281,27 @@ export interface ReportingSettingsUpdate {
   test_mode_enabled?: boolean;
   reset_statistics?: boolean;
   clear_statistics_baseline?: boolean;
+}
+
+export interface MarketingAsset {
+  asset_id: string;
+  kind: "notes" | "offer" | "media";
+  title: string;
+  body_preview: string;
+  filename: string | null;
+  created_at: string;
+}
+
+export interface MarketingGuidance {
+  revision: number;
+  activated_at: string;
+  snapshot_preview: string;
+}
+
+export interface MarketingPacket {
+  assets: MarketingAsset[];
+  guidance: MarketingGuidance | null;
+  pending: boolean;
 }
 
 export interface ReportingScope {
@@ -735,6 +782,27 @@ export const api = {
     request<ReportingSettings>(`/api/v1/businesses/${businessId}/analytics/settings`, {
       method: "PATCH",
       body: JSON.stringify(update),
+    }, token),
+
+  getMarketingPacket: (token: string, businessId: string) =>
+    request<MarketingPacket>(`/api/v1/businesses/${businessId}/marketing-materials`, { method: "GET" }, token),
+
+  addMarketingText: (token: string, businessId: string, payload: { kind: "notes" | "offer"; title: string; body_text: string }) =>
+    request<MarketingPacket>(`/api/v1/businesses/${businessId}/marketing-materials`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }, token),
+
+  addMarketingFile: (token: string, businessId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return requestMultipart<MarketingPacket>(`/api/v1/businesses/${businessId}/marketing-materials/files`, form, token);
+  },
+
+  activateMarketingPacket: (token: string, businessId: string) =>
+    request<MarketingPacket>(`/api/v1/businesses/${businessId}/marketing-materials/activate`, {
+      method: "POST",
+      body: JSON.stringify({}),
     }, token),
 
   getCase: (token: string, businessId: string, caseId: string) =>

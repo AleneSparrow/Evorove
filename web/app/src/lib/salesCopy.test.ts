@@ -41,7 +41,7 @@ import {
 test("sales stage labels stay distinct from process-state wording", () => {
   assert.equal(salesStageLabel("DISCOVERY"), "Discovery");
   assert.equal(salesStageLabel("WON"), "Won (sales conversation)");
-  assert.equal(salesStageLabel("HUMAN_REVIEW"), "Needs you");
+  assert.equal(salesStageLabel("HUMAN_REVIEW"), "Safety stop");
   assert.notEqual(salesStageLabel("WON"), "Won");
 });
 

@@ -19,8 +19,8 @@ export default function AppFaq() {
         <div className="max-w-3xl mx-auto px-5 sm:px-8 py-10 md:py-12">
           <div className="mb-9">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-coral">FAQ</p>
-            <h1 className="text-3xl font-semibold tracking-tight mt-2">What people ask before they start</h1>
-            <p className="text-sm text-mute mt-2">Straight answers about what Evorove does and does not do.</p>
+            <h1 className="text-3xl font-semibold tracking-tight mt-2">Questions people actually ask</h1>
+            <p className="text-sm text-mute mt-2">Subscribe, Cold, the sale, Done — and what you do (watch) versus what the engine does (talk).</p>
           </div>
           <section className="max-w-2xl border border-line bg-white rounded-xl p-5 sm:p-6">
             <FaqList />

@@ -24,6 +24,11 @@ describe("legal documents", () => {
     assert.match(privacy, /do not use your conversations to train a foundation model/i);
     assert.match(dpa, /will not use Customer Content to train, fine-tune, or develop a foundation model/i);
     assert.match(terms, /do not promise you a conversion rate/i);
+    assert.match(terms, /does not collect payment from your end customer/i);
+    assert.match(terms, /Finding new people is a planned contour and is not included in the Service as shipped/i);
+    assert.match(terms, /They are not lead generation/i);
+    assert.doesNotMatch(terms, /The Service does not generate new leads/);
+    assert.doesNotMatch(terms, /inquiry-to-deal/i);
     assert.doesNotMatch(all, /\b96%/);
     assert.doesNotMatch(all, /chatbot/i);
     assert.doesNotMatch(all, /cold lead/i);

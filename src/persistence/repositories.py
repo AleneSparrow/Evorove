@@ -14,6 +14,7 @@ from src.domain.sales import (
     CustomerSalesProfile, SalesKnowledgeCard, SalesKnowledgeStatus, SalesObjectionRecord,
     SalesPlaybookVersion, SalesShadowEvaluation, SalesShadowJob, SalesShadowResult, SalesTurn,
 )
+from src.domain.marketing_materials import MarketingAsset, MarketingGuidance
 from src.domain.tenancy import Business, BusinessDNAVersion
 
 
@@ -99,6 +100,14 @@ class BusinessDNARepository(Protocol):
     def add_version(self, business_id: str, configuration: Mapping[str, Any]) -> BusinessDNAVersion: ...
     def get_active(self, business_id: str) -> BusinessDNAVersion | None: ...
     def list_versions(self, business_id: str) -> tuple[BusinessDNAVersion, ...]: ...
+
+
+class MarketingMaterialsRepository(Protocol):
+    def add_asset(self, asset: MarketingAsset) -> None: ...
+    def list_assets(self, business_id: str) -> tuple[MarketingAsset, ...]: ...
+    def count_assets(self, business_id: str) -> int: ...
+    def get_guidance(self, business_id: str) -> MarketingGuidance | None: ...
+    def save_guidance(self, guidance: MarketingGuidance) -> None: ...
 
 
 class LeadRepository(Protocol):
@@ -261,6 +270,13 @@ class ConversationRepository(Protocol):
     def get_by_channel_session(
         self,
         business_id: str,
+        channel: str,
+        external_session_id: str,
+        *,
+        for_update: bool = False,
+    ) -> Conversation | None: ...
+    def find_open_by_channel_session(
+        self,
         channel: str,
         external_session_id: str,
         *,
@@ -508,6 +524,7 @@ class UnitOfWork(Protocol):
     sales_knowledge: SalesKnowledgeRepository
     sales_playbooks: SalesPlaybookRepository
     sales_objections: SalesObjectionRepository
+    marketing_materials: MarketingMaterialsRepository
 
     def __enter__(self) -> "UnitOfWork": ...
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None: ...

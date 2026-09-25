@@ -79,6 +79,13 @@ class SalesPolicyEngine:
         booking_available: bool = False,
         operational_intake_incomplete: bool = False,
     ) -> SalesMoveDecision:
+        """Select one governed move. AI recommendations never override precedence.
+
+        operational_intake_incomplete is accepted from callers but must not
+        stall discovery: zone and forms belong to booking (cycle 3), not the sale.
+        """
+
+        del operational_intake_incomplete
         if analysis.requires_human:
             return SalesMoveDecision(
                 SalesMove.HANDOFF_TO_HUMAN,
@@ -153,6 +160,7 @@ class SalesPolicyEngine:
             )
 
         if profile.stage is SalesStage.GREETING:
+            # Includes the first outbound touch: no inbound customer message yet.
             return SalesMoveDecision(
                 SalesMove.GREET_AND_SET_CONTEXT,
                 "conversation_started",
@@ -164,13 +172,6 @@ class SalesPolicyEngine:
                 SalesMove.ASK_DISCOVERY_QUESTION,
                 "required_discovery_context_missing",
                 SalesStage.DISCOVERY,
-            )
-
-        if operational_intake_incomplete:
-            return SalesMoveDecision(
-                SalesMove.ASK_DISCOVERY_QUESTION,
-                "operational_intake_incomplete",
-                profile.stage if profile.stage is not SalesStage.GREETING else SalesStage.DISCOVERY,
             )
 
         if profile.stage is SalesStage.DISCOVERY:

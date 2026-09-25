@@ -1,19 +1,12 @@
-"""Structured-output contracts for the experimental SalesTurnAnalysis prompt.
+"""Structured-output contract for SalesTurnAnalysis.
 
-Scope note (docs/agent-prompts/claude-code-sales-knowledge-and-evals.md): this
-module is a prompt/eval experiment. It mirrors the exact provider-neutral
-schema in src/domain/sales.py -- same enums, same field meaning. Converting a
-validated instance of this schema into a real domain.sales.SalesTurnAnalysis
-is NOT a bare 1:1 field copy, though: the domain object also needs a
-caller-supplied `source_message_id` (for every CustomerEvidence), an
-evidence-grounding check against the actual current customer message, and
-server-controlled audit metadata that must never come from model output. See
-src/ai/sales_adapter.py::build_sales_turn_analysis for that conversion. This
-module does not add enum members, does not wire into SalesPolicyEngine, and is
-not imported by any production code path. Recommendations from this model are
-advisory only: the deterministic SalesPolicyEngine (src/engine/sales_policy.py,
-out of scope here) makes the final, authoritative choice and may disregard
-them entirely.
+Mirrors src/domain/sales.py field-for-field. AISalesTurnAnalyzer (live turn
+and shadow) converts a validated instance via
+src/ai/sales_adapter.py::build_sales_turn_analysis: the caller supplies
+`source_message_id`, evidence must occur in the customer message, and audit
+metadata never comes from the model. This module does not add enum members
+and does not choose SalesMove — SalesPolicyEngine does. Recommendations are
+advisory.
 """
 
 from pydantic import AwareDatetime, Field
@@ -45,11 +38,9 @@ from src.domain.sales import CommitmentLevel, ObjectionStatus, ObjectionType, Sa
 #     ANSWER_OBJECTION with objections=[] for a guarantee/discount request).
 #     Closed in model_post_init below; prompt text updated to match, which is
 #     why this needed its own version rather than silently patching v2.
-#   2026-09-07.v4 -- CLOSED_ENUMS gained SalesMove.REQUEST_BUSINESS_FACT (owner
-#     decision 2026-09-07: ask the owner for a missing fact instead of handing
-#     the customer to a person). Prompt wording unchanged; the enum block the
-#     model sees changed, so the version moves with it.
-SALES_PROMPT_VERSION = "2026-09-07.v4"
+#   2026-09-07.v1 -- foundation alignment slice B: READY_FOR_NEXT_STEP is
+#     readiness to book, not a calendar hour already set.
+SALES_PROMPT_VERSION = "2026-09-07.v1"
 
 
 class SalesSignalOutput(StrictAIModel):

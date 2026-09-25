@@ -15,7 +15,7 @@ export const SALES_STAGE_LABELS: Record<SalesStage, string> = {
   FOLLOW_UP: "Follow-up",
   WON: "Won (sales conversation)",
   LOST: "Lost (sales conversation)",
-  HUMAN_REVIEW: "Needs you",
+  HUMAN_REVIEW: "Safety stop",
 };
 
 export const SALES_MOVE_LABELS: Record<SalesMove, string> = {

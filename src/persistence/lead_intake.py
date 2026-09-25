@@ -51,6 +51,7 @@ class PersistentLeadIntakeService:
         universal_reassurance_response_generator: UniversalReassuranceResponseGenerator | None = None,
         sales_turn_analyzer: object | None = None,
         sales_response_generator: object | None = None,
+        crm_touch_publisher=None,
     ) -> None:
         self.unit_of_work_factory = unit_of_work_factory
         self.intent_extractor = intent_extractor
@@ -68,6 +69,7 @@ class PersistentLeadIntakeService:
         self.process_engine = process_engine or ProcessEngine()
         self.sales_turn_analyzer = sales_turn_analyzer
         self.sales_response_generator = sales_response_generator
+        self.crm_touch_publisher = crm_touch_publisher
 
     def receive(
         self,

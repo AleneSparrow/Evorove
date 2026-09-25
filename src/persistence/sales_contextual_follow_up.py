@@ -52,6 +52,7 @@ from src.engine.sales_response_validator import (
     SalesResponseValidationContext,
 )
 from src.persistence.errors import StaleCaseError, StaleSalesProfileError
+from src.persistence.owner_materials import merge_active_owner_materials
 from src.persistence.repositories import DeliveryStatus, UnitOfWorkFactory
 from src.persistence.sms_service import SmsService
 
@@ -218,6 +219,9 @@ class PersistentSalesContextualFollowUpRunner:
                 return None
             if self.sms_service.is_suppressed(business_id, case.lead.phone):
                 return None
+            sale_threads = uow.conversations.list_for_case(business_id, case_id)
+            if _open_whatsapp_thread(sale_threads):
+                return None
             twilio_sid = self.sms_service.send_outbound(
                 business_id, to_number=case.lead.phone, body=message_text,
             )
@@ -328,12 +332,13 @@ class PersistentSalesContextualFollowUpRunner:
         dna_version = uow.business_dna.get_active(business_id)
         if dna_version is None:
             return None
-        dna = dna_version.configuration
+        dna = merge_active_owner_materials(uow, business_id, dna_version.configuration)
         profile = uow.sales_profiles.get(business_id, case_id, for_update=for_update)
         if profile is None:
             profile = CustomerSalesProfile(business_id, case_id)
         conversations = uow.conversations.list_for_case(business_id, case_id)
         human_owns = any(item.status in _HUMAN_OWNED for item in conversations)
+        whatsapp_thread = _open_whatsapp_thread(conversations)
         playbook = uow.sales_playbooks.get_active(business_id)
         playbook_config = None if playbook is None else dict(playbook.configuration)
         cadence, maximum_attempts, quiet_hours = cadence_from_config(playbook_config, dna)
@@ -354,8 +359,8 @@ class PersistentSalesContextualFollowUpRunner:
             last_inbound_at=_last_inbound_at(uow, conversations),
             last_sales_follow_up_at=_last_sales_follow_up_at(case),
             attempts_sent=_attempts_sent(profile),
-            sms_consent=bool(case.lead.sms_consent),
-            has_phone=bool(case.lead.phone),
+            sms_consent=bool(case.lead.sms_consent) and not whatsapp_thread,
+            has_phone=bool(case.lead.phone) and not whatsapp_thread,
             sms_suppressed=bool(
                 case.lead.phone and self.sms_service.is_suppressed(business_id, case.lead.phone)
             ),
@@ -569,6 +574,14 @@ def _mirror_into_conversations(
                 business_id,
                 conversation.conversation_id,
             )
+
+
+def _open_whatsapp_thread(conversations: tuple[Any, ...] | list[Any]) -> bool:
+    return any(
+        conversation.status is not ConversationStatus.CLOSED
+        and conversation.channel.casefold() == "whatsapp"
+        for conversation in conversations
+    )
 
 
 def _log_event(level: int, event: str, **fields: Any) -> None:

@@ -37,6 +37,15 @@ class StaleSalesProfileError(PersistenceError):
     """A sales profile changed after it was loaded and cannot be overwritten safely."""
 
 
+class OutboundFirstTouchBlocked(PersistenceError):
+    """Outbound GREET must not send: missing consent, STOP, or a rejected found person."""
+
+    def __init__(self, code: str, public_message: str) -> None:
+        super().__init__(public_message)
+        self.code = code
+        self.public_message = public_message
+
+
 class StaleSalesObjectionError(PersistenceError):
     """A sales objection changed after it was loaded and cannot be overwritten safely."""
 
@@ -65,6 +74,19 @@ class CaseNotAwaitingApprovalError(PersistenceError):
 
 class ConversationClosedError(PersistenceError):
     """A staff action was requested on a conversation that is already closed."""
+
+
+class StaffSaleTakeoverForbidden(PersistenceError):
+    """Owner may not hop into a normal sale. Reply only after a risk handoff."""
+
+    def __init__(self, public_message: str | None = None) -> None:
+        text = public_message or (
+            "The engine is selling this thread. A person replies only after "
+            "STOP, emergency, or policy handoff."
+        )
+        super().__init__(text)
+        self.code = "sale_takeover_forbidden"
+        self.public_message = text
 
 
 class BillingNotConfiguredError(PersistenceError):

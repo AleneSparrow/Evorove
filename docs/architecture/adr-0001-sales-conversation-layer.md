@@ -5,7 +5,7 @@
 
 ## Context
 
-Flywheel already has a deterministic `ProcessState` machine for lead-to-cash commitments. It controls qualification, booking, quoting, follow-up, winning, payment, completion, loss, reactivation, and human review. Anthropic is currently used through a provider-neutral boundary to extract intent and phrase constrained messages.
+Evorove already has a deterministic `ProcessState` machine for lead-to-cash commitments. It controls qualification, booking, quoting, follow-up, winning, payment, completion, loss, reactivation, and human review. Anthropic is currently used through a provider-neutral boundary to extract intent and phrase constrained messages.
 
 A complete sales conversation needs additional progress markers such as discovery, presentation, objection handling, and commitment. These markers describe conversational progress, not a business commitment. Adding them to `ProcessState` would make conversational turns capable of widening the transition policy that protects bookings, quotes, prices, and human approval.
 

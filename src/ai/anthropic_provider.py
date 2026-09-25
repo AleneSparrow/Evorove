@@ -63,6 +63,39 @@ _MAX_OUTPUT_TOKENS = 4096
 # here is "asked again, got it right," not "failed for a durable reason."
 _MAX_STRUCTURED_OUTPUT_ATTEMPTS = 3
 
+# Live 2026-09-04 sales-turn eval: Claude nested a schema-valid object under
+# one extra key (`parameters`, later `input`) that does not exist on the
+# tool schema. Prompt text cut the rate but did not eliminate it. Unwrap
+# only that exact one-key wrapper; leave every other shape for Pydantic.
+_TOOL_INPUT_WRAPPER_KEYS = frozenset({"parameters", "input", "output", "data", "arguments"})
+
+
+def unwrap_forced_tool_input(payload: object) -> object:
+    """Return the inner dict when Claude wrapped the schema under one extra key.
+
+    If the payload is already the schema object, or is not a single-key
+    wrapper, it is returned unchanged. Callers must still `model_validate`.
+    """
+
+    if not isinstance(payload, dict) or len(payload) != 1:
+        return payload
+    key, value = next(iter(payload.items()))
+    if key in _TOOL_INPUT_WRAPPER_KEYS and isinstance(value, dict):
+        return value
+    return payload
+
+
+def _validate_forced_tool_input(output_model: type[OutputT], payload: object) -> OutputT:
+    """Validate tool input, unwrapping the 2026-09-04 nesting defect if needed."""
+
+    try:
+        return output_model.model_validate(payload)
+    except ValidationError:
+        unwrapped = unwrap_forced_tool_input(payload)
+        if unwrapped is payload:
+            raise
+        return output_model.model_validate(unwrapped)
+
 
 class AnthropicProvider:
     def __init__(self, *, api_key: str, model: str, timeout_seconds: float) -> None:
@@ -127,7 +160,9 @@ class AnthropicProvider:
                     last_shape_error = "Claude returned no tool call"
                     continue
                 try:
-                    output = request.output_model.model_validate(tool_use.input)
+                    output = _validate_forced_tool_input(
+                        request.output_model, tool_use.input
+                    )
                 except ValidationError as exc:
                     # Field path + pydantic error type only -- never the
                     # offending value, which may be customer-submitted text

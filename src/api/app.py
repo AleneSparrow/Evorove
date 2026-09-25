@@ -48,8 +48,13 @@ from .routes import (
     public_conversations,
     sales,
     sms,
+    marketing_materials,
     unsubscribe,
 )
+try:
+    from .routes import marketing_material_files as marketing_material_files
+except RuntimeError:
+    marketing_material_files = None
 
 
 def _maybe_run_migrations_on_startup(runtime_settings: Settings) -> None:
@@ -213,6 +218,9 @@ def create_app(
     application.include_router(lead_intake.router)
     application.include_router(public_conversations.router)
     application.include_router(sales.router)
+    application.include_router(marketing_materials.router)
+    if marketing_material_files is not None:
+        application.include_router(marketing_material_files.router)
     application.include_router(sms.router)
     application.include_router(sms.public_router)
     application.include_router(internal.router)

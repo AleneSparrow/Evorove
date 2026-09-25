@@ -1,5 +1,11 @@
 # Prompt for Claude Code: sales knowledge and Anthropic evals
 
+Узкий исходный промпт (4 сентября 2026). **Актуальный шаг 1 companion-модели:**
+`docs/agent-prompts/claude-code-companion-sales-model-step1.md`.
+
+Карточки по-прежнему не утверждать. Ниже — исходный текст, если нужно
+повторить только extraction + analyzer eval без корпуса модели.
+
 Copy the prompt below into Claude Code from the repository root.
 
 ```text

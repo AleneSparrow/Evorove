@@ -25,6 +25,7 @@ from src.persistence.billing_service import BillingService
 from src.persistence.business_provisioning_service import BusinessProvisioningService
 from src.persistence.lead_intake import PersistentLeadIntakeService
 from src.persistence.conversation_service import ConversationService
+from src.persistence.crm_touch_publisher import publisher_from_settings
 from src.persistence.business_dna_settings_service import BusinessDNASettingsService
 from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
@@ -33,6 +34,7 @@ from src.persistence.email_outreach_service import EmailOutreachService
 from src.persistence.outreach_service import OutreachService
 from src.persistence.sms_service import SmsService
 from src.persistence.sms_thread_service import SmsThreadService
+from src.persistence.whatsapp_mouth import WhatsAppMouth
 from src.persistence.staff_action_service import StaffActionService
 from src.persistence.sqlalchemy_uow import SQLAlchemyUnitOfWork
 
@@ -128,6 +130,9 @@ def get_intake_service(
         universal_reassurance_response_generator=container.universal_reassurance_response_generator,
         sales_turn_analyzer=container.sales_turn_analyzer,
         sales_response_generator=container.sales_response_generator,
+        crm_touch_publisher=publisher_from_settings(
+            container.settings, container.unit_of_work_factory,
+        ),
     )
 
 
@@ -144,6 +149,9 @@ def get_conversation_service(
         sales_turn_analyzer=container.sales_turn_analyzer,
         sales_response_generator=container.sales_response_generator,
         token_ttl_hours=container.settings.public_conversation_token_ttl_hours,
+        crm_touch_publisher=publisher_from_settings(
+            container.settings, container.unit_of_work_factory,
+        ),
     )
 
 
@@ -238,6 +246,17 @@ def get_sms_service(
     )
 
 
+def get_whatsapp_mouth(
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> WhatsAppMouth:
+    return WhatsAppMouth(
+        container.unit_of_work_factory,
+        from_number=container.settings.evorove_whatsapp_from,
+        account_sid=container.settings.twilio_account_sid,
+        auth_token=container.settings.twilio_auth_token,
+    )
+
+
 def get_sms_thread_service(
     container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> SmsThreadService:
@@ -313,7 +332,7 @@ def require_active_subscription(
     delivered value) on the business having billing access (see
     `Business.has_billing_access`). Deliberately NOT applied to Settings/Business
     DNA (the owner needs to reach billing to fix a lapsed subscription) or to
-    public lead-intake/widget routes (a payment problem on Flywheel's side
+    public lead-intake/widget routes (a payment problem on Evorove's side)
     shouldn't immediately break the automation a business's own customers are
     already relying on)."""
     with unit_of_work_factory() as unit_of_work:

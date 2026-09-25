@@ -1,0 +1,64 @@
+Loading pretrained model
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 2130.65it/s]
+Loading datasets
+Training
+Trainable parameters: 0.216% (6.652M/3085.939M)
+Starting training..., iters: 200
+Calculating loss...:   0%|          | 0/1 [00:00<?, ?it/s]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.19s/it]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.20s/it]
+Iter 1: Val loss 5.342, Val took 2.120s
+Iter 10: Train loss 2.832, Learning Rate 1.000e-05, It/sec 0.505, Tokens/sec 38.896, Trained Tokens 770, Peak mem 2.592 GB
+Iter 20: Train loss 1.487, Learning Rate 1.000e-05, It/sec 0.605, Tokens/sec 49.344, Trained Tokens 1586, Peak mem 2.592 GB
+Iter 30: Train loss 1.151, Learning Rate 1.000e-05, It/sec 0.651, Tokens/sec 43.099, Trained Tokens 2248, Peak mem 2.595 GB
+Iter 40: Train loss 0.954, Learning Rate 1.000e-05, It/sec 0.645, Tokens/sec 47.209, Trained Tokens 2980, Peak mem 2.595 GB
+Iter 50: Train loss 0.872, Learning Rate 1.000e-05, It/sec 0.615, Tokens/sec 50.696, Trained Tokens 3804, Peak mem 2.595 GB
+Iter 50: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter/0000050_adapters.safetensors.
+Iter 60: Train loss 0.792, Learning Rate 1.000e-05, It/sec 0.602, Tokens/sec 47.662, Trained Tokens 4596, Peak mem 2.619 GB
+Iter 70: Train loss 0.605, Learning Rate 1.000e-05, It/sec 0.602, Tokens/sec 48.984, Trained Tokens 5410, Peak mem 2.622 GB
+Iter 80: Train loss 0.926, Learning Rate 1.000e-05, It/sec 0.631, Tokens/sec 45.571, Trained Tokens 6132, Peak mem 2.622 GB
+Iter 90: Train loss 0.934, Learning Rate 1.000e-05, It/sec 0.632, Tokens/sec 45.947, Trained Tokens 6859, Peak mem 2.622 GB
+Iter 100: Train loss 0.506, Learning Rate 1.000e-05, It/sec 0.685, Tokens/sec 55.004, Trained Tokens 7662, Peak mem 2.622 GB
+Iter 100: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter/0000100_adapters.safetensors.
+Iter 110: Train loss 0.717, Learning Rate 1.000e-05, It/sec 0.675, Tokens/sec 52.164, Trained Tokens 8435, Peak mem 2.622 GB
+Iter 120: Train loss 0.567, Learning Rate 1.000e-05, It/sec 0.611, Tokens/sec 53.374, Trained Tokens 9308, Peak mem 2.622 GB
+Iter 130: Train loss 0.634, Learning Rate 1.000e-05, It/sec 0.612, Tokens/sec 47.645, Trained Tokens 10086, Peak mem 2.622 GB
+Iter 140: Train loss 0.438, Learning Rate 1.000e-05, It/sec 0.488, Tokens/sec 36.038, Trained Tokens 10825, Peak mem 2.622 GB
+Iter 150: Train loss 0.729, Learning Rate 1.000e-05, It/sec 0.350, Tokens/sec 26.432, Trained Tokens 11581, Peak mem 2.622 GB
+Iter 150: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter/0000150_adapters.safetensors.
+Iter 160: Train loss 0.530, Learning Rate 1.000e-05, It/sec 0.232, Tokens/sec 17.701, Trained Tokens 12345, Peak mem 2.622 GB
+Iter 170: Train loss 0.524, Learning Rate 1.000e-05, It/sec 0.360, Tokens/sec 26.000, Trained Tokens 13068, Peak mem 2.622 GB
+Iter 180: Train loss 0.681, Learning Rate 1.000e-05, It/sec 0.501, Tokens/sec 36.421, Trained Tokens 13795, Peak mem 2.622 GB
+Iter 190: Train loss 0.504, Learning Rate 1.000e-05, It/sec 0.530, Tokens/sec 38.184, Trained Tokens 14516, Peak mem 2.622 GB
+Calculating loss...:   0%|          | 0/1 [00:00<?, ?it/s]Calculating loss...: 100%|██████████| 1/1 [00:00<00:00,  1.11it/s]Calculating loss...: 100%|██████████| 1/1 [00:00<00:00,  1.10it/s]
+Iter 200: Val loss 0.627, Val took 0.931s
+Iter 200: Train loss 0.434, Learning Rate 1.000e-05, It/sec 0.543, Tokens/sec 46.541, Trained Tokens 15373, Peak mem 2.622 GB
+Iter 200: Saved adapter weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter/adapters.safetensors and /Users/alenakulish/dev/evorove/private/companion-lora/adapter/0000200_adapters.safetensors.
+Saved final weights to /Users/alenakulish/dev/evorove/private/companion-lora/adapter/adapters.safetensors.
+Starting local LoRA (this downloads the base model if missing):
+/Library/Frameworks/Python.framework/Versions/3.13/bin/python3 -m mlx_lm lora --model mlx-community/Qwen2.5-3B-Instruct-4bit --data /Users/alenakulish/dev/evorove/evals/companion_step2/sft --train --mask-prompt --grad-checkpoint --batch-size 1 --val-batches 1 --max-seq-length 1024 --iters 200 --save-every 50 --adapter-path /Users/alenakulish/dev/evorove/private/companion-lora/adapter
+{
+  "training_job_started": true,
+  "ai_provider_changed": false,
+  "cards_approved": false,
+  "export": {
+    "training_job_started": false,
+    "owner_zip_excluded": true,
+    "cards_approved": false,
+    "ai_provider_changed": false,
+    "total": 236,
+    "train": 206,
+    "valid": 30,
+    "analyzer": 115,
+    "generator": 121,
+    "negative": 46,
+    "dest": "/Users/alenakulish/dev/evorove/evals/companion_step2/sft"
+  },
+  "hardware": {
+    "machine": "arm64",
+    "cpu": "Apple M2",
+    "apple_silicon": true,
+    "mlx_lm": true
+  },
+  "adapter_dir": "/Users/alenakulish/dev/evorove/private/companion-lora/adapter",
+  "model": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+  "lora_exit": 0
+}

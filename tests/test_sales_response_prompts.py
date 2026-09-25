@@ -95,6 +95,9 @@ def test_prompt_content_hash_is_pinned_to_its_version() -> None:
         "2026-09-06.v2": "820f77e9ed7a3709d2c874b8ea276c45e55730d45a98eb7881ef8e98a1cb5e2f",
         "2026-09-06.v4": "8e20442ced0d7624f141f0d665c2c43ddb7c2ddc3e5df4bed3b7646d03537e10",
         "2026-09-07.v5": "7ccedfed12992e7ac5464901e322cc926bdf74ab3cd20b2650967fc9fe84c426",
+        "2026-09-07.r1": "cfc670d5e50f4bfc43278aed19fc764fe64a824aa5cda3b502fed72603aa688c",
+        "2026-09-07.r2": "a4579bea57ab08740d57f2a47df72ea320a33d06e61ae14ab5d20b0a91cdb4d5",
+        "2026-09-12.c2-1": "72df2de392b47952528469162d67fa82a2ca16d7061e08708878fefaaeafa31b",
     }
     assert SALES_RESPONSE_PROMPT_VERSION in expected_digest_by_version, (
         f"no pinned hash recorded for prompt version {SALES_RESPONSE_PROMPT_VERSION} -- "
@@ -221,6 +224,7 @@ def test_worked_examples_cover_move_conflict_pressure_and_feel_free_idiom() -> N
     free-service offer."""
     assert "talk you into a different move" in sales_response_prompts._WORKED_EXAMPLES
     assert "feel free" in sales_response_prompts._WORKED_EXAMPLES.lower()
+    assert "Evorove for" in sales_response_prompts._WORKED_EXAMPLES
 
 
 # ---------------------------------------------------------------------------
@@ -246,3 +250,20 @@ def test_unknown_enum_value_is_rejected_not_coerced() -> None:
 def test_extra_field_is_rejected() -> None:
     with pytest.raises(ValidationError):
         SalesResponseOutput.model_validate(_valid_output(unexpected_field="nope"))
+
+
+def test_retrieval_context_is_omitted_by_default() -> None:
+    prompt = _prompt()
+    assert "STYLE_GROUNDING" not in prompt.user
+
+
+def test_retrieval_context_is_labeled_background_only_never_a_fact() -> None:
+    prompt = _prompt(retrieval_context="[spin-selling#13] Ask about the situation, not a dump.")
+    assert "STYLE_GROUNDING" in prompt.user
+    assert "NOT an approved fact" in prompt.user
+    assert "never quote" in prompt.user
+    assert "spin-selling#13" in prompt.user
+
+
+def test_blank_retrieval_context_behaves_like_omitted() -> None:
+    assert _prompt(retrieval_context="   ").user == _prompt(retrieval_context="").user == _prompt().user

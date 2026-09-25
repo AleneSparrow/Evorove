@@ -54,7 +54,7 @@ export default function Login() {
     <AuthShell>
       <div className="bg-white rounded-2xl border border-line p-7">
         <h1 className="ev-display text-5xl mb-2">Sign in</h1>
-        <p className="text-sm text-mute mb-6">Welcome back — your engine kept working while you were away.</p>
+        <p className="text-sm text-mute mb-6">The board kept moving. Cold through Done is waiting.</p>
 
         {!challenge ? (
           <form onSubmit={handleSubmit}>

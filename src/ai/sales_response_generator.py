@@ -24,6 +24,7 @@ class SalesResponseGenerationInput:
     safe_fallback_text: str | None
     conversation_context: Mapping[str, Any]
     customer_message: str
+    retrieval_context: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +52,7 @@ class AISalesResponseGenerator:
             safe_fallback_text=value.safe_fallback_text,
             conversation_context=value.conversation_context,
             customer_message=value.customer_message,
+            retrieval_context=value.retrieval_context,
         )
         result = self._provider.generate(AIRequest(
             prompt.identifier,

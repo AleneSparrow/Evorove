@@ -1,45 +1,52 @@
-/** Public FAQ copy for the marketing homepage and the dedicated /faq route.
- * Kept in one place so the cabinet can link to the same answers without
- * duplicating (or drifting from) the homepage section. */
+/** Public FAQ. Real questions about the three-cycle product. CRM is the board. */
+
 export const FAQ_ITEMS: { q: string; a: string }[] = [
   {
-    q: "Is this a CRM?",
-    a: "No. A CRM stores the pipeline. Evorove runs the sale: it talks to the inquiry, handles objections, follows up, and works toward a booked or quoted deal. You can still ping a CRM when a conversation is qualified or won.",
+    q: "What happens after I subscribe?",
+    a: "You describe the business: what you sell, who it is for, multimedia if you have it, and a commercial offer if one exists. Evorove studies that packet first. It does not start writing to people from a blank guess.",
   },
   {
-    q: "Do I have to write prompts?",
-    a: "No. You describe the business and the services. The sales agent is already trained. There is no prompt to write or maintain.",
+    q: "Where do the people in Cold come from?",
+    a: "Cycle 1 looks in the open web — public places your audience already lives — then checks each person against the portrait built from your materials. If they fit, and there is a reason and a way to reach them, they land in CRM on Cold. Nobody has been written to yet. This is not a list of people who filled a form on your site.",
   },
   {
-    q: "Does this bring me new customers?",
-    a: "No. Evorove works the inquiries you already get — from your website, your ads, your referrals. Finding new leads is a different problem and we don't claim to solve it.",
+    q: "What are the four CRM tabs?",
+    a: "Cold — found, not written. In progress — the sales engine is in the conversation. Offer made — value or the offer has been named, the person is not closed. Done — they paid through your payment link, or (for an offline service) a specific hour is on your calendar. The board updates as each step happens. Open a person to read the dialogue. You do not hop in to close a normal sale.",
   },
   {
-    q: "Does it take payment from my customer?",
-    a: "No. It gets to a confirmed booking or an approved quote and hands you a prepared job. Collecting the money stays with you, through whatever you already use.",
+    q: "Who talks to the lead?",
+    a: "The sales engine. It writes first, keeps the thread, handles objections, and uses techniques grounded in an approved sales corpus — books the product was trained on, not a prompt you have to maintain. A person at your business is not the closer.",
   },
   {
-    q: "What does setup actually look like?",
-    a: "At signup you name your industry, describe what you do in a sentence, and list your services. That is enough to start the sales cycle. Nobody builds a version for your company, and there are no keyword lists or prompts to maintain — it understands what customers write in their own words.",
+    q: "When does someone get my commercial offer?",
+    a: "When the conversation is actually ready for it — not as the first cold line. The engine sends the offer you uploaded. It cannot invent a price, a discount, or a promise you did not approve.",
   },
   {
-    q: "What if it doesn't understand someone?",
-    a: "It asks again, in plain language, rather than guessing or dumping the person on you. After a few attempts it hands the conversation to a person.",
+    q: "What does Done mean for an offline vs online business?",
+    a: "Offline: the person is booked into a real appointment for the service you sell. Online: they purchased the product or subscription, and the money goes to your business account — Evorove does not take that payment as merchant of record for your customer.",
   },
   {
-    q: "Can it say something that gets me in trouble?",
-    a: "It can phrase an approved sales move. It has no mechanism to generate a price, a discount, a promise, or an opinion you did not write. Requests for advice or a judgment call are escalated to you, not answered.",
+    q: "Can I jump into a live chat and take over?",
+    a: "No for a normal sale. The dashboard lets you watch the thread when you click a lead. Safety, STOP, and identity conflicts still stop the engine — that is the Safety page, not a closer’s inbox. Missing business facts can be requested from you without handing the customer to a closer.",
   },
   {
-    q: "My business is nothing like a law firm. Will it work?",
-    a: "The engine contains no industry-specific logic — not one branch, anywhere. It reads your own description of what you do. Law practices are simply the first industry we opened to customers, not what the product is built around.",
+    q: "I uploaded new photos and a new offer. When does the engine use them?",
+    a: "Add files any time on CRM → Advertising materials (or Settings → Materials). Press Refresh. From that moment the analysis and the sales wording follow the new packet. Draft uploads sitting un-refreshed are not in force yet.",
   },
   {
-    q: "Where does it work?",
-    a: "The United States today. Other English-speaking markets follow once address handling is ready for them — we would rather say that plainly than sell you something that mishandles your postcodes.",
+    q: "Do I write prompts or train a model?",
+    a: "No. You describe the business and keep the materials current. The sales agent is already trained. There is no prompt to maintain.",
   },
   {
-    q: "Do you train AI on my customers' conversations?",
-    a: "No. We do not use those conversations to train or fine-tune a foundation model. A model may rewrite a step the engine already chose. We keep logs and audits so the cycle is measurable. The Privacy Policy and DPA spell this out.",
+    q: "Will this work if I am not a law firm?",
+    a: "Yes. The engine has no industry-specific branch. Law was an early market door, not the product. It reads your description of the work.",
+  },
+  {
+    q: "If I put a chat widget on my site, is that how Cold fills?",
+    a: "No. The widget is a conversation channel for someone already on the site. Cycle 1 finds people in the open web and puts them on Cold. Do not treat website visitors as generation.",
+  },
+  {
+    q: "Where does it work, and do you train on my customers?",
+    a: "The United States today. We do not use your customers' conversations to train or fine-tune a foundation model. The Privacy Policy and DPA spell that out.",
   },
 ];

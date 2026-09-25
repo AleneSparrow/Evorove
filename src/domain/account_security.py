@@ -54,7 +54,7 @@ def verify_totp(secret: str, code: str, at: datetime, *, window: int = 1) -> boo
     )
 
 
-def provisioning_uri(secret: str, email: str, *, issuer: str = "Flywheel") -> str:
+def provisioning_uri(secret: str, email: str, *, issuer: str = "Evorove") -> str:
     # The account's email is only returned to its authenticated owner during
     # setup; it is never persisted in security audit metadata or logs.
     from urllib.parse import quote

@@ -1,0 +1,1 @@
+{"training_job_started":false,"ai_provider_changed":false,"cards_approved":false,"provider":"together","format":"openai_chat_messages","train":358,"valid":42,"dest":"/Users/alenakulish/dev/evorove/evals/companion_step2/hosted","note":"Hosted LoRA retrains from this ChatML. Mac mlx adapters are not uploaded."}

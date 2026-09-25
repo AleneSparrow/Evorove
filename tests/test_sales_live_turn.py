@@ -19,8 +19,12 @@ from src.domain.states import ProcessState
 from src.engine.sales_live_turn import (
     DeterministicSalesTurnAnalyzer,
     booking_available_for_live_turn,
+    discovery_prompt,
+    ensure_evorove_acting_for,
     merge_profile_from_analysis,
+    operationally_qualified_for_commitment,
     phrase_approved_move,
+    phrase_outbound_greet,
 )
 from src.engine.sales_objections import matching_knowledge
 from src.engine.sales_policy import SalesPolicyEngine
@@ -139,7 +143,7 @@ def test_slots_require_commitment_stage_and_explicit_ready_signal() -> None:
     assert booking_available_for_live_turn(_qualification(), profile, ready) is True
     assert booking_available_for_live_turn(
         _qualification(qualified=False), profile, ready,
-    ) is False
+    ) is True
     assert booking_available_for_live_turn(
         _qualification(), _profile(stage=SalesStage.DISCOVERY), ready,
     ) is False
@@ -181,7 +185,7 @@ def test_low_confidence_complete_case_can_offer_slots_when_ready() -> None:
         service_id="diagnostic-visit",
     )
     assert booking_available_for_live_turn(shaky, profile, ready) is True
-    assert booking_available_for_live_turn(incomplete, profile, ready) is False
+    assert booking_available_for_live_turn(incomplete, profile, ready) is True
 
 
 def test_profile_merge_is_evidence_grounded() -> None:
@@ -203,7 +207,38 @@ def test_profile_merge_is_evidence_grounded() -> None:
     assert profile.commitment_level is CommitmentLevel.INTERESTED
 
 
-def test_greeting_wording_does_not_offer_booking_or_price() -> None:
+def test_discovery_prompt_asks_problem_and_outcome_not_zone_or_forms() -> None:
+    dna = {
+        "customer_information": {
+            "field_questions": {"service_address": "What is your ZIP code?"},
+        }
+    }
+    missing_problem = discovery_prompt(_profile(), _qualification(qualified=False), dna)
+    assert "zip" not in missing_problem.casefold()
+    assert "getting in the way" in missing_problem.casefold()
+    missing_outcome = discovery_prompt(
+        _profile(current_problem="AC stopped cooling"),
+        _qualification(qualified=False),
+        dna,
+    )
+    assert "zip" not in missing_outcome.casefold()
+    assert "good look like" in missing_outcome.casefold()
+    both = discovery_prompt(
+        _profile(current_problem="AC stopped cooling", desired_outcome="it working this week"),
+        _qualification(qualified=False),
+        dna,
+    )
+    assert "zip" not in both.casefold()
+
+
+def test_operational_completeness_is_not_the_sale() -> None:
+    complete = _qualification()
+    incomplete = _qualification(qualified=False)
+    assert operationally_qualified_for_commitment(complete) is True
+    assert operationally_qualified_for_commitment(incomplete) is False
+
+
+def test_greeting_wording_does_not_offer_booking_or_assume_they_wrote_in() -> None:
     text = phrase_approved_move(
         SalesMove.GREET_AND_SET_CONTEXT, safe_fallback="A team member will follow up with you.",
     )
@@ -211,6 +246,39 @@ def test_greeting_wording_does_not_offer_booking_or_price() -> None:
     assert "appointment" not in lowered
     assert "quote" not in lowered
     assert "slot" not in lowered
+    assert "$" not in text
+    assert "reaching out" not in lowered
+    assert "thanks for" not in lowered
+
+
+def test_outbound_greet_does_not_assume_they_wrote_in() -> None:
+    text = phrase_outbound_greet(
+        business_name="Acme Home Services",
+        offer="Residential plumbing and maintenance",
+    )
+    lowered = text.casefold()
+    assert "thanks for reaching out" not in lowered
+    assert "you reached out" not in lowered
+    assert "got your message" not in lowered
+    assert "evorove for acme home services" in lowered
+    assert "plumbing" in lowered
+    stamped = ensure_evorove_acting_for(
+        "Hey — this is Acme Home Services. We help with plumbing.",
+        business_name="Acme Home Services",
+    )
+    assert "evorove for acme home services" in stamped.casefold()
+    assert ensure_evorove_acting_for(text, business_name="Acme Home Services") == text
+
+
+def test_ready_to_book_wording_does_not_set_a_slot() -> None:
+    text = phrase_approved_move(
+        SalesMove.OFFER_BOOKING_SLOTS, safe_fallback="A team member will follow up with you.",
+    )
+    lowered = text.casefold()
+    assert "you're in" in lowered
+    assert "choose an appointment time" not in lowered
+    assert "confirmed" not in lowered
+    assert "tuesday" not in lowered
     assert "$" not in text
 
 

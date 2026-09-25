@@ -1,12 +1,14 @@
 # Evorove agent instructions
 
 - Communicate with the product owner in Russian. Product UI and customer-facing copy remain English.
-- `FOUNDATION.md` is the product anchor (revised 12 September 2026, clarified 13 September 2026). Every action is checked against the three cycles and the four CRM tabs: Cold → In progress → Offer made → Done. This repository owns cycle 2 only: write cold to a person from the Cold tab and sell until close. Do not search for people here; finding lives in `evorove_lead`. The board and close live in `evorove-crm`.
-- `docs/sales-agent-implementation-plan-ru.md` describes the sales-agent mechanics. It does not override `FOUNDATION.md`.
-- Conversion from the first cold message to a closed deal is the product task. Do not promise a conversion rate to customers.
-- The engine talks to the customer until the deal. Do not create an employee callback or hand a normal sale to a person. Missing business facts may be requested from the owner; the customer conversation stays with the engine.
-- The trained AI is the configured production language model. Do not train a separate foundation model unless the owner explicitly reopens that decision.
-- Read `CLAUDE.md` for the product boundaries and operational rules.
+- Read `FOUNDATION.md` first (revised 13 September 2026). Every action is checked against the three cycles and the four CRM tabs: Cold → In progress → Offer made → Done. The board is live: the step and its dialogue must be visible in CRM as they happen, not as an evening snapshot. `CLAUDE.md` is only a pointer plus hard operational rules. The alignment-stage file is historical and does not override the north star.
+- Evorove is client 0. Search, the first write, and the first metrics are for selling Evorove itself. A payment close is the business's own payment link; for client 0 that link is the Evorove subscription. An offline close is an hour on the business calendar. Do not treat a missing calendar connection as a booked hour.
+- This repository owns cycle 2 only (cold write and sale). Cycle 1 lives in `evorove_lead` (open-web find → CRM Cold). The CRM board and close live in `evorove-crm`. Do not mix those goals. Do not scrape people here.
+- Three-repo map: `docs/three-repos-next-steps-ru.md`. Cycle 1 bootstrap prompt: `docs/agent-prompts/evorove-lead-bootstrap.md`.
+- `docs/sales-agent-implementation-plan-ru.md` is the source of truth for sales-agent mechanics (cycle 2). It does not override `FOUNDATION.md`.
+- Conversion from a found person to a ready-to-book customer is the product task of cycle 2. Do not promise a conversion rate to customers.
+- The engine talks to the customer until they are ready to book. Do not create an employee callback or hand a normal sale to a person. Missing business facts may be requested from the owner; the customer conversation stays with the engine.
+- The trained companion exists (local LoRA 10 September 2026; Together Qwen3.5-9B job 12 September 2026). It is not the production mouth until a per-move eval shows it sells and the owner says to switch. Training loss is not that eval. Do not change `AI_PROVIDER` until both happen. Do not start another training job unless `scripts/train_companion_lora.py --run` is requested. Do not `--run` the mouth server unless the owner accepts a hung Mac. Do not feed alpaca/chatml/sharegpt. Do not scrape paywalled or pirated books. Do not approve knowledge cards. Do not read or request `TOGETHER_API_KEY`.
 - Never run `git push`; only the owner pushes.
 - Do not read, request, print, or edit secrets and local `.env` files.
 - Do not add a `SalesStage` or `SalesMove` without updating the sales-agent specification and transition tests.
@@ -17,4 +19,4 @@
 - Preserve tenant scope, consent, STOP suppression, human takeover, idempotency, concurrency controls, and durable outbox behavior.
 - Keep changes inside the assigned file scope. Frontend tasks must not invent or change backend contracts.
 - Run focused tests for the changed behavior before handoff. Do not weaken tests to accommodate an implementation.
-
+- Customer-facing tone is alive and interesting, not dry corporate copy. Do not ship a correct step that feels like a form or a call center.

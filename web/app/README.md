@@ -1,4 +1,4 @@
-# Flywheel web app
+# Evorove web app
 
 The real, buildable frontend for the AI Business Process Engine — a Vite + React +
 TypeScript app that talks to the actual backend in `src/api` (not a mockup).
@@ -16,10 +16,10 @@ TypeScript app that talks to the actual backend in `src/api` (not a mockup).
 - **Conversation view** — real conversation list and message thread via
   `GET /api/v1/businesses/{id}/conversations` and `GET .../conversations/{conversation_id}`,
   plus the real audit trail (`ProcessEvent` history) for the linked case via
-  `GET /api/v1/businesses/{id}/cases/{case_id}`.
-- **Replying to a customer** — `POST .../conversations/{conversation_id}/reply` sends a
-  real outbound message (role `human`), stored and shown in the thread immediately. Moves
-  the conversation to `human_takeover_active` if it was only `_requested`.
+  `GET /api/v1/businesses/{id}/cases/{case_id}`. A normal sale is watch-only.
+- **Risk reply** — `POST .../conversations/{conversation_id}/reply` is allowed only after
+  STOP / emergency / policy handoff (`human_takeover_requested` or `_active`). It is not a
+  sales close. The board stays watch-only.
 - **Mark resolved** — `POST .../conversations/{conversation_id}/resolve` approves the
   case's pending transition (the state the engine wanted to move to before it escalated to
   `NEEDS_HUMAN` — see `StaffActionService` in `src/persistence/staff_action_service.py`)

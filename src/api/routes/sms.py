@@ -23,6 +23,7 @@ from fastapi import APIRouter, Depends, Header, Request
 from fastapi.responses import Response
 
 from src.domain.auth import StaffUser
+from src.domain.conversations import ConversationStatus
 from src.domain.models import utc_now
 from src.domain.qualification import IncomingMessage
 from src.domain.sms_commands import classify_inbound_sms
@@ -39,6 +40,7 @@ from src.persistence.sms_service import (
 )
 from src.persistence.sms_thread_service import SmsThreadService
 from src.persistence.twilio_client import validate_inbound_signature
+from src.persistence.whatsapp_mouth import WhatsAppMouth, strip_whatsapp_address
 
 from ..dependencies import (
     ApplicationContainer,
@@ -47,6 +49,7 @@ from ..dependencies import (
     get_intake_service,
     get_sms_service,
     get_sms_thread_service,
+    get_whatsapp_mouth,
     require_own_business,
 )
 from ..errors import PublicApiError, RequestDataError, ResourceNotFoundError
@@ -56,6 +59,57 @@ public_router = APIRouter(prefix="/api/v1/public/sms", tags=["sms"])
 router = APIRouter(prefix="/api/v1/businesses/{business_id}/integrations", tags=["integrations"])
 
 _EMPTY_TWIML = '<?xml version="1.0" encoding="UTF-8"?><Response></Response>'
+_WHATSAPP_PAUSED = frozenset({
+    ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
+    ConversationStatus.HUMAN_TAKEOVER_ACTIVE,
+})
+
+
+def _receive_inbound_whatsapp(
+    container: ApplicationContainer,
+    sms_service: SmsService,
+    intake_service: PersistentLeadIntakeService,
+    whatsapp_mouth: WhatsAppMouth,
+    *,
+    from_number: str,
+    body: str,
+    message_sid: str,
+) -> Response:
+    """Continue an Evorove WhatsApp sale. Do not invent a new found person."""
+
+    e164 = strip_whatsapp_address(from_number)
+    with container.unit_of_work_factory() as uow:
+        conversation = uow.conversations.find_open_by_channel_session(
+            "whatsapp", f"wa:{e164}",
+        )
+        if conversation is None:
+            return Response(content=_EMPTY_TWIML, media_type="application/xml")
+        business_id = conversation.business_id
+        paused = conversation.status in _WHATSAPP_PAUSED
+
+    command = classify_inbound_sms(body)
+    if command == "stop":
+        sms_service.opt_out(business_id, e164, inbound_message_id=message_sid)
+        return Response(content=_EMPTY_TWIML, media_type="application/xml")
+    if command in {"start", "help"}:
+        return Response(content=_EMPTY_TWIML, media_type="application/xml")
+    if paused:
+        return Response(content=_EMPTY_TWIML, media_type="application/xml")
+
+    message = IncomingMessage(
+        business_id=business_id,
+        channel="whatsapp",
+        external_message_id=message_sid,
+        raw_text=body,
+        timestamp=utc_now(),
+        phone=e164,
+    )
+    result = intake_service.receive(message, sales_led_conversation=True)
+    if result.response is not None and not result.duplicate:
+        whatsapp_mouth.send_outbound(
+            business_id, to_number=e164, body=result.response.message_text,
+        )
+    return Response(content=_EMPTY_TWIML, media_type="application/xml")
 
 
 class SmsProvisioningFailedError(PublicApiError):
@@ -75,6 +129,7 @@ async def receive_inbound_sms(
     sms_service: Annotated[SmsService, Depends(get_sms_service)],
     intake_service: Annotated[PersistentLeadIntakeService, Depends(get_intake_service)],
     sms_threads: Annotated[SmsThreadService, Depends(get_sms_thread_service)],
+    whatsapp_mouth: Annotated[WhatsAppMouth, Depends(get_whatsapp_mouth)],
     x_twilio_signature: Annotated[str | None, Header(alias="X-Twilio-Signature")] = None,
 ) -> Response:
     if not x_twilio_signature or not container.settings.twilio_auth_token:
@@ -100,6 +155,17 @@ async def receive_inbound_sms(
     message_sid = form_params.get("MessageSid")
     if not from_number or not to_number or not message_sid:
         raise RequestDataError("Missing From/To/MessageSid in Twilio webhook payload")
+
+    if from_number.casefold().startswith("whatsapp:") or to_number.casefold().startswith("whatsapp:"):
+        return _receive_inbound_whatsapp(
+            container,
+            sms_service,
+            intake_service,
+            whatsapp_mouth,
+            from_number=from_number,
+            body=body,
+            message_sid=message_sid,
+        )
 
     business_id = sms_service.resolve_business_id_by_phone(to_number)
     if business_id is None:

@@ -14,7 +14,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status
 
 from src.domain.auth import StaffUser
+from src.domain.conversations import ConversationStatus
 from src.domain.models import utc_now
+from src.domain.sales import SalesStage
 from src.domain.states import ProcessState
 from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.staff_action_service import StaffActionService
@@ -48,7 +50,7 @@ from ..schemas import (
 
 # Gated on require_active_subscription: this is the actual delivered product
 # (cases and conversations), so it's what's blocked when a business's own
-# Flywheel subscription lapses. Settings, billing itself, and public lead
+# Evorove subscription lapses. Settings, billing itself, and public lead
 # intake stay reachable regardless -- see src/api/dependencies.py.
 router = APIRouter(
     prefix="/api/v1/businesses/{business_id}",
@@ -122,10 +124,11 @@ def get_dashboard_analytics(
 ) -> DashboardAnalyticsSchema:
     """Compute transparent owner metrics from persisted audit data.
 
-    Rates use all cases as the denominator. Booked/escalated are historical
-    ever-events, while lost is the current terminal state. Response time is
-    the median first outbound message after the first inbound message per
-    conversation, which is robust to a few very slow conversations.
+    Booking conversion uses cases that are not in human review (STOP /
+    emergency / policy handoff). Those rows are counted, then excluded from
+    the rate denominator. Booked/escalated are historical ever-events.
+    Lost is the current terminal state. Response time is the median first
+    outbound after the first inbound per conversation.
     """
     _validate_reporting_range(start_date, end_date)
 
@@ -204,13 +207,34 @@ def get_dashboard_analytics(
             )
             if outbound_at is not None:
                 first_response_seconds.append((outbound_at - inbound_at).total_seconds())
+        takeover_case_ids = {
+            conversation.case_id
+            for conversation in conversations
+            if conversation.case_id
+            and conversation.status in {
+                ConversationStatus.HUMAN_TAKEOVER_REQUESTED,
+                ConversationStatus.HUMAN_TAKEOVER_ACTIVE,
+            }
+        }
+        human_review = 0
+        for case in cases:
+            profile = unit_of_work.sales_profiles.get(business_id, case.case_id)
+            if (
+                case.current_state is ProcessState.NEEDS_HUMAN
+                or case.case_id in takeover_case_ids
+                or (profile is not None and profile.stage is SalesStage.HUMAN_REVIEW)
+            ):
+                human_review += 1
+        eligible = total - human_review
     denominator = total or 1
     return DashboardAnalyticsSchema(
         total_cases=total,
         booked_cases=booked,
         escalated_cases=escalated,
         lost_cases=lost,
-        booking_conversion_rate=booked / denominator if total else 0.0,
+        human_review_cases=human_review,
+        conversion_eligible_cases=eligible,
+        booking_conversion_rate=(booked / eligible) if eligible else 0.0,
         escalation_rate=escalated / denominator if total else 0.0,
         lost_rate=lost / denominator if total else 0.0,
         median_first_response_seconds=(median(first_response_seconds) if first_response_seconds else None),

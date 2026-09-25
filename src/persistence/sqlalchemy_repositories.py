@@ -51,6 +51,7 @@ from src.domain.sales import (
     SalesStage,
     SalesTurn,
 )
+from src.domain.marketing_materials import MarketingAsset, MarketingGuidance
 from src.domain.tenancy import Business, BusinessDNAVersion
 
 from .errors import (
@@ -79,6 +80,8 @@ from .sqlalchemy_models import (
     FollowUpDeliveryAttemptRow,
     SmsConnectionRow,
     LeadRow,
+    MarketingAssetRow,
+    MarketingGuidanceRow,
     PaymentRequestRow,
     ProcessCaseRow,
     ProcessedMessageRow,
@@ -1788,6 +1791,27 @@ class SQLAlchemyConversationRepository:
         row = self.session.scalar(statement)
         return self._to_domain(row) if row is not None else None
 
+    def find_open_by_channel_session(
+        self,
+        channel: str,
+        external_session_id: str,
+        *,
+        for_update: bool = False,
+    ) -> Conversation | None:
+        statement = (
+            select(ConversationRow)
+            .where(
+                ConversationRow.channel == channel,
+                ConversationRow.external_session_id == external_session_id,
+                ConversationRow.status != ConversationStatus.CLOSED.value,
+            )
+            .order_by(ConversationRow.updated_at.desc())
+        )
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.scalars(statement).first()
+        return self._to_domain(row) if row is not None else None
+
     def save(self, conversation: Conversation, expected_version: int) -> None:
         new_version = expected_version + 1
         result = self.session.execute(
@@ -2297,4 +2321,81 @@ class SQLAlchemyPaymentRequestRepository:
             expires_at=_aware(row.expires_at).astimezone(timezone.utc),
             metadata=row.metadata_json,
             version=row.version,
+        )
+
+
+class SQLAlchemyMarketingMaterialsRepository:
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def add_asset(self, asset: MarketingAsset) -> None:
+        self.session.add(
+            MarketingAssetRow(
+                id=asset.asset_id,
+                business_id=asset.business_id,
+                kind=asset.kind,
+                title=asset.title,
+                body_text=asset.body_text,
+                filename=asset.filename,
+                created_at=asset.created_at,
+            )
+        )
+        self.session.flush()
+
+    def list_assets(self, business_id: str) -> tuple[MarketingAsset, ...]:
+        rows = self.session.scalars(
+            select(MarketingAssetRow)
+            .where(MarketingAssetRow.business_id == business_id)
+            .order_by(MarketingAssetRow.created_at.desc())
+        ).all()
+        return tuple(self._asset(row) for row in rows)
+
+    def count_assets(self, business_id: str) -> int:
+        return int(
+            self.session.scalar(
+                select(func.count()).select_from(MarketingAssetRow).where(
+                    MarketingAssetRow.business_id == business_id
+                )
+            )
+            or 0
+        )
+
+    def get_guidance(self, business_id: str) -> MarketingGuidance | None:
+        row = self.session.get(MarketingGuidanceRow, business_id)
+        if row is None:
+            return None
+        return MarketingGuidance(
+            business_id=row.business_id,
+            revision=row.revision,
+            snapshot_text=row.snapshot_text,
+            activated_at=_aware(row.activated_at),
+        )
+
+    def save_guidance(self, guidance: MarketingGuidance) -> None:
+        row = self.session.get(MarketingGuidanceRow, guidance.business_id)
+        if row is None:
+            self.session.add(
+                MarketingGuidanceRow(
+                    business_id=guidance.business_id,
+                    revision=guidance.revision,
+                    snapshot_text=guidance.snapshot_text,
+                    activated_at=guidance.activated_at,
+                )
+            )
+        else:
+            row.revision = guidance.revision
+            row.snapshot_text = guidance.snapshot_text
+            row.activated_at = guidance.activated_at
+        self.session.flush()
+
+    @staticmethod
+    def _asset(row: MarketingAssetRow) -> MarketingAsset:
+        return MarketingAsset(
+            asset_id=row.id,
+            business_id=row.business_id,
+            kind=row.kind,
+            title=row.title,
+            body_text=row.body_text,
+            filename=row.filename,
+            created_at=_aware(row.created_at),
         )

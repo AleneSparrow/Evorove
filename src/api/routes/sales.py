@@ -13,10 +13,14 @@ from src.engine.sales_owner_facts import (
     pending_business_fact_request,
 )
 from src.engine.sales_policy import SalesPolicyEngine
-from src.persistence.errors import StaleSalesProfileError
+from src.domain.found_person import FoundPersonRejected
+from src.persistence.errors import OutboundFirstTouchBlocked, StaleSalesProfileError
+from src.persistence.crm_touch_publisher import publisher_from_settings
+from src.persistence.outbound_first_touch import OutboundFirstTouchService
 from src.persistence.sales_knowledge_import_service import SalesKnowledgeImportService
 from src.persistence.sales_live_turn import SalesLiveTurnService
 from src.persistence.sms_service import SmsService
+from src.persistence.whatsapp_mouth import WhatsAppMouth
 
 from ..dependencies import (
     ApplicationContainer,
@@ -24,11 +28,14 @@ from ..dependencies import (
     UnitOfWorkFactory,
     get_container,
     get_sms_service,
+    get_whatsapp_mouth,
     get_unit_of_work_factory,
     require_own_business,
 )
 from ..errors import ConflictError, RequestDataError, ResourceNotFoundError
 from ..schemas import (
+    OutboundFirstTouchRequest,
+    OutboundFirstTouchResponse,
     PendingBusinessFactRequestSchema,
     SalesCaseContextResponse,
     SalesKnowledgeCardListResponse,
@@ -48,6 +55,65 @@ from ..schemas import (
 
 
 router = APIRouter(prefix="/api/v1/businesses/{business_id}/sales", tags=["sales"])
+
+
+@router.post("/outbound-first-touch", response_model=OutboundFirstTouchResponse)
+def start_outbound_first_touch(
+    business_id: BusinessIdPath,
+    body: OutboundFirstTouchRequest,
+    user: Annotated[StaffUser, Depends(require_own_business)],
+    unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
+    sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    whatsapp_mouth: Annotated[WhatsAppMouth, Depends(get_whatsapp_mouth)],
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> OutboundFirstTouchResponse:
+    """Write first to a found person. No inbound customer message is required."""
+
+    del user
+    try:
+        result = OutboundFirstTouchService(
+            unit_of_work_factory,
+            sms_service=sms_service,
+            whatsapp_mouth=whatsapp_mouth,
+            sales_live=SalesLiveTurnService(
+                analyzer=container.sales_turn_analyzer,  # type: ignore[arg-type]
+                response_generator=container.sales_response_generator,
+                crm_touch_publisher=publisher_from_settings(
+                    container.settings, container.unit_of_work_factory,
+                ),
+            ),
+        ).start(
+            business_id,
+            idempotency_key=body.idempotency_key,
+            reason=body.reason,
+            source=body.source,
+            channel=body.channel,
+            consent_basis=body.consent_basis,
+            name=body.name,
+            phone=body.phone,
+            email=body.email,
+            person_id=body.person_id,
+            preferred_channel=body.preferred_channel,
+            messenger_id=body.messenger_id,
+            gender=body.gender,
+            region=body.region,
+        )
+    except FoundPersonRejected as exc:
+        raise RequestDataError(str(exc)) from exc
+    except OutboundFirstTouchBlocked as exc:
+        if exc.code in {"sms_suppressed", "conversation_already_active"}:
+            raise ConflictError(exc.code, exc.public_message) from exc
+        raise RequestDataError(exc.public_message) from exc
+    return OutboundFirstTouchResponse(
+        case_id=result.case_id,
+        conversation_id=result.conversation_id,
+        lead_id=result.lead_id,
+        move=result.move,
+        message_text=result.message_text,
+        delivered=result.delivered,
+        process_state=result.process_state,
+        duplicate=result.duplicate,
+    )
 
 
 @router.post("/knowledge-cards/import/validate", response_model=SalesKnowledgeImportResponse)
@@ -210,6 +276,7 @@ def supply_case_business_fact(
     user: Annotated[StaffUser, Depends(require_own_business)],
     unit_of_work_factory: Annotated[UnitOfWorkFactory, Depends(get_unit_of_work_factory)],
     sms_service: Annotated[SmsService, Depends(get_sms_service)],
+    whatsapp_mouth: Annotated[WhatsAppMouth, Depends(get_whatsapp_mouth)],
     container: Annotated[ApplicationContainer, Depends(get_container)],
 ) -> SalesCaseContextResponse:
     """Record a fact from the owner so the engine can keep talking to the customer."""
@@ -231,8 +298,16 @@ def supply_case_business_fact(
                 dna = {} if dna_version is None else dna_version.configuration
                 SalesLiveTurnService(
                     response_generator=container.sales_response_generator,
+                    crm_touch_publisher=publisher_from_settings(
+                        container.settings, container.unit_of_work_factory,
+                    ),
                 ).resume_after_owner_fact(
-                    unit_of_work, case, dna, occurred_at=now, sms_service=sms_service,
+                    unit_of_work,
+                    case,
+                    dna,
+                    occurred_at=now,
+                    sms_service=sms_service,
+                    whatsapp_mouth=whatsapp_mouth,
                 )
                 saved = unit_of_work.sales_profiles.get(business_id, case_id) or saved
         except ValueError as exc:

@@ -1,0 +1,12 @@
+{
+  "training_job_started": false,
+  "ai_provider_changed": false,
+  "cards_approved": false,
+  "endpoint": "http://127.0.0.1:8741/v1/chat/completions",
+  "model": "/Users/alenakulish/dev/evorove/private/companion-lora/base-qwen2.5-7b",
+  "adapter_path": "/Users/alenakulish/dev/evorove/private/companion-lora/adapter-qwen2.5-7b-v3",
+  "mouth_guard": true,
+  "sales_policy_engine_chooses_move": true,
+  "mode": "live",
+  "serving": true
+}

@@ -1,9 +1,10 @@
 /** Public legal copy for /privacy, /terms, /dpa, and /subprocessors.
- * Customer-facing English. Keep claims aligned with the product: we store
- * inquiry-to-deal records; we do not train a foundation model on them. */
+ * Customer-facing English. Keep claims aligned with the product: three cycles
+ * (find → sell until ready to book → CRM sets the hour); we do not train a
+ * foundation model on conversation records; we do not collect end-customer money. */
 
 export const LEGAL_CONTACT_EMAIL = "privacy@evorove.com";
-export const LEGAL_UPDATED = "September 7, 2026";
+export const LEGAL_UPDATED = "September 12, 2026";
 export const LEGAL_SITE = "https://evorove.com";
 
 export const LEGAL_NAV = [
@@ -41,7 +42,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
     eyebrow: "Privacy Policy",
     title: "How Evorove handles information",
     summary:
-      "This policy describes how the operator of Evorove (“Evorove,” “we,” “us”) collects, uses, and shares information when you visit evorove.com, create an account, or use the inquiry-to-deal engine. Paid subscriptions are billed by Lemon Squeezy as merchant of record. We do not sell personal information. We do not use your conversations to train a foundation model.",
+      "This policy describes how the operator of Evorove (“Evorove,” “we,” “us”) collects, uses, and shares information when you visit evorove.com, create an account, or use the sales engine. Paid subscriptions are billed by Lemon Squeezy as merchant of record. We do not sell personal information. We do not use your conversations to train a foundation model.",
     sections: [
       {
         id: "who",
@@ -55,7 +56,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
             type: "ul",
             items: [
               "Account holders — the business that signs up for Evorove, and that business’s staff. You are our customer. We are the business collecting your account data.",
-              "End customers — people who inquire with your business (website chat, SMS if you enable it, or another connected channel). For their personal information, you are the business that decides why it is collected. We process it to run the Service for you. Details are in the [[/dpa|Data Processing Addendum]].",
+              "End customers — people who talk with your business (website chat, SMS if you enable it, or another connected channel). For their personal information, you are the business that decides why it is collected. We process it to run the Service for you. Details are in the [[/dpa|Data Processing Addendum]].",
             ],
           },
         ],
@@ -80,7 +81,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
           },
           {
             type: "p",
-            text: "Service records. Incoming inquiries, conversation messages, extracted facts (for example name, phone, email, ZIP, service requested), qualification answers, SMS consent flags, STOP/START/HELP handling, bookings, quotes, payment-request records that do not collect funds, audit events, and staff actions such as human takeover.",
+            text: "Service records. Conversation messages, extracted facts (for example name, phone, email, ZIP, service requested), qualification answers, SMS consent flags, STOP/START/HELP handling, ready-to-book signals, booking and quote records when an hour is set, payment-request records that do not collect funds, audit events, and safety-stop actions (not a closer taking a normal sale).",
           },
           {
             type: "p",
@@ -95,7 +96,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
           {
             type: "ul",
             items: [
-              "Provide the Service: qualify the inquiry, choose the next allowed step, send approved wording, book or quote when your rules allow it, follow up, and hand off to a person.",
+              "Provide the Service: run the sale until Done, store the four-tab board, send approved wording, follow up, and stop for safety, STOP, or an identity conflict. A normal sale stays with the engine; it is not handed to a closer. Booking and quote records may be stored when the hour is set.",
               "Secure the account: authentication, rate limits, abuse prevention, and audit trails.",
               "Bill the account through Lemon Squeezy.",
               "Improve the engine without training a model: logs, evals, prompt and policy review, and staff-reviewed shadow comparisons. That work uses operational records. It does not fine-tune or train a foundation model on your content.",
@@ -124,7 +125,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "If you embed chat or connect SMS, people who contact you will send messages and contact details into Evorove because you asked us to run that conversation. You are responsible for telling them who is writing (including that a system may reply), for collecting any consent your channel requires, and for honoring their requests that the law puts on you. We will help you locate or delete their records in the Service when you ask, as described in the [[/dpa|DPA]].",
+            text: "If you embed chat or connect SMS, people who talk with you will send messages and contact details into Evorove because you asked us to run that conversation. Those channels are how the sale is spoken, not lead generation. You are responsible for telling them who is writing (including that a system may reply), for collecting any consent your channel requires, and for honoring their requests that the law puts on you. We will help you locate or delete their records in the Service when you ask, as described in the [[/dpa|DPA]].",
           },
         ],
       },
@@ -248,14 +249,14 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "Evorove is an inquiry-to-deal engine. It carries an inbound lead through qualification, follow-up, and a booked job or accepted quote, using rules you configure as Business DNA. A language model may rephrase an already chosen step. It does not invent your prices, discounts, legal advice, or guarantees.",
+            text: "Evorove is a sales engine in a three-cycle system: find the right person, sell until they are ready to book, then CRM records Done — a paid sale or a set hour. This Service today runs the sale on channels you connect, such as website chat and SMS, using rules you configure as Business DNA and advertising materials you Refresh. Finding new people is a planned contour and is not included in the Service as shipped. The owner dashboard shows Cold, In progress, Offer made, and Done for watching; it is not a closer’s inbox. Setting the calendar hour is the CRM step for a person who is already ready to book. A language model may rephrase an already chosen step. It does not invent your prices, discounts, legal advice, or guarantees.",
           },
           {
             type: "ul",
             items: [
-              "The Service does not generate new leads or run ads for you.",
+              "Website chat and SMS are conversation channels for the sale. They are not lead generation, and we do not claim the Service finds people today.",
               "The Service does not collect payment from your end customer. A payment request in the product is a record, not a charge.",
-              "We do not promise you a conversion rate. Closing a qualified inquiry is the job the product is built to do; the percentage you see in your own account is not a guarantee we make to you.",
+              "We do not promise you a conversion rate. Getting a qualified person ready to book is the job the product is built to do; the percentage you see in your own account is not a guarantee we make to you.",
             ],
           },
         ],
@@ -276,7 +277,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "You own your Business DNA, your staff data, and the conversation content your end customers send you. You grant us a limited license to host and process that content only to provide and secure the Service, as described in the [[/privacy|Privacy Policy]] and [[/dpa|DPA]]. You represent that you have the right to give us that content and that it does not violate the law or someone else’s rights.",
+            text: "You own your Business DNA, advertising materials you upload, your staff data, and the conversation content your end customers send you. Draft materials are not in force until you press Refresh. You grant us a limited license to host and process that content only to provide and secure the Service, as described in the [[/privacy|Privacy Policy]] and [[/dpa|DPA]]. You represent that you have the right to give us that content and that it does not violate the law or someone else’s rights.",
           },
         ],
       },
@@ -336,7 +337,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "The Service is provided “as is.” We do not warrant that every inquiry will become a booked job, that the model’s wording will always match your taste, or that the Service will be uninterrupted. To the fullest extent the law allows, we disclaim implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
+            text: "The Service is provided “as is.” We do not warrant that every conversation will become a ready-to-book person or a booked hour, that the model’s wording will always match your taste, or that the Service will be uninterrupted. To the fullest extent the law allows, we disclaim implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
           },
         ],
       },
@@ -430,7 +431,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "Subject matter: hosting and running inquiry-to-deal conversations for your business. Duration: the term of your account plus the short retention window in the Privacy Policy. Nature: storage, structured extraction, routing, messaging, audit, and constrained language-model calls. Types of data: identifiers and contact details the end customer or you supply, message content, location as ZIP when collected, service and qualification answers, SMS consent and suppression, booking and quote records. Data subjects: your end customers and, as needed, your staff users.",
+            text: "Subject matter: hosting and running sales conversations for your business until a person is ready to book. Duration: the term of your account plus the short retention window in the Privacy Policy. Nature: storage, structured extraction, routing, messaging, audit, and constrained language-model calls. Types of data: identifiers and contact details the end customer or you supply, message content, location as ZIP when collected, service and qualification answers, SMS consent and suppression, ready-to-book signals, booking and quote records when an hour is set. Data subjects: your end customers and, as needed, your staff users.",
           },
         ],
       },
@@ -440,7 +441,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "We will process Customer Content only: (a) to provide, secure, and support the Service; (b) as this DPA, the Terms, and the Privacy Policy describe; (c) as you instruct through the product (for example Business DNA, takeover, and channel settings); and (d) as US law requires. We will not sell Customer Content or use it for cross-context behavioral advertising.",
+            text: "We will process Customer Content only: (a) to provide, secure, and support the Service; (b) as this DPA, the Terms, and the Privacy Policy describe; (c) as you instruct through the product (for example Business DNA, advertising materials, safety stops, and channel settings); and (d) as US law requires. We will not sell Customer Content or use it for cross-context behavioral advertising.",
           },
         ],
       },
