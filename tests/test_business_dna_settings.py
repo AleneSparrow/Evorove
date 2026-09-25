@@ -34,6 +34,7 @@ def _base_config() -> dict:
         "service_areas": [{"id": "primary", "type": "remote", "values": ["everywhere"]}],
         "qualification": {"enforce_service_area": False},
         "human_escalation": {"triggers": ["high", "emergency"]},
+        "payment": {"payment_link": ""},
         "business_hours": {"monday": [{"opens": "09:00", "closes": "17:00"}]},
         "booking": {
             "enabled": False,
@@ -359,3 +360,38 @@ def test_local_business_rules_are_left_alone():
     config["qualification"] = {"enforce_service_area": False}
     result = BusinessDNASettingsService._apply(config, _update(service_zip_codes=("94103",)))
     assert "rules" not in result["qualification"]
+
+
+def test_payment_link_is_saved_and_cleared():
+    written = BusinessDNASettingsService._apply(
+        _base_config(),
+        _update(payment_link="https://buy.stripe.com/test_4eC5928kK1MK2kE188"),
+    )
+    assert written["payment"]["payment_link"] == "https://buy.stripe.com/test_4eC5928kK1MK2kE188"
+
+    cleared = BusinessDNASettingsService._apply(written, _update(payment_link=""))
+    assert cleared["payment"]["payment_link"] == ""
+
+
+def test_payment_link_is_stripped_before_storing():
+    written = BusinessDNASettingsService._apply(
+        _base_config(),
+        _update(payment_link="  https://pay.example.com/checkout  "),
+    )
+    assert written["payment"]["payment_link"] == "https://pay.example.com/checkout"
+
+
+@pytest.mark.parametrize(
+    "bad_link",
+    [
+        "javascript:alert(1)",
+        "mailto:owner@example.com",
+        "ftp://pay.example.com",
+        "not a url",
+        "https://pay.example.com/has space",
+        "pay.example.com/checkout",
+    ],
+)
+def test_payment_link_rejects_anything_but_a_bare_http_url(bad_link: str):
+    with pytest.raises(ValueError, match="payment link"):
+        _update(payment_link=bad_link)

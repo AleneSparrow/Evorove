@@ -670,6 +670,131 @@ def test_quote_accept_phrases_and_conditions(tmp_path) -> None:
     engine.dispose()
 
 
+PAYMENT_LINK = "https://buy.stripe.com/test_4eC5928kK1MK2kE188"
+
+
+def case_current_state(factory, dna: dict, case_id: str) -> ProcessState:
+    with factory() as uow:
+        case = uow.cases.get(dna["business"]["id"], case_id)
+        return case.current_state
+
+
+def _quote_accept_flow(tmp_path, service: CommercialWorkflowService, dna: dict, factory, case_id: str):
+    metadata: dict = {}
+    with factory() as uow:
+        case = uow.cases.get(dna["business"]["id"], case_id)
+        service.initialize(uow, case, dna, metadata, occurred_at=NOW)
+        service.handle_message(uow, case, dna, metadata, "2", occurred_at=NOW)
+        response = service.handle_message(
+            uow, case, dna, metadata, "Yes, let's do it", occurred_at=NOW
+        )
+        uow.commit()
+    return response
+
+
+def test_quote_accept_with_payment_link_closes_to_paid_and_skips_approval(tmp_path) -> None:
+    """FOUNDATION.md: a payment close is the business's own payment link.
+
+    With payment.payment_link set, quote acceptance hands the link to the
+    customer, moves the case straight to PAID, and lifts the human-approval
+    gate (here 5500 > 100 threshold, which without the link escalates).
+    """
+    engine, factory, dna, case_id = make_factory(tmp_path, "equipment-replacement")
+    dna["payment"]["human_approval_above"] = "100.00"
+    dna["payment"]["payment_link"] = PAYMENT_LINK
+    service = CommercialWorkflowService()
+    response = _quote_accept_flow(tmp_path, service, dna, factory, case_id)
+    assert response.reason == "quote_accepted_payment_link"
+    assert response.requires_human is False
+    assert PAYMENT_LINK in response.message_text
+    assert case_current_state(factory, dna, case_id) is ProcessState.PAID
+    with factory() as uow:
+        payment = uow.session.scalar(select(PaymentRequestRow))
+        assert payment.status == PaymentStatus.READY.value
+        assert payment.metadata_json["human_approval_required"] is False
+    engine.dispose()
+
+
+def test_quote_accept_without_payment_link_keeps_human_approval_gate(tmp_path) -> None:
+    """The gate must not move for businesses that never configured a link."""
+    engine, factory, dna, case_id = make_factory(tmp_path, "equipment-replacement")
+    dna["payment"]["human_approval_above"] = "100.00"
+    service = CommercialWorkflowService()
+    response = _quote_accept_flow(tmp_path, service, dna, factory, case_id)
+    assert response.requires_human is True
+    assert PAYMENT_LINK not in response.message_text
+    assert case_current_state(factory, dna, case_id) is ProcessState.NEEDS_HUMAN
+    engine.dispose()
+
+
+def test_quote_accept_with_invalid_payment_link_falls_back_to_standard_close(tmp_path) -> None:
+    """A malformed DNA value (hand-edited, old version) must never reach a
+    customer message; the close behaves exactly as if no link existed."""
+    engine, factory, dna, case_id = make_factory(tmp_path, "equipment-replacement")
+    dna["payment"]["payment_link"] = "javascript:alert(1)"
+    service = CommercialWorkflowService()
+    response = _quote_accept_flow(tmp_path, service, dna, factory, case_id)
+    assert response.reason == "quote_accepted"
+    assert case_current_state(factory, dna, case_id) is ProcessState.WON
+    assert "javascript:" not in response.message_text
+    engine.dispose()
+
+
+def test_duplicate_accept_after_payment_link_close_resends_link(tmp_path) -> None:
+    """The losing racer of a concurrent double "yes" sees the quote already
+    ACCEPTED while holding a stale QUOTED snapshot; it must re-hand the
+    payment link instead of a bare duplicate line. (Directly driving
+    _handle_quote because the public dispatcher never routes a PAID case
+    there -- only the race reaches this branch.)"""
+    engine, factory, dna, case_id = make_factory(tmp_path, "equipment-replacement")
+    dna["payment"]["human_approval_above"] = "100.00"
+    dna["payment"]["payment_link"] = PAYMENT_LINK
+    service = CommercialWorkflowService()
+    metadata: dict = {}
+    with factory() as uow:
+        case = uow.cases.get(dna["business"]["id"], case_id)
+        service.initialize(uow, case, dna, metadata, occurred_at=NOW)
+        service.handle_message(uow, case, dna, metadata, "2", occurred_at=NOW)
+        uow.commit()
+    with factory() as uow:
+        stale_case = uow.cases.get(dna["business"]["id"], case_id)
+        assert stale_case.current_state is ProcessState.QUOTED
+    with factory() as uow:
+        case = uow.cases.get(dna["business"]["id"], case_id)
+        won = service.handle_message(uow, case, dna, metadata, "yes", occurred_at=NOW)
+        uow.commit()
+    assert won.reason == "quote_accepted_payment_link"
+    assert case_current_state(factory, dna, case_id) is ProcessState.PAID
+    with factory() as uow:
+        duplicate = service._handle_quote(uow, stale_case, dna, {}, "yes", occurred_at=NOW)
+        uow.commit()
+    assert duplicate.reason == "quote_acceptance_duplicate"
+    assert PAYMENT_LINK in duplicate.message_text
+    engine.dispose()
+
+
+def test_booking_confirmation_with_payment_link_appends_link_and_stays_booked(tmp_path) -> None:
+    engine, factory, dna, case_id = make_factory(tmp_path, "diagnostic-visit")
+    dna["payment"]["human_approval_above"] = "10.00"
+    dna["payment"]["payment_link"] = PAYMENT_LINK
+    service = CommercialWorkflowService()
+    metadata: dict = {}
+    with factory() as uow:
+        case = uow.cases.get(dna["business"]["id"], case_id)
+        service.initialize(uow, case, dna, metadata, occurred_at=NOW)
+        response = service.handle_message(
+            uow, case, dna, metadata, "Option 2 please", occurred_at=NOW
+        )
+        uow.commit()
+    assert response.reason == "booking_confirmed"
+    assert case_current_state(factory, dna, case_id) is ProcessState.BOOKED
+    assert PAYMENT_LINK in response.message_text
+    with factory() as uow:
+        payment = uow.session.scalar(select(PaymentRequestRow))
+        assert payment.status == PaymentStatus.READY.value
+    engine.dispose()
+
+
 def test_option_two_please_books_second_slot(tmp_path) -> None:
     engine, factory, dna, case_id = make_factory(tmp_path, "diagnostic-visit")
     service = CommercialWorkflowService()

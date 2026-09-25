@@ -240,6 +240,39 @@ follow-up consent-capture path yet and will simply never qualify for
 proactive follow-up (safe by default, just incomplete coverage). Conversation
 replies to a number that texted in still go out until that person sends STOP.
 
+## 7. Google Calendar connection (optional, for offline closes)
+
+An offline close is a real hour in the business's own calendar
+(`FOUNDATION.md`); until the owner connects a calendar, a booked hour in a
+"foreign" calendar does not count as placed. This is entirely optional: with
+the variables below unset the feature is off — no connection UI, no event
+writes — and every online (payment-link) close works unchanged.
+
+1. Register a Google OAuth web application at
+   `console.cloud.google.com/apis/credentials` (the owner does this herself;
+   do not create the app or share its secret):
+   - Application type: **Web application**.
+   - Authorized redirect URI: `https://<your-frontend>/app/settings?tab=calendar`
+     (or `http://localhost:5173/app/settings?tab=calendar` for local dev).
+   - Add the scope `https://www.googleapis.com/auth/calendar.events` (write-only;
+     the engine never reads or lists the owner's calendar).
+   - Publish the app for testing or production as Google requires.
+2. On the backend service set:
+   - `GOOGLE_CALENDAR_CLIENT_ID` — the OAuth client ID.
+   - `GOOGLE_CALENDAR_CLIENT_SECRET` — the OAuth client secret.
+   - `ACCOUNT_SECURITY_ENCRYPTION_KEY` — at least 32 characters of high-entropy
+     material (the same key already used for authenticator-app 2FA). Both
+     Google tokens are stored Fernet-encrypted with it; the database never
+     sees a plaintext token.
+3. The owner then opens **Settings → Calendar** and clicks
+   **Connect Google Calendar**. Google consents with `prompt=consent` +
+   `access_type=offline`, so a refresh token is issued and the connection
+   stays alive past the first hour.
+4. Delivery rides the same `integrations/deliver` sweep as the CRM board
+   (step 6.2 above), so the hour lands even if a write fails and is retried
+   with the usual 8-attempt / 5-minute-linear backoff. A reschedule PATCHes
+   the existing event; a cancel deletes it.
+
 ## Known limitation carried over from local dev
 
 The public chat and account-security rate limiter (`src/api/rate_limit.py`)

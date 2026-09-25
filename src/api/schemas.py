@@ -1514,6 +1514,7 @@ class BusinessDNASettingsResponse(ApiModel):
     widget_snippet: str = ""
     compliance_disclaimer: str = ""
     ai_disclosure_text: str = ""
+    payment_link: str = ""
 
     @classmethod
     def from_domain(cls, dna: BusinessDNAVersion, *, api_base: str | None = None) -> "BusinessDNASettingsResponse":
@@ -1562,6 +1563,7 @@ class BusinessDNASettingsResponse(ApiModel):
             widget_snippet=_widget_embed_snippet(dna.business_id, api_base=api_base),
             compliance_disclaimer=str(config.get("communication", {}).get("compliance_disclaimer", "") or ""),
             ai_disclosure_text=str(config.get("chat_widget", {}).get("ai_disclosure_text", "") or ""),
+            payment_link=str(config.get("payment", {}).get("payment_link", "") or ""),
         )
 
 
@@ -1611,3 +1613,32 @@ class BusinessDNASettingsUpdateRequest(ApiModel):
     objection_responses: Annotated[tuple[ObjectionResponseUpdateSchema, ...], Field(max_length=50)] = ()
     compliance_disclaimer: Annotated[str, Field(max_length=1000)] = ""
     ai_disclosure_text: Annotated[str, Field(max_length=200)] = ""
+    # The business's own checkout URL (payment.payment_link). Empty clears it;
+    # a non-empty value must be an http(s) URL -- enforced again in
+    # SettingsUpdate.__post_init__ so a direct caller can't bypass it.
+    payment_link: Annotated[str, Field(max_length=2048)] = ""
+
+
+class CalendarStatusResponse(ApiModel):
+    """Connection status for the owner's settings page."""
+
+    enabled: bool
+    connected: bool = False
+    provider: str = "google"
+    calendar_id: str = "primary"
+    connected_at: AwareDatetime | None = None
+
+
+class CalendarConnectRequest(ApiModel):
+    """Where Google should send the owner back after consent."""
+
+    redirect_uri: Annotated[str, Field(min_length=1, max_length=2048)]
+
+
+class CalendarConnectResponse(ApiModel):
+    auth_url: Annotated[str, Field(min_length=1)]
+
+
+class CalendarCallbackRequest(ApiModel):
+    state: Annotated[str, Field(min_length=1, max_length=4096)]
+    code: Annotated[str, Field(min_length=1, max_length=2048)]

@@ -93,6 +93,7 @@ def update_settings(
             ),
             compliance_disclaimer=body.compliance_disclaimer,
             ai_disclosure_text=body.ai_disclosure_text,
+            payment_link=body.payment_link,
         )
         dna = service.update(business_id, update)
     except BusinessDNANotConfiguredError as exc:

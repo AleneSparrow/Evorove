@@ -4,7 +4,7 @@ FOUNDATION.md: a step that is not on the board when it happens is not done,
 and the owner reads the replies on the card, not only a status word. This
 service turns a conversation's committed state into CRM lead-touches
 (`dialogue_started`, one `message` per reply, `offer_sent`, `ready_to_book`,
-`human_takeover`, `booked`) plus the hot-lead handoff when the sale is ready.
+`human_takeover`, `booked`, `paid`) plus the hot-lead handoff when the sale is ready.
 
 Every touch is an `integration_outbox` row whose id is derived from the
 conversation and message, so reporting the same conversation twice enqueues
@@ -53,6 +53,7 @@ OFFER_SALES_STAGES = frozenset({"PRESENTATION", "COMMITMENT", "BOOKING"})
 OFFER_PROCESS_STATES = frozenset({"QUOTED"})
 READY_PROCESS_STATES = frozenset({"QUALIFIED"})
 BOOKED_PROCESS_STATES = frozenset({"BOOKED"})
+PAID_PROCESS_STATES = frozenset({"PAID"})
 HUMAN_STATUSES = frozenset({"human_takeover_requested", "human_takeover_active"})
 CHANNELS = {"sms": "sms", "email": "email"}
 
@@ -287,6 +288,8 @@ class CrmBoardService:
                 self._enqueue_hot_lead(add, conversation, case, identity, messages)
             if case.current_state in BOOKED_PROCESS_STATES:
                 touch("booked", "booked", "Appointment booked.")
+            if case.current_state in PAID_PROCESS_STATES:
+                touch("paid", "paid", "Sale closed — payment link sent to the customer.")
             if conversation.status in HUMAN_STATUSES:
                 touch("takeover", "human_takeover", "Handed to a person.")
             uow.commit()

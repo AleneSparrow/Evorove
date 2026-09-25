@@ -61,6 +61,12 @@ class Settings:
     # set, every cycle-2 touch is reported there (CrmBoardService); unset
     # means nothing is reported.
     crm_base_url: str | None = None
+    # Google Calendar OAuth app credentials. The operator registers the app
+    # herself (cloud.google.com) and pastes the pair into .env; when either is
+    # empty the calendar feature is off: no connection UI, no event writes.
+    # Grant tokens are stored Fernet-encrypted at rest (account_security_encryption_key).
+    google_calendar_client_id: str | None = field(default=None, repr=False)
+    google_calendar_client_secret: str | None = field(default=None, repr=False)
     # Required only when the owner enables authenticator-app 2FA. It has no
     # development default: an operator must provide high-entropy key material
     # before the server may retain an encrypted TOTP seed.
@@ -266,6 +272,8 @@ class Settings:
                 ),
                 internal_task_secret=os.getenv("INTERNAL_TASK_SECRET"),
                 crm_base_url=(os.getenv("CRM_BASE_URL") or "").strip().rstrip("/") or None,
+                google_calendar_client_id=os.getenv("GOOGLE_CALENDAR_CLIENT_ID") or None,
+                google_calendar_client_secret=os.getenv("GOOGLE_CALENDAR_CLIENT_SECRET") or None,
                 account_security_encryption_key=os.getenv("ACCOUNT_SECURITY_ENCRYPTION_KEY"),
                 smtp_host=os.getenv("SMTP_HOST"), smtp_port=smtp_port,
                 smtp_username=os.getenv("SMTP_USERNAME"), smtp_password=os.getenv("SMTP_PASSWORD"),

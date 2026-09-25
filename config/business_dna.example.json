@@ -111,7 +111,8 @@
       "fixed_amount": null
     },
     "request_expiry_hours": 72,
-    "human_approval_above": "10000.00"
+    "human_approval_above": "10000.00",
+    "payment_link": ""
   },
   "communication": {
     "channels": ["sms", "email", "webchat"],

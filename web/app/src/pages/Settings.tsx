@@ -4,7 +4,7 @@ import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Globe,
 import { Sidebar } from "../components/Sidebar";
 import { AreaOption, Field, formatRelativeTime, inputCls, ToneOption } from "../components/Shared";
 import { useAuth, describeError } from "../auth/AuthContext";
-import { API_BASE, api, type BusinessDNASettings, type CommercialPath, type CrmWebhookStatus, type ReportingSettings, type SmsStatus } from "../api/client";
+import { API_BASE, api, type BusinessDNASettings, type CalendarStatus, type CommercialPath, type CrmWebhookStatus, type ReportingSettings, type SmsStatus } from "../api/client";
 import { StatisticsPanel } from "../components/StatisticsPanel";
 import { SalesPlaybookSettings } from "../components/SalesPlaybookSettings";
 import { MaterialsPanel } from "../components/MaterialsPanel";
@@ -24,6 +24,7 @@ const SETTINGS_TABS = [
   { key: "materials", label: "Materials" },
   { key: "reporting", label: "Statistics" },
   { key: "sms", label: "SMS" },
+  { key: "calendar", label: "Calendar" },
   { key: "widget", label: "Site chat" },
   { key: "crm", label: "Webhooks" },
 ] as const;
@@ -144,6 +145,10 @@ interface SettingsState {
   objectionResponses: ObjectionResponseState[];
   complianceDisclaimer: string;
   aiDisclosureText: string;
+  /** payment.payment_link -- the business's own checkout URL handed to the
+   * customer when the sale closes. Empty = close only records the payment
+   * request and a human collects outside the conversation. */
+  paymentLink: string;
 }
 
 /** Preset labels map to the exact copy `src/domain/business_dna_builder.py::_TONE_COPY`
@@ -223,6 +228,7 @@ function fromServer(dna: BusinessDNASettings): SettingsState {
     })),
     complianceDisclaimer: dna.compliance_disclaimer ?? "",
     aiDisclosureText: dna.ai_disclosure_text ?? "",
+    paymentLink: dna.payment_link ?? "",
   };
 }
 
@@ -270,6 +276,10 @@ export default function Settings() {
   const [crmError, setCrmError] = useState<string | null>(null);
   const [crmUrl, setCrmUrl] = useState("");
   const [crmSaving, setCrmSaving] = useState(false);
+  const [calendarStatus, setCalendarStatus] = useState<CalendarStatus | null>(null);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [calendarError, setCalendarError] = useState<string | null>(null);
+  const [calendarBusy, setCalendarBusy] = useState(false);
   const [reporting, setReporting] = useState<ReportingSettings | null>(null);
   const [reportingSaving, setReportingSaving] = useState(false);
   const [reportingError, setReportingError] = useState<string | null>(null);
@@ -351,6 +361,56 @@ export default function Settings() {
       cancelled = true;
     };
   }, [token, businessId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!token || !businessId) return;
+    setCalendarLoading(true);
+    setCalendarError(null);
+    api
+      .getCalendarStatus(token, businessId)
+      .then((status) => {
+        if (!cancelled) setCalendarStatus(status);
+      })
+      .catch((err) => {
+        if (!cancelled) setCalendarError(describeError(err));
+      })
+      .finally(() => {
+        if (!cancelled) setCalendarLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, businessId]);
+
+  // Google sends the owner back to ?tab=calendar&code=...&state=... after
+  // consent; exchange those once, then scrub them from the address bar so a
+  // refresh can't replay the one-time code.
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    if (!token || !businessId || !code || !state) return;
+    setCalendarBusy(true);
+    setCalendarError(null);
+    api
+      .completeCalendarConnect(token, businessId, state, code)
+      .then((status) => {
+        setCalendarStatus(status);
+      })
+      .catch((err) => {
+        setCalendarError(describeError(err));
+      })
+      .finally(() => {
+        setCalendarBusy(false);
+        setSearchParams((prev) => {
+          const params = new URLSearchParams(prev);
+          params.delete("code");
+          params.delete("state");
+          return params;
+        }, { replace: true });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, businessId, searchParams]);
 
   const provisionSms = async () => {
     if (!token || !businessId) return;
@@ -487,6 +547,7 @@ export default function Settings() {
         })),
         compliance_disclaimer: state.complianceDisclaimer.trim(),
         ai_disclosure_text: state.aiDisclosureText.trim(),
+        payment_link: state.paymentLink.trim(),
       });
       const mapped = fromServer(dna);
       // Keep the client-only keys we already had (by position — the server returns
@@ -942,6 +1003,23 @@ export default function Settings() {
                       })}
                     </div>
                   </Field>
+
+                  <Field
+                    label="Payment link"
+                    hint="Your own checkout URL (Stripe, Square, PayPal — anything). When the sale closes, the engine sends this link to the customer and stops there. Leave blank if you collect payment yourself after the conversation."
+                  >
+                    <input
+                      className={inputCls}
+                      type="url"
+                      maxLength={2048}
+                      placeholder="https://buy.stripe.com/…"
+                      value={state.paymentLink}
+                      onChange={(e) => setState({ ...state, paymentLink: e.target.value })}
+                    />
+                    {state.paymentLink.trim().length > 0 && !/^https?:\/\/\S+$/.test(state.paymentLink.trim()) && (
+                      <p className="text-xs mt-1.5" style={{ color: "#B4483A" }}>Enter a full URL starting with https:// or http://.</p>
+                    )}
+                  </Field>
                 </div>
               )}
 
@@ -1183,6 +1261,81 @@ export default function Settings() {
                         </button>
                       )}
                     </div>
+                  )}
+                </div>
+              )}
+
+              {tab === "calendar" && (
+                <div>
+                  <p className="text-sm text-mute mb-6">
+                    When a customer books an offline appointment, the hour is written into your Google calendar automatically — the close isn't finished until it lands there.
+                    You connect your own Google account; we only ever create, move, or remove the booked event, nothing else.
+                  </p>
+                  {calendarLoading && (
+                    <div className="flex items-center gap-2 text-sm text-mute py-6">
+                      <Loader2 size={16} className="animate-spin" /> Checking connection…
+                    </div>
+                  )}
+                  {!calendarLoading && !calendarStatus?.enabled && (
+                    <div className="px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: "#FBF3E8", color: "#8A5A1F" }}>
+                      Calendar sync isn't enabled on this deployment yet. Ask the Evorove team to turn it on.
+                    </div>
+                  )}
+                  {!calendarLoading && calendarStatus?.enabled && calendarStatus.connected && (
+                    <div className="px-4 py-3 rounded-lg text-sm mb-4 flex items-center justify-between gap-3" style={{ backgroundColor: "#E9F5EF", color: "#1E7B52" }}>
+                      <span>
+                        Connected to Google Calendar
+                        {calendarStatus.calendar_id && calendarStatus.calendar_id !== "primary" ? ` (${calendarStatus.calendar_id})` : ""}.
+                        {calendarStatus.connected_at ? ` Connected ${formatRelativeTime(calendarStatus.connected_at)}.` : ""}
+                      </span>
+                      <button
+                        disabled={calendarBusy}
+                        onClick={async () => {
+                          if (!token || !businessId) return;
+                          setCalendarBusy(true);
+                          setCalendarError(null);
+                          try {
+                            await api.disconnectCalendar(token, businessId);
+                            const status = await api.getCalendarStatus(token, businessId);
+                            setCalendarStatus(status);
+                          } catch (err) {
+                            setCalendarError(describeError(err));
+                          } finally {
+                            setCalendarBusy(false);
+                          }
+                        }}
+                        className="text-xs font-medium underline shrink-0 disabled:opacity-50"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+                  )}
+                  {calendarError && (
+                    <div className="mt-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: "#FBEBE9", color: "#8A3225" }}>
+                      {calendarError}
+                    </div>
+                  )}
+                  {!calendarLoading && calendarStatus?.enabled && !calendarStatus.connected && (
+                    <button
+                      disabled={calendarBusy}
+                      onClick={async () => {
+                        if (!token || !businessId) return;
+                        setCalendarBusy(true);
+                        setCalendarError(null);
+                        try {
+                          const redirectUri = `${window.location.origin}/app/settings?tab=calendar`;
+                          const { auth_url } = await api.beginCalendarConnect(token, businessId, redirectUri);
+                          window.location.href = auth_url;
+                        } catch (err) {
+                          setCalendarError(describeError(err));
+                          setCalendarBusy(false);
+                        }
+                      }}
+                      className="text-sm font-medium text-white px-4 py-2.5 rounded-lg disabled:opacity-50"
+                      style={{ backgroundColor: "#0B0B0D" }}
+                    >
+                      {calendarBusy ? "Opening Google…" : "Connect Google Calendar"}
+                    </button>
                   )}
                 </div>
               )}

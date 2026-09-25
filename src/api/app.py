@@ -38,6 +38,7 @@ from .routes import (
     board,
     business_dna,
     businesses,
+    calendar,
     dashboard,
     health,
     integrations,
@@ -209,6 +210,7 @@ def create_app(
     application.include_router(onboarding.router)
     application.include_router(dashboard.router)
     application.include_router(business_dna.router)
+    application.include_router(calendar.router)
     application.include_router(integrations.router)
     application.include_router(outreach.router)
     application.include_router(board.router)

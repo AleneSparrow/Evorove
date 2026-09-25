@@ -286,6 +286,11 @@ def build_business_dna(onboarding: OnboardingInput) -> dict:
             "deposit": {"required": False, "type": "percentage", "percentage": None, "fixed_amount": None},
             "request_expiry_hours": 72,
             "human_approval_above": "10000.00",
+            # Empty by default: no business-owned checkout URL yet, so the
+            # engine records the payment request and the human-approval gate
+            # still applies. Settings lets the owner fill this in; once set,
+            # commercial_service hands the link to the customer at close.
+            "payment_link": "",
         },
         "communication": {
             "channels": ["webchat"],

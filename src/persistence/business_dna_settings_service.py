@@ -48,6 +48,11 @@ _ALL_WEEKDAYS = (
     "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
 )
 _TIME_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+# The business's own checkout URL. Mirrors the schema's payment.payment_link
+# pattern (config/business_dna.schema.json): empty or an http(s) URL with no
+# whitespace -- a mailto:, javascript: or typo'd value must never reach a
+# customer message.
+_PAYMENT_LINK_PATTERN = re.compile(r"^https?://\S+$")
 # Wide enough to never further restrict business_hours -- booking.allowed_times
 # is required non-empty by the schema, so this is the "no extra restriction"
 # placeholder when Settings owns business_hours as the single source of truth
@@ -152,6 +157,11 @@ class SettingsUpdate:
     objection_responses: tuple[ObjectionResponseInput, ...] = ()
     compliance_disclaimer: str = ""
     ai_disclosure_text: str = ""
+    # The business's own checkout URL, handed to the customer when a quote or
+    # booking closes (see commercial_service._business_payment_link). Empty
+    # clears it, same convention as compliance_disclaimer above: Settings is
+    # the sole owner of this field once saved here.
+    payment_link: str = ""
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -162,6 +172,9 @@ class SettingsUpdate:
             raise ValueError("tone must not be empty")
         if not self.services:
             raise ValueError("at least one service is required")
+        link = self.payment_link.strip()
+        if link and not _PAYMENT_LINK_PATTERN.match(link):
+            raise ValueError("payment link must be an http(s) URL")
         try:
             ZoneInfo(self.booking_timezone)
         except ZoneInfoNotFoundError as exc:
@@ -428,5 +441,7 @@ class BusinessDNASettingsService:
             {"trigger_description": item.trigger_description.strip(), "approved_response": item.approved_response.strip()}
             for item in update.objection_responses
         ]
+
+        config["payment"]["payment_link"] = update.payment_link.strip()
 
         return config

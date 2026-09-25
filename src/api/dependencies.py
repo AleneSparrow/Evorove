@@ -27,6 +27,7 @@ from src.persistence.lead_intake import PersistentLeadIntakeService
 from src.persistence.conversation_service import ConversationService
 from src.persistence.crm_touch_publisher import publisher_from_settings
 from src.persistence.business_dna_settings_service import BusinessDNASettingsService
+from src.persistence.calendar_service import CalendarService
 from src.persistence.crm_board_service import CrmBoardService
 from src.persistence.crm_webhook_service import CrmWebhookService
 from src.persistence.email_inbox_service import EmailInboxService
@@ -208,6 +209,17 @@ def get_crm_board_service(
         container.unit_of_work_factory,
         crm_base_url=container.settings.crm_base_url,
         secret=container.settings.internal_task_secret,
+    )
+
+
+def get_calendar_service(
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+) -> CalendarService:
+    return CalendarService(
+        container.unit_of_work_factory,
+        client_id=container.settings.google_calendar_client_id,
+        client_secret=container.settings.google_calendar_client_secret,
+        encryption_key=container.settings.account_security_encryption_key,
     )
 
 

@@ -163,6 +163,28 @@ def test_board_commands_pause_the_engine_idempotently(board) -> None:
     assert reply.json()["status"] == "human_takeover_active"
 
 
+def test_paid_case_reports_paid_touch_to_done_tab(board) -> None:
+    """A payment close (business's own payment link) lands the person on the
+    CRM Done tab: PAID is the only state that emits the `paid` touch."""
+    from src.persistence.sqlalchemy_models import ProcessCaseRow
+
+    client, factory, posts, _ = board
+    _chat(client, FIRST, "b-1")
+    with factory() as uow:
+        case = uow.session.scalars(select(ProcessCaseRow)).one()
+        case.current_state = "PAID"
+        uow.commit()
+    with factory() as uow:
+        conversation_id = uow.session.scalars(select(ConversationRow.id)).one()
+    service = crm_board_service.CrmBoardService(factory, crm_base_url=CRM, secret=SECRET)
+    service.report_conversation("tenant-a", conversation_id)
+
+    paid = _touches(posts, "paid")
+    assert len(paid) == 1
+    assert paid[0]["summary"] == "Sale closed — payment link sent to the customer."
+    assert paid[0]["cycle"] == 2 and paid[0]["source"] == "evorove"
+
+
 def test_disabled_without_crm_base_url(tmp_path: Path) -> None:
     engine = create_database_engine(f"sqlite+pysqlite:///{tmp_path / 'off.db'}")
     Base.metadata.create_all(engine)

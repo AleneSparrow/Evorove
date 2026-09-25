@@ -63,6 +63,28 @@ _ACTIVE_BOOKING_STATUSES = {
     BookingStatus.RESCHEDULED,
 }
 _NUMBER = re.compile(r"(?<![\w.])(?:\d+(?:\.\d{1,3})?)(?![\w.])")
+_PAYMENT_LINK_PREFIXES = ("https://", "http://")
+
+
+def _business_payment_link(dna: Mapping[str, Any]) -> str | None:
+    """The business's own checkout URL (payment.payment_link), or None.
+
+    Strict on purpose -- this string goes verbatim into a customer message,
+    so anything that is not a plain http(s) URL reads as "not configured"
+    rather than reaching the customer. Owner input is already validated at
+    save time (SettingsUpdate + the DNA schema); this guard covers DNA
+    written by any other path.
+    """
+    payment = dna.get("payment")
+    if not isinstance(payment, Mapping):
+        return None
+    link = payment.get("payment_link")
+    if not isinstance(link, str):
+        return None
+    link = link.strip()
+    if not link.startswith(_PAYMENT_LINK_PREFIXES) or any(character.isspace() for character in link):
+        return None
+    return link
 
 
 class CommercialWorkflowService:
@@ -623,6 +645,7 @@ class CommercialWorkflowService:
             occurred_at,
             "Deterministic booking was confirmed",
         )
+        payment_link = _business_payment_link(dna)
         payment = self._prepare_payment(
             uow,
             case,
@@ -630,6 +653,7 @@ class CommercialWorkflowService:
             commercial_total,
             occurred_at,
             booking_id=booking.booking_id,
+            skip_human_approval=payment_link is not None,
         )
         commercial.clear()
         commercial.update({"path": CommercialPath.BOOKING.value, "mode": "booked"})
@@ -652,7 +676,10 @@ class CommercialWorkflowService:
             )
         message = self._booking_confirmation(booking, dna, case)
         if payment is not None:
-            message += _PAYMENT_FOLLOW_UP
+            if payment_link is not None:
+                message += f" You can complete the payment here: {payment_link}"
+            else:
+                message += _PAYMENT_FOLLOW_UP
         return CommercialResponse(
             message,
             "booking_confirmed",
@@ -848,8 +875,15 @@ class CommercialWorkflowService:
             ) or uow.payment_requests.get_for_case_type(
                 case.business_id, case.case_id, PaymentType.FINAL
             )
+            message = "Thank you — your quote was already accepted."
+            payment_link = _business_payment_link(dna)
+            if payment_link is not None and current is ProcessState.PAID:
+                # A repeat "yes" after the link close: the customer most likely
+                # lost the link, so hand it over again instead of a bare
+                # "already accepted".
+                message += f" You can complete the payment here: {payment_link}"
             return CommercialResponse(
-                "Thank you — your quote was already accepted.",
+                message,
                 "quote_acceptance_duplicate",
                 current.value,
                 quote_id=quote.quote_id,
@@ -939,6 +973,7 @@ class CommercialWorkflowService:
             self._transition(
                 uow, case, ProcessState.WON, occurred_at, "Commercial outcome won"
             )
+            payment_link = _business_payment_link(dna)
             payment = self._prepare_payment(
                 uow,
                 case,
@@ -946,8 +981,30 @@ class CommercialWorkflowService:
                 quote.total,
                 occurred_at,
                 quote_id=quote.quote_id,
+                skip_human_approval=payment_link is not None,
             )
             commercial["mode"] = "quote_accepted"
+            if payment is not None and payment_link is not None:
+                # FOUNDATION.md: a payment close is the business's own payment
+                # link. Hand it over and close -- no human-approval gate (the
+                # business collects on their own checkout) and no payment
+                # verification on our side.
+                self._transition(
+                    uow,
+                    case,
+                    ProcessState.PAID,
+                    occurred_at,
+                    "Payment link issued to customer",
+                )
+                commercial["mode"] = "quote_accepted_payment_link"
+                return CommercialResponse(
+                    "Thank you — your quote is accepted. You can complete the payment here: "
+                    f"{payment_link}",
+                    "quote_accepted_payment_link",
+                    case.current_state.value,
+                    quote_id=quote.quote_id,
+                    payment_request_id=payment.payment_request_id,
+                )
             if payment is not None and payment.status is PaymentStatus.PENDING:
                 escalation = self._escalate(
                     uow,
@@ -1219,7 +1276,15 @@ class CommercialWorkflowService:
         *,
         quote_id: str | None = None,
         booking_id: str | None = None,
+        skip_human_approval: bool = False,
     ) -> PaymentRequest | None:
+        """Create the payment request for a won case.
+
+        A payment above the configured approval threshold stays PENDING and
+        requires human approval. ``skip_human_approval`` (the business runs the
+        close through their own checkout URL -- see ``_business_payment_link``)
+        lifts that gate because the engine no longer moves the money itself.
+        """
         if total is None:
             return None
         config = self._mapping(dna.get("payment"), "payment")
@@ -1245,7 +1310,7 @@ class CommercialWorkflowService:
         approval_threshold = DeterministicPricingEngine._decimal(
             config.get("human_approval_above"), "payment human_approval_above"
         )
-        approval_required = total > approval_threshold
+        approval_required = total > approval_threshold and not skip_human_approval
         payment = PaymentRequest(
             payment_request_id=str(uuid4()),
             business_id=case.business_id,

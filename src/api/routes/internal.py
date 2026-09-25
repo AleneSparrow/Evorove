@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from src.domain.found_person import FoundPersonRejected, parse_crm_found_card
 from src.domain.models import utc_now
+from src.persistence.calendar_service import CalendarService
 from src.persistence.commercial_expiry import CommercialExpirySweep
 from src.persistence.crm_board_service import CrmBoardService, apply_board_command
 from src.persistence.crm_touch_publisher import publisher_from_settings
@@ -116,7 +117,13 @@ def deliver_integration_outbox(
     build_email_inbox_service(container).poll_all()  # replies first, so answers go out in this sweep
     email = get_email_outreach_service(container).deliver_due()
     build_outreach_service(container).sync_sent()
-    parts = (crm, sms, touches, board, email)
+    calendar = CalendarService(
+        container.unit_of_work_factory,
+        client_id=container.settings.google_calendar_client_id,
+        client_secret=container.settings.google_calendar_client_secret,
+        encryption_key=container.settings.account_security_encryption_key,
+    ).deliver_due()
+    parts = (crm, sms, touches, board, email, calendar)
     return {key: sum(part[key] for part in parts) for key in ("attempted", "sent", "failed")}
 
 

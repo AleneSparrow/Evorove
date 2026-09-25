@@ -621,6 +621,11 @@ export interface BusinessDNASettings {
   widget_snippet: string;
   compliance_disclaimer: string;
   ai_disclosure_text: string;
+  /** The business's own checkout URL. Empty means the engine only records the
+   * payment request at close; when set, the quote/booking close hands this link
+   * to the customer instead of gating on human approval (payment.payment_link
+   * in the Business DNA). */
+  payment_link: string;
 }
 
 export interface BusinessDNAServiceUpdate {
@@ -648,6 +653,7 @@ export interface BusinessDNASettingsUpdate {
   objection_responses: ObjectionResponse[];
   compliance_disclaimer?: string;
   ai_disclosure_text?: string;
+  payment_link?: string;
 }
 
 export type BillingPlan = "starter" | "pro";
@@ -676,6 +682,14 @@ export interface SmsStatus {
 
 export interface CrmWebhookStatus {
   configured: boolean;
+}
+
+export interface CalendarStatus {
+  enabled: boolean;
+  connected: boolean;
+  provider: string;
+  calendar_id: string;
+  connected_at: string | null;
 }
 
 export interface CheckoutSessionResponse {
@@ -905,6 +919,26 @@ export const api = {
       { method: "DELETE" },
       token,
     ),
+
+  getCalendarStatus: (token: string, businessId: string) =>
+    request<CalendarStatus>(`/api/v1/businesses/${businessId}/calendar`, { method: "GET" }, token),
+
+  beginCalendarConnect: (token: string, businessId: string, redirectUri: string) =>
+    request<{ auth_url: string }>(
+      `/api/v1/businesses/${businessId}/calendar/connect`,
+      { method: "POST", body: JSON.stringify({ redirect_uri: redirectUri }) },
+      token,
+    ),
+
+  completeCalendarConnect: (token: string, businessId: string, state: string, code: string) =>
+    request<CalendarStatus>(
+      `/api/v1/businesses/${businessId}/calendar/callback`,
+      { method: "POST", body: JSON.stringify({ state, code }) },
+      token,
+    ),
+
+  disconnectCalendar: (token: string, businessId: string) =>
+    request<void>(`/api/v1/businesses/${businessId}/calendar`, { method: "DELETE" }, token),
 
   getActiveSalesPlaybook: (token: string, businessId: string) =>
     request<SalesPlaybook>(`/api/v1/businesses/${businessId}/sales/playbook`, { method: "GET" }, token),

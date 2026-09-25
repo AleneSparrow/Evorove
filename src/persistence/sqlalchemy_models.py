@@ -1242,3 +1242,41 @@ class MarketingGuidanceRow(Base):
     activated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     __table_args__ = (CheckConstraint("revision > 0", name="ck_marketing_guidance_revision"),)
+
+
+class CalendarConnectionRow(Base):
+    """One tenant's Google Calendar grant. Tokens are Fernet ciphertext, never plaintext."""
+
+    __tablename__ = "calendar_connections"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), primary_key=True
+    )
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    calendar_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    encrypted_refresh_token: Mapped[str] = mapped_column(Text, nullable=False)
+    encrypted_access_token: Mapped[str] = mapped_column(Text, nullable=False)
+    access_token_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    scopes: Mapped[str] = mapped_column(String(255), nullable=False)
+    connected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (CheckConstraint("provider = 'google'", name="ck_calendar_connections_provider"),)
+
+
+class CalendarEventLinkRow(Base):
+    """Which Google event mirrors which booking, so reschedules PATCH instead of duplicating."""
+
+    __tablename__ = "calendar_event_links"
+
+    business_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("businesses.id", ondelete="CASCADE"), nullable=False
+    )
+    booking_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("bookings.id", ondelete="CASCADE"), primary_key=True
+    )
+    google_event_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (Index("ix_calendar_event_links_business", "business_id"),)
