@@ -352,6 +352,10 @@ def install_error_handlers(app: FastAPI) -> None:
         # isn't set up" when it actually is, just misconfigured.
         code = "billing_provider_error"
         _log_error(request, code, 502, type(exc).__name__)
+        # Lemon Squeezy's JSON:API error body names the rejected resource
+        # (store vs variant); it carries no secret, and without it the
+        # operator cannot tell which ID to fix.
+        logging.getLogger("uvicorn.error").error("lemonsqueezy_error %s", exc)
         return _response(request, 502, code, "Billing provider rejected the request; check the store/variant configuration")
 
     @app.exception_handler(Exception)
