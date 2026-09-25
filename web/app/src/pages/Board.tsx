@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Loader2, Mail, Pause, Phone, Search, Trash2 } from "lucide-react";
-import { Sidebar } from "../components/Sidebar";
 import { useAuth, describeError } from "../auth/AuthContext";
 import {
   api,
@@ -26,6 +25,9 @@ function searchMessage(search: LeadSearchStatus | null): string {
   if (search.status === "not_set_up") return "People search isn't connected yet.";
   if (SEARCH_ACTIVE.has(search.status)) return "Searching from your site… new people will appear on Cold.";
   if (search.status === "failed") return "The last search didn't finish. Try again.";
+  if (search.status === "need_presence") return "We couldn't read your website. Check the address and try again.";
+  if (search.status === "offer_incomplete") return "Your website doesn't say clearly enough what you sell. Add your services to Settings → Materials and try again.";
+  if (search.status === "search_unconnected") return "People search isn't connected yet.";
   const when = search.last_run_at ? new Date(search.last_run_at).toLocaleString("en-US") : "";
   if (search.cold > 0) return `Last search found ${search.cold} new ${search.cold === 1 ? "person" : "people"}${when ? ` · ${when}` : ""}.`;
   return `Last search found nobody new who fits${when ? ` · ${when}` : ""}. We search again every day.`;
@@ -110,7 +112,8 @@ function personLabel(person: BoardPerson): string {
   return person.name || person.email || person.phone || "Person";
 }
 
-export default function Board() {
+/** The CRM board (evorove-crm): Cold, In progress, Offer made, Done. Rendered as the Board view of the CRM page. */
+export function CrmBoard() {
   const { token, businessId } = useAuth();
   const [tab, setTab] = useState<BoardTab>("cold");
   const [people, setPeople] = useState<BoardPerson[] | null>(null);
@@ -186,15 +189,7 @@ export default function Board() {
   }
 
   return (
-    <div className="ev-page min-h-screen w-full flex">
-      <Sidebar />
-      <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
-        <header className="px-6 md:px-8 py-4 border-b border-line">
-          <h1 className="text-xl font-semibold">People</h1>
-          <p className="text-sm text-mute mt-0.5">
-            Every touch from search and sale lands here. Tomorrow stays the booked hours.
-          </p>
-        </header>
+    <>
         <div className="px-6 md:px-8 pt-4 flex gap-2 flex-wrap">
           {TABS.map((item) => (
             <button
@@ -306,7 +301,6 @@ export default function Board() {
             )}
           </section>
         </div>
-      </main>
-    </div>
+    </>
   );
 }
