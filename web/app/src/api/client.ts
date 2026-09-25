@@ -933,6 +933,94 @@ export const api = {
       { method: "POST", body: JSON.stringify({ evaluation }) },
       token,
     ),
+  getLeadSearch: (token: string, businessId: string) =>
+    request<LeadSearchStatus>(`/api/v1/businesses/${businessId}/board/search`, { method: "GET" }, token),
+
+  startLeadSearch: (token: string, businessId: string, siteUrl: string) =>
+    request<LeadSearchStatus>(
+      `/api/v1/businesses/${businessId}/board/search`,
+      { method: "POST", body: JSON.stringify({ site_url: siteUrl }) },
+      token,
+    ),
+
+  listBoard: (token: string, businessId: string, tab: BoardTab) =>
+    request<BoardListResponse>(
+      `/api/v1/businesses/${businessId}/board?tab=${encodeURIComponent(tab)}`,
+      { method: "GET" },
+      token,
+    ),
+
+  getBoardPerson: (token: string, businessId: string, personId: string) =>
+    request<BoardPersonDetail>(
+      `/api/v1/businesses/${businessId}/board/people/${encodeURIComponent(personId)}`,
+      { method: "GET" },
+      token,
+    ),
+
+  issueBoardCommand: (
+    token: string,
+    businessId: string,
+    personId: string,
+    action: "discard" | "correct_identity" | "pause_outreach" | "takeover",
+    fields?: { name?: string; phone?: string; email?: string },
+  ) =>
+    request<BoardCommand>(
+      `/api/v1/businesses/${businessId}/board/people/${encodeURIComponent(personId)}/commands`,
+      { method: "POST", body: JSON.stringify({ action, ...fields }) },
+      token,
+    ),
 };
 
 export { API_BASE };
+
+export type BoardTab = "cold" | "in_work" | "offer_sent" | "done";
+
+export interface LeadSearchStatus {
+  business_id: string;
+  status: string; // never_run | not_set_up | queued | running | people_found | no_fit | failed | ...
+  site_url: string | null;
+  cold: number;
+  last_run_at: string | null;
+}
+
+export interface BoardPerson {
+  person_id: string;
+  tab: BoardTab | "discarded";
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  summary: string;
+  last_kind: string;
+  last_cycle: number;
+  last_touch_at: string;
+  paused: boolean;
+}
+
+export interface BoardTouch {
+  touch_id: string;
+  cycle: number;
+  kind: string;
+  source: string;
+  summary: string;
+  occurred_at: string;
+  payload: Record<string, unknown>;
+}
+
+export interface BoardCommand {
+  command_id: string;
+  action: string;
+  status: string;
+  created_at: string;
+  payload: Record<string, unknown>;
+}
+
+export interface BoardListResponse {
+  tab: BoardTab;
+  people: BoardPerson[];
+}
+
+export interface BoardPersonDetail {
+  person: BoardPerson;
+  touches: BoardTouch[];
+  commands: BoardCommand[];
+}
