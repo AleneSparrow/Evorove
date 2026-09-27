@@ -17,3 +17,6 @@ private/sales-corpus/**
 !private/sales-corpus/incoming/.gitkeep
 private/companion-lora/**
 !private/companion-lora/README.md
+private/social-queue/**
+!private/social-queue/README.md
+!private/social-queue/seed.jsonl
