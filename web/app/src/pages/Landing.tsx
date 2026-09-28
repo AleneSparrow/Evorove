@@ -8,6 +8,33 @@ import { brand } from "../brand/theme";
 
 const OrbitScene = lazy(() => import("../brand/OrbitScene").then((mod) => ({ default: mod.OrbitScene })));
 
+const SALE_LOG = [
+  ["09:41:02", "Find", "Public match — reason on file — Cold"],
+  ["09:41:04", "Sell", "First outbound. Engine, not staff"],
+  ["09:42:11", "Sell", "Price objection answered from facts"],
+  ["09:51:02", "Done", "Paid, or the hour is set"],
+] as const;
+
+function SaleLogCard({ compact = false }: { compact?: boolean }) {
+  const rows = compact ? SALE_LOG.slice(0, 3) : SALE_LOG;
+  return (
+    <div className={compact ? "p-4 max-w-sm" : "p-5"} style={{ background: "#161616", border: "1px solid #2A2A2A" }}>
+      <div className="text-xs mb-3" style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#9A8F83" }}>
+        CS-1042 · sales cycle
+      </div>
+      <div className="flex flex-col gap-2.5 text-sm">
+        {rows.map(([time, stage, desc]) => (
+          <div key={`${time}-${stage}`} className="flex gap-3">
+            <span className="shrink-0" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "#9A8F83" }}>{time}</span>
+            <span className="font-medium shrink-0 w-16" style={{ color: "#C6FF00" }}>{stage}</span>
+            <span className="text-[#C9C2B6]">{desc}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function useDesktopHero() {
   const [desktop, setDesktop] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true,
@@ -81,6 +108,10 @@ export default function Landing() {
               See how it works
             </a>
           </div>
+          <div className="mb-10 max-w-sm">
+            <p className="text-xs mb-2 text-clay">This is the board, not a rendering:</p>
+            <SaleLogCard compact />
+          </div>
           <div className="flex gap-10">
             <div>
               <div className="ev-display text-5xl">24/7</div>
@@ -95,6 +126,9 @@ export default function Landing() {
               <div className="text-xs uppercase tracking-[0.16em] text-clay">CRM tabs, evening view</div>
             </div>
           </div>
+          <p className="text-xs text-clay mt-6 max-w-md">
+            Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.
+          </p>
         </div>
       </section>
 
@@ -141,22 +175,9 @@ export default function Landing() {
               ))}
             </ul>
           </div>
-          <div className="p-5" style={{ background: "#161616", border: "1px solid #2A2A2A" }}>
-            <div className="text-xs mb-3" style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#9A8F83" }}>CS-1042 · sales cycle</div>
-            <div className="flex flex-col gap-2.5 text-sm">
-              {[
-                ["09:41:02", "Find", "Public match — reason on file — Cold"],
-                ["09:41:04", "Sell", "First outbound. Engine, not staff"],
-                ["09:42:11", "Sell", "Price objection answered from facts"],
-                ["09:51:02", "Done", "Paid, or the hour is set"],
-              ].map(([time, stage, desc]) => (
-                <div key={`${time}-${stage}`} className="flex gap-3">
-                  <span className="shrink-0" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "#9A8F83" }}>{time}</span>
-                  <span className="font-medium shrink-0 w-16" style={{ color: "#C6FF00" }}>{stage}</span>
-                  <span className="text-[#C9C2B6]">{desc}</span>
-                </div>
-              ))}
-            </div>
+          <div>
+            <p className="text-xs mb-2 text-clay">What actually happens, logged in real time — not a mockup.</p>
+            <SaleLogCard />
           </div>
         </div>
       </section>
@@ -165,7 +186,7 @@ export default function Landing() {
 
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 text-center">
         <h2 className="ev-display text-6xl md:text-7xl mb-5">Open the board.<br />The cold ones are already there.</h2>
-        <p className="text-mute mb-8 max-w-md mx-auto">Seven-day trial. No prompt engineering. $199/mo after trial.</p>
+        <p className="text-mute mb-8 max-w-md mx-auto">Seven-day trial. No prompt engineering. $199/mo after trial — instead of a hire.</p>
         <button
           onClick={() => navigate(primaryCtaTarget)}
           className="text-[12px] font-bold uppercase tracking-[0.14em] px-6 py-3.5 rounded-full inline-flex items-center gap-2"
