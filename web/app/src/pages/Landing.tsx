@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { FaqSection } from "../components/FaqSection";
+import { BoardPreview } from "../brand/BoardPreview";
 import { MarketingFooter, MarketingHeader } from "../brand/MarketingChrome";
 import { brand } from "../brand/theme";
 
@@ -47,47 +48,50 @@ export default function Landing() {
       <MarketingHeader />
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
-        <div className="relative z-10 max-w-xl">
-          <div className="inline-block mb-5 text-[11px] font-extrabold uppercase tracking-[0.16em] px-3 py-1.5 -rotate-2" style={{ background: "#C6FF00", color: "#0B0B0D" }}>
-            Find · sell · close
-          </div>
-          <h1 className="ev-display text-[72px] md:text-[112px] text-ink">
-            COLD IN.<br />DONE ON THE BOARD.
-          </h1>
-          <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">
-            Subscribe. Tell Evorove the business. It studies your setup, finds people in the open web,
-            puts them on Cold, then sells until the deal is done — a booked hour, or money in your account.
-            You watch the board. You do not hop in to close.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 mb-12">
-            <button
-              onClick={() => navigate(primaryCtaTarget)}
-              className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full inline-flex items-center gap-2"
-              style={{ background: "#C6FF00", color: "#0B0B0D" }}
-            >
-              Start free trial <ArrowRight size={15} />
-            </button>
-            <a href="#how" className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full" style={{ background: "#0B0B0D", color: "#F7F1E4" }}>
-              See how it works
-            </a>
-          </div>
-          <div className="flex gap-10">
-            <div>
-              <div className="ev-display text-5xl">24/7</div>
-              <div className="text-xs uppercase tracking-[0.16em] text-clay">The sale keeps moving</div>
+        <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,1fr)] gap-10 xl:gap-12 items-center">
+          <div className="relative z-10 max-w-xl">
+            <div className="inline-block mb-5 text-[11px] font-extrabold uppercase tracking-[0.16em] px-3 py-1.5 -rotate-2" style={{ background: "#C6FF00", color: "#0B0B0D" }}>
+              Find · sell · close
             </div>
-            <div>
-              <div className="ev-display text-5xl">$199</div>
-              <div className="text-xs uppercase tracking-[0.16em] text-clay">Instead of a hire</div>
+            <h1 className="ev-display text-[64px] md:text-[92px] lg:text-[80px] xl:text-[100px] text-ink">
+              COLD IN.<br />DONE ON THE BOARD.
+            </h1>
+            <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">
+              Subscribe. Tell Evorove the business. It studies your setup, finds people in the open web,
+              puts them on Cold, then sells until the deal is done — a booked hour, or money in your account.
+              You watch the board. You do not hop in to close.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-12">
+              <button
+                onClick={() => navigate(primaryCtaTarget)}
+                className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full inline-flex items-center gap-2"
+                style={{ background: "#C6FF00", color: "#0B0B0D" }}
+              >
+                Start free trial <ArrowRight size={15} />
+              </button>
+              <a href="#how" className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full" style={{ background: "#0B0B0D", color: "#F7F1E4" }}>
+                See how it works
+              </a>
             </div>
-            <div>
-              <div className="ev-display text-5xl">4</div>
-              <div className="text-xs uppercase tracking-[0.16em] text-clay">Live CRM tabs</div>
+            <div className="flex gap-10">
+              <div>
+                <div className="ev-display text-5xl">24/7</div>
+                <div className="text-xs uppercase tracking-[0.16em] text-clay">The sale keeps moving</div>
+              </div>
+              <div>
+                <div className="ev-display text-5xl">$199</div>
+                <div className="text-xs uppercase tracking-[0.16em] text-clay">Instead of a hire</div>
+              </div>
+              <div>
+                <div className="ev-display text-5xl">4</div>
+                <div className="text-xs uppercase tracking-[0.16em] text-clay">Live CRM tabs</div>
+              </div>
             </div>
+            <p className="text-xs text-clay mt-6 max-w-md">
+              Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.
+            </p>
           </div>
-          <p className="text-xs text-clay mt-6 max-w-md">
-            Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.
-          </p>
+          <BoardPreview />
         </div>
       </section>
 
