@@ -116,7 +116,7 @@ export function BoardPreview() {
                   return (
                     <div key={message.text} className={`flex flex-col ${inbound ? "items-start" : "items-end"}`}>
                       <p
-                        className="text-[12px] leading-relaxed max-w-[92%] px-3 py-2"
+                        className="text-[12px] leading-relaxed max-w-[92%] px-3 py-2 rounded-2xl"
                         style={{
                           backgroundColor: inbound ? "#F1F1EF" : "#FFE4D6",
                           color: brand.ink,
