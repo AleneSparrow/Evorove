@@ -4,6 +4,7 @@ import {
   CRM_BOARD_TABS,
   boardApiTab,
   engagementBand,
+  isWatchTab,
   mapBoardApiTab,
   mapCrmTab,
   mapLeadTouchKind,
@@ -11,6 +12,8 @@ import {
 
 test("owner board is four tabs; lost is mapped aside so it does not vanish", () => {
   assert.deepEqual([...CRM_BOARD_TABS], ["cold", "in_progress", "offer_made", "done"]);
+  assert.equal(isWatchTab("cold"), true);
+  assert.equal(isWatchTab("lost"), false);
 });
 
 test("maps lead-touch kinds onto the four watch tabs, not ProcessState", () => {

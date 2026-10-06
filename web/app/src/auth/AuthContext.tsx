@@ -168,7 +168,7 @@ export function describeError(err: unknown): string {
       case "invalid_credentials":
         return "That email or password isn't right.";
       case "business_id_taken":
-        return "That business name is already taken — try a slightly different name.";
+        return "That business ID is already taken — change the ID or the name.";
       case "validation_error":
         return "Please check the highlighted fields and try again.";
       case "conversation_not_linked":

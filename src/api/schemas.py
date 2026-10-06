@@ -1,5 +1,6 @@
 """Pydantic request and response contracts for API v1."""
 
+import re
 from collections.abc import Mapping
 from datetime import datetime
 from decimal import Decimal
@@ -41,6 +42,8 @@ from src.persistence.sales_knowledge_import_service import (
     SalesKnowledgeImportItem,
     SalesKnowledgeImportResult,
 )
+
+_BUSINESS_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
 class ApiModel(BaseModel):
@@ -605,6 +608,9 @@ class OnboardingServiceRequest(ApiModel):
 
 class OnboardingRequest(ApiModel):
     business_name: Annotated[str, Field(min_length=1, max_length=255)]
+    # Optional owner-chosen tenant id. Empty/omitted still slugifies the name.
+    # Search, CRM, and the sale all use this same id — it is not a Railway secret.
+    business_id: Annotated[str | None, Field(default=None, max_length=128)] = None
     # No longer defaulted to a specific vertical -- the wizard now requires the
     # owner to type their own industry (any business, not just home services).
     industry: Annotated[str, Field(min_length=1, max_length=120)]
@@ -627,6 +633,20 @@ class OnboardingRequest(ApiModel):
     # business_dna_builder.OnboardingInput for why.
     escalate_on_high_urgency: bool = False
     escalate_on_emergency: bool = True
+
+    @field_validator("business_id")
+    @classmethod
+    def normalize_business_id(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip().casefold()
+        if not cleaned:
+            return None
+        if not _BUSINESS_ID_PATTERN.fullmatch(cleaned):
+            raise ValueError(
+                "business_id must start with a letter or number and use only lowercase letters, numbers, and hyphens"
+            )
+        return cleaned
 
     @field_validator("service_zip_codes")
     @classmethod

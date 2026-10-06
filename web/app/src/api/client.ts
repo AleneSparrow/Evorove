@@ -188,6 +188,8 @@ export interface OnboardingServicePayload {
 
 export interface OnboardingPayload {
   business_name: string;
+  /** Owner-chosen tenant id. Search, CRM, and the sale all use this same id. */
+  business_id?: string;
   industry: string;
   /** Optional plain-language description of what the business does. With
    * `industry`, this is what lets the engine map a customer's own wording onto

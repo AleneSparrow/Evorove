@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Loader2, Search } from "lucide-react";
 import { useAuth, describeError } from "../auth/AuthContext";
 import { api, type LeadSearchStatus } from "../api/client";
+import { CopyableBusinessId } from "./Shared";
 
 const SEARCH_ACTIVE = new Set(["queued", "running"]);
 
@@ -67,6 +68,18 @@ export function FindPeople({ onFound }: { onFound: () => void }) {
   const disabled = sending || active || search?.status === "not_set_up";
   return (
     <form onSubmit={start} className="px-5 py-4 border-b border-line flex flex-col gap-3">
+      <div>
+        <h2 className="text-sm font-semibold">Find people</h2>
+        <p className="text-xs text-mute mt-1">
+          Paste your website. Found people land on Cold for this business — the same ID the sale uses.
+        </p>
+      </div>
+      {businessId && (
+        <div className="flex items-center gap-2 text-xs text-mute">
+          <span>Business ID</span>
+          <CopyableBusinessId id={businessId} />
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="url"

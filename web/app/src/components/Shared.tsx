@@ -1,4 +1,5 @@
-import type { ComponentType, ReactNode } from "react";
+import { useState, type ComponentType, ReactNode } from "react";
+import { Check, Copy } from "lucide-react";
 import type { ProcessState } from "../api/client";
 import { brand } from "../brand/theme";
 
@@ -197,6 +198,36 @@ export function Field({
 
 export const inputCls =
   "w-full px-3.5 py-2.5 rounded-lg border border-line bg-white text-sm outline-none focus:ring-2 focus:ring-coral/20 focus:border-coral transition-shadow";
+
+export function CopyableBusinessId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // The id stays visible and selectable if clipboard is blocked.
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <code className="text-sm truncate" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+        {id}
+      </code>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label="Copy business ID"
+        className="shrink-0 p-1 rounded-md text-mute hover:text-ink"
+      >
+        {copied ? <Check size={13} /> : <Copy size={13} />}
+      </button>
+    </div>
+  );
+}
 
 /** Used on both Onboarding's "Who can you serve?" step and Settings' "Service
  * area" tab, so a remote/local choice looks and behaves identically wherever

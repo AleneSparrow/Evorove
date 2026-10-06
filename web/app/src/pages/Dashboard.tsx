@@ -18,6 +18,7 @@ import {
   BOARD_API_TABS,
   CRM_BOARD_TABS,
   CRM_TAB_META,
+  isWatchTab,
   mapBoardApiTab,
   type WatchTab,
 } from "../lib/crmBoard";
@@ -50,7 +51,8 @@ export default function Dashboard() {
   const requestedPerson = searchParams.get("lead");
   const [people, setPeople] = useState<BoardPerson[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [crmTab, setCrmTab] = useState<WatchTab>("cold");
+  const requestedCrmTab = searchParams.get("tab");
+  const [crmTab, setCrmTab] = useState<WatchTab>(isWatchTab(requestedCrmTab) ? requestedCrmTab : "cold");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<BoardPersonDetail | null>(null);
@@ -75,7 +77,9 @@ export default function Dashboard() {
         const pick = fromUrl ?? listed[0];
         if (pick) {
           setSelectedId(pick.person_id);
-          setCrmTab(mapBoardApiTab(pick.tab === "discarded" ? "cold" : pick.tab));
+          if (!isWatchTab(requestedCrmTab)) {
+            setCrmTab(mapBoardApiTab(pick.tab === "discarded" ? "cold" : pick.tab));
+          }
         }
       })
       .catch((err) => {
@@ -90,6 +94,20 @@ export default function Dashboard() {
     if (!token || !businessId) return;
     api.getReportingSettings(token, businessId).then(setReporting).catch((err) => setReportingError(describeError(err)));
   }, [token, businessId]);
+
+  useEffect(() => {
+    if (isWatchTab(requestedCrmTab)) setCrmTab(requestedCrmTab);
+  }, [requestedCrmTab]);
+
+  const selectCrmTab = (tab: WatchTab) => {
+    setCrmTab(tab);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("view", "board");
+      params.set("tab", tab);
+      return params;
+    }, { replace: true });
+  };
 
   const setPageTab = (next: PageView) => {
     setSearchParams((prev) => {
@@ -106,6 +124,7 @@ export default function Dashboard() {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
       params.set("view", "board");
+      params.set("tab", tab);
       params.set("lead", personId);
       return params;
     }, { replace: true });
@@ -242,7 +261,7 @@ export default function Dashboard() {
                       <button
                         key={tab}
                         type="button"
-                        onClick={() => setCrmTab(tab)}
+                        onClick={() => selectCrmTab(tab)}
                         className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
                         style={{ backgroundColor: crmTab === tab ? "#FFE8E1" : "transparent", color: crmTab === tab ? "#FF5A36" : "#6B6459" }}
                       >

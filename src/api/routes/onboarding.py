@@ -47,7 +47,7 @@ def create_business(
     provisioning_service: Annotated[BusinessProvisioningService, Depends(get_business_provisioning_service)],
 ) -> BusinessCreatedResponse:
     onboarding = OnboardingInput(
-        business_id=business_id_from_name(body.business_name),
+        business_id=body.business_id or business_id_from_name(body.business_name),
         business_name=body.business_name,
         industry=body.industry,
         tone=body.tone,

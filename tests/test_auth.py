@@ -333,6 +333,34 @@ def test_business_not_linked_to_account_is_forbidden(auth_environment: TestClien
     assert response.status_code == 403
 
 
+def test_owner_can_choose_business_id_and_invalid_id_is_rejected(auth_environment: TestClient) -> None:
+    token = signup(auth_environment, email="owner-id@example.com").json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    created = auth_environment.post(
+        "/api/v1/businesses",
+        json={**onboarding_payload("Evorove"), "business_id": "evorove"},
+        headers=headers,
+    )
+    assert created.status_code == 201
+    assert created.json()["business_id"] == "evorove"
+
+    other = signup(auth_environment, email="owner-id-2@example.com").json()["token"]
+    taken = auth_environment.post(
+        "/api/v1/businesses",
+        json={**onboarding_payload("Something Else"), "business_id": "evorove"},
+        headers={"Authorization": f"Bearer {other}"},
+    )
+    assert taken.status_code == 409
+    assert taken.json()["error"]["code"] == "business_id_taken"
+
+    bad = auth_environment.post(
+        "/api/v1/businesses",
+        json={**onboarding_payload("Other Co"), "business_id": "Not A Valid ID"},
+        headers=headers,
+    )
+    assert bad.status_code == 422
+
+
 def test_duplicate_business_name_is_rejected(auth_environment: TestClient) -> None:
     token_a = signup(auth_environment, email="ownerA@example.com").json()["token"]
     token_b = signup(auth_environment, email="ownerB@example.com").json()["token"]

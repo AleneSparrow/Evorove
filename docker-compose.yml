@@ -64,6 +64,7 @@ services:
       - ./config:/app/config
       - ./scripts:/app/scripts
       - ./evals:/app/evals
+      - ./web/app/src:/app/web/app/src
       - ./pytest.ini:/app/pytest.ini
       - ./alembic.ini:/app/alembic.ini
 

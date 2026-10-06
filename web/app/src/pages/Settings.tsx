@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Globe, Loader2, MapPin, MessageSquare, Plus, RotateCcw, X } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
-import { AreaOption, Field, formatRelativeTime, inputCls, ToneOption } from "../components/Shared";
+import { AreaOption, CopyableBusinessId, Field, formatRelativeTime, inputCls, ToneOption } from "../components/Shared";
 import { useAuth, describeError } from "../auth/AuthContext";
 import { API_BASE, api, type BusinessDNASettings, type CalendarStatus, type CommercialPath, type CrmWebhookStatus, type ReportingSettings, type SmsStatus } from "../api/client";
 import { StatisticsPanel } from "../components/StatisticsPanel";
@@ -767,6 +767,18 @@ export default function Settings() {
               {tab === "basics" && (
                 <div>
                   <Field label="Business name"><input className={inputCls} value={state.name} onChange={(e) => setState({ ...state, name: e.target.value })} /></Field>
+                  <Field
+                    label="Business ID"
+                    hint="Search, the CRM board, and the sale all use this same ID. It cannot change after launch."
+                  >
+                    {businessId ? (
+                      <div className="px-3.5 py-2.5 rounded-lg border border-line bg-cream">
+                        <CopyableBusinessId id={businessId} />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-mute">No business selected.</p>
+                    )}
+                  </Field>
                   <Field label="Industry"><input className={inputCls} value={state.industry} onChange={(e) => setState({ ...state, industry: e.target.value })} /></Field>
                   <Field label="How should it sound to customers?">
                     <div className="grid sm:grid-cols-3 gap-2.5">

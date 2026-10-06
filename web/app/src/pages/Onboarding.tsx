@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { useAuth, describeError } from "../auth/AuthContext";
 import { api, type OnboardingServicePayload } from "../api/client";
-import { AreaOption, Field, EvoroveMark, inputCls, ToneOption } from "../components/Shared";
+import { AreaOption, CopyableBusinessId, Field, EvoroveMark, inputCls, ToneOption } from "../components/Shared";
+import { isValidBusinessId, slugifyBusinessId } from "../lib/businessId";
 
 /**
  * Adaptive to any business, not just a fixed vertical -- see
@@ -96,6 +97,9 @@ export default function Onboarding() {
 
   const [step, setStep] = useState(0);
   const [business, setBusiness] = useState({ name: "", industry: "", description: "", offer: "", tone: "Friendly & direct" });
+  const [businessIdDraft, setBusinessIdDraft] = useState("");
+  const [businessIdTouched, setBusinessIdTouched] = useState(false);
+  const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
   const [services, setServices] = useState<string[]>([]);
   const [newService, setNewService] = useState("");
   const [areaMode, setAreaMode] = useState<"remote" | "local" | null>(null);
@@ -115,11 +119,13 @@ export default function Onboarding() {
   const [attemptedContinue, setAttemptedContinue] = useState(false);
 
   const zipList = useMemo(() => zips.split(",").map((z) => z.trim()).filter(Boolean), [zips]);
+  const suggestedBusinessId = slugifyBusinessId(business.name);
+  const businessId = businessIdTouched ? businessIdDraft.trim() : suggestedBusinessId;
 
   const canContinue = useMemo(() => {
     switch (OB_STEPS[step].key) {
       case "basics":
-        return business.name.trim().length > 0 && business.industry.trim().length > 0;
+        return business.name.trim().length > 0 && business.industry.trim().length > 0 && isValidBusinessId(businessId);
       case "services":
         return services.length > 0;
       case "area":
@@ -127,7 +133,7 @@ export default function Onboarding() {
       default:
         return true;
     }
-  }, [step, business, services, areaMode, zipList]);
+  }, [step, business, businessId, services, areaMode, zipList]);
 
   const next = () => {
     if (!canContinue) {
@@ -161,6 +167,7 @@ export default function Onboarding() {
       const descriptionParts = [business.description.trim(), business.offer.trim() && `Commercial offer:\n${business.offer.trim()}`].filter(Boolean);
       const created = await api.createBusiness(token, {
         business_name: business.name.trim() || "Untitled business",
+        business_id: businessId,
         industry: business.industry.trim(),
         description: descriptionParts.join("\n\n"),
         tone: business.tone,
@@ -180,6 +187,7 @@ export default function Onboarding() {
         // -- switch to it regardless of whatever was previously selected.
         selectBusiness(created.business_id);
       }
+      setCreatedBusinessId(created.business_id);
       setLaunched(true);
     } catch (err) {
       setError(describeError(err));
@@ -230,6 +238,29 @@ export default function Onboarding() {
                     <Field label="Business name">
                       <input className={inputCls} placeholder="e.g. Acme Studio" value={business.name} onChange={(e) => setBusiness({ ...business, name: e.target.value })} />
                       {attemptedContinue && !business.name.trim() && <p className="text-xs mt-1.5" style={{ color: "#B4483A" }}>Give it a name to continue.</p>}
+                    </Field>
+                    <Field
+                      label="Business ID"
+                      hint="Search, the CRM board, and the sale all use this same ID. You can change it now. After launch it stays."
+                    >
+                      <input
+                        className={inputCls}
+                        style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+                        value={businessId}
+                        onChange={(event) => {
+                          setBusinessIdTouched(true);
+                          setBusinessIdDraft(event.target.value.toLowerCase());
+                        }}
+                        placeholder="your-business"
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-label="Business ID"
+                      />
+                      {attemptedContinue && !isValidBusinessId(businessId) && (
+                        <p className="text-xs mt-1.5" style={{ color: "#B4483A" }}>
+                          Use lowercase letters, numbers, and hyphens.
+                        </p>
+                      )}
                     </Field>
                     <Field label="Industry">
                       <input
@@ -417,6 +448,7 @@ export default function Onboarding() {
                     <p className="text-sm text-mute mb-7">Here's what your engine will run on.</p>
                     <div className="rounded-xl bg-cream border border-line p-5 flex flex-col gap-4 text-sm">
                       <div className="flex justify-between"><span className="text-mute">Business</span><span className="font-medium">{business.name || "Untitled business"} · {business.industry}</span></div>
+                      <div className="flex justify-between gap-4"><span className="text-mute">Business ID</span><span className="font-medium" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{businessId}</span></div>
                       <div className="flex justify-between"><span className="text-mute">Voice</span><span className="font-medium">{business.tone}</span></div>
                       <div className="flex justify-between"><span className="text-mute">Services</span><span className="font-medium text-right">{services.join(", ")}</span></div>
                       <div className="flex justify-between">
@@ -473,7 +505,13 @@ export default function Onboarding() {
               <h2 className="ev-display text-4xl mb-2">
                 {business.name || "Your business"} is live.
               </h2>
-              <p className="text-sm text-mute mb-7 max-w-sm">Your business is live. Open CRM and watch: the engine finds people, puts them on Cold, then writes to them. You do not hop in to close a normal sale.</p>
+              <p className="text-sm text-mute mb-4 max-w-sm">Your business is live. Open CRM → Cold and press Find people. Found people land on that board under this ID. You do not hop in to close a normal sale.</p>
+              {createdBusinessId && (
+                <div className="mb-7 px-4 py-3 rounded-xl border border-line bg-cream text-left">
+                  <div className="text-xs text-mute mb-1">Business ID</div>
+                  <CopyableBusinessId id={createdBusinessId} />
+                </div>
+              )}
               <button
                 onClick={() => navigate("/app")}
                 className="text-sm font-medium text-white px-5 py-2.5 rounded-lg flex items-center gap-1.5"

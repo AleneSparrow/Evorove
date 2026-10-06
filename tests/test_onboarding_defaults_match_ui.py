@@ -106,6 +106,14 @@ def test_api_schema_default_matches_the_engine() -> None:
     )
 
 
+def test_wizard_sends_the_chosen_business_id() -> None:
+    source = WIZARD.read_text(encoding="utf-8")
+    assert re.search(r"business_id:\s*businessId\b", source), (
+        "the wizard must post the owner-chosen business_id so search, CRM, "
+        "and the sale use the same tenant"
+    )
+
+
 def test_wizard_actually_sends_the_state_it_initialises() -> None:
     """Guards the other half: a correct default is useless if it isn't sent.
 

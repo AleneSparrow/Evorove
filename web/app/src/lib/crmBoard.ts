@@ -7,6 +7,10 @@ export const BOARD_API_TABS = ["cold", "in_work", "offer_sent", "done"] as const
 export type CrmTab = (typeof CRM_TABS)[number];
 export type WatchTab = (typeof CRM_BOARD_TABS)[number];
 
+export function isWatchTab(value: string | null): value is WatchTab {
+  return value !== null && (CRM_BOARD_TABS as readonly string[]).includes(value);
+}
+
 export const CRM_TAB_META: Record<CrmTab, { label: string; hint: string }> = {
   cold: { label: "Cold", hint: "Found. Not written yet." },
   in_progress: { label: "In progress", hint: "The engine is talking." },

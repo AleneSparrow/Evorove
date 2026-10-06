@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutGrid, MessageSquare, Workflow, CreditCard, LogOut, Menu, X, Plus, Check, ChevronsUpDown, Home, HelpCircle, User } from "lucide-react";
+import { LayoutGrid, MessageSquare, Workflow, CreditCard, LogOut, Menu, X, Plus, Check, ChevronsUpDown, Home, HelpCircle, User, Search } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, type OwnedBusiness } from "../api/client";
 import { EvoroveMark } from "./Shared";
@@ -32,6 +32,11 @@ function BusinessSwitcher({
     >
         <div className="min-w-0">
           <div className="text-sm font-semibold leading-tight truncate">{active?.name ?? "Your business"}</div>
+          {activeId && (
+            <div className="text-[11px] text-mute leading-tight truncate" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+              {activeId}
+            </div>
+          )}
         </div>
         <ChevronsUpDown size={13} className="shrink-0" style={{ color: "#9A8F83" }} />
       </button>
@@ -49,7 +54,12 @@ function BusinessSwitcher({
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-cream"
                 style={{ color: "#0B0B0D" }}
             >
-                <span className="truncate">{b.name}</span>
+                <span className="min-w-0 truncate">
+                  <span className="block truncate">{b.name}</span>
+                  <span className="block text-[11px] text-mute truncate" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                    {b.business_id}
+                  </span>
+                </span>
                 {b.business_id === activeId && <Check size={13} style={{ color: "#1E7B52" }} className="shrink-0" />}
               </button>
             ))}
@@ -194,7 +204,14 @@ function MobileNav({
                       onAddBusiness={() => go("/onboarding")}
                     />
                   ) : (
-                    <div className="text-sm font-semibold leading-tight truncate">{businessName ?? "Your business"}</div>
+                    <div>
+                      <div className="text-sm font-semibold leading-tight truncate">{businessName ?? "Your business"}</div>
+                      {businessId && (
+                        <div className="text-[11px] text-mute leading-tight truncate" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                          {businessId}
+                        </div>
+                      )}
+                    </div>
                   )}
                   <NavLink
                     to="/app/account"
@@ -211,6 +228,7 @@ function MobileNav({
               </div>
               <nav className="flex flex-col gap-1">
                 <NavItem icon={LayoutGrid} label="CRM" to="/app" end onClick={() => setOpen(false)} />
+                <NavItem icon={Search} label="Find people" to="/app?tab=cold" onClick={() => setOpen(false)} />
                 <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" onClick={() => setOpen(false)} />
                 <NavItem icon={Workflow} label="Settings" to="/app/settings" onClick={() => setOpen(false)} />
                 <NavItem icon={CreditCard} label="Billing" to="/app/billing" onClick={() => setOpen(false)} />
@@ -308,6 +326,11 @@ export function Sidebar() {
               ) : (
                 <button onClick={() => navigate("/app")} className="text-left w-full">
                   <div className="text-sm font-semibold leading-tight truncate">{businessName ?? "Your business"}</div>
+                  {businessId && (
+                    <div className="text-[11px] text-mute leading-tight truncate" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                      {businessId}
+                    </div>
+                  )}
                 </button>
               )}
               <NavLink
@@ -321,6 +344,7 @@ export function Sidebar() {
           </div>
           <nav className="flex flex-col gap-1">
             <NavItem icon={LayoutGrid} label="CRM" to="/app" end />
+            <NavItem icon={Search} label="Find people" to="/app?tab=cold" />
             <NavItem icon={MessageSquare} label="Safety" to="/app/conversations" />
             <NavItem icon={Workflow} label="Settings" to="/app/settings" />
             <NavItem icon={CreditCard} label="Billing" to="/app/billing" />
