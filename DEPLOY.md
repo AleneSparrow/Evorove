@@ -1,39 +1,21 @@
 # Deploying Evorove to production
 
-This is a precise, minimal path to get the real app (not `localhost`) live on
-the internet. The backend already has everything it needs (`Dockerfile`,
-Alembic migrations run automatically before each deploy, a `/health`
-endpoint) — this
-guide is mostly account setup and environment variables, most of which only
-you can do (creating accounts and entering secrets/payment isn't something
-Claude does on your behalf).
+One product, one Railway project, one site. The owner opens
+[https://evorove.com](https://evorove.com). The API is
+[https://api.evorove.com](https://api.evorove.com). The Docker image builds
+the React app and the API serves it. There is no public CRM hostname and no
+separate Vercel frontend.
 
-Two independent pieces, two different hosts:
-
-- **Backend + Postgres** → [Railway](https://railway.com). Recommended
-  because it deploys straight from this repo's `Dockerfile`, gives you a
-  Postgres database in the same project with one click, and its Hobby plan
-  ($5/mo minimum, no credit card required to start on the trial) is enough
-  for an early-stage app — no separate database bill, no 30-day database
-  expiry like some competitors' free tiers have.
-- **Frontend (the `web/app` React app)** → [Vercel](https://vercel.com) or
-  [Cloudflare Pages](https://pages.cloudflare.com). Both have a genuinely
-  free, no-time-limit tier for a static site like this one, with a global CDN
-  and free custom domain support. Either works; pick whichever you already
-  have an account style preference for.
-
-(Render is a fine alternative to Railway if you'd rather use it — same
-`Dockerfile`-based deploy — but its free Postgres tier expires after 30 days
-and its free web service tier sleeps when idle, which is a bad first
-impression on a prospect visiting your own signup funnel. Not recommended for
-launch, only mentioned in case you already have a Render account.)
+The backend already has a `Dockerfile`, Alembic migrations before each
+deploy, and `/health`. This guide is account setup and environment
+variables. The owner types secrets. The agent does not.
 
 ## 1. Backend on Railway
 
 1. Sign up at railway.com (GitHub login is the fastest option) and create a
-   **New Project → Deploy from GitHub repo**, pointing at
-   `AleneSparrow/ai-business-process-engine`. Railway will detect the
-   `Dockerfile` automatically.
+   **New Project → Deploy from GitHub repo**, pointing at this repository.
+   Railway will detect the `Dockerfile` automatically. Keep cycle 1 and the
+   board journal in **this same project** if they run as extra services.
 2. In the same project, click **+ New → Database → PostgreSQL**. Railway
    provisions it and exposes a `DATABASE_URL`-shaped set of variables
    automatically inside the project.
@@ -56,11 +38,12 @@ launch, only mentioned in case you already have a Render account.)
      second cloud: Anthropic outage continues the same constrained request
      there before deterministic fallback. Set keys **directly in
      Railway's Variables tab**, not by giving them to Claude.
-   - `CORS_ALLOWED_ORIGINS` — leave a placeholder for now
-     (`https://placeholder.example`); you'll come back and set this to your
-     real frontend URL in step 3. The app refuses to start in production
-     with a wildcard (`*`) here, and refuses every browser request from an
-     origin not explicitly listed — so this has to be exact.
+   - `CORS_ALLOWED_ORIGINS` — `https://evorove.com`. The app refuses a
+     wildcard (`*`) in production.
+   - `FRONTEND_BASE_URL` — `https://evorove.com` (no trailing slash).
+   - `PUBLIC_API_BASE_URL` — `https://api.evorove.com` (unsubscribe links).
+   - `CRM_BASE_URL` — internal origin of the board journal in this project,
+     not a second public site.
    - `LOG_LEVEL` = `INFO` (optional, this is already the default)
 4. Deploy. Railway builds the Docker image, runs `alembic upgrade head` once
    as a pre-deploy step, then starts the app (see `railway.toml` — this is
@@ -69,30 +52,10 @@ launch, only mentioned in case you already have a Render account.)
    exactly once per deployment, before anything serves traffic, so adding a
    second replica later can't make several containers race to apply the same
    migration. Once it's live, Railway shows a public URL like
-   `https://your-service.up.railway.app` — note it, the frontend needs it.
-5. Generate a custom domain later from the service's **Settings → Networking**
-   if you want `api.yourdomain.com` instead of the railway.app subdomain.
+   `https://your-service.up.railway.app`. Custom domains: `api.evorove.com`
+   and `evorove.com` on this image.
 
-## 2. Frontend on Vercel (or Cloudflare Pages)
-
-1. Sign up, **Add New Project**, import the same GitHub repo.
-2. Set the project root to `web/app` (Vercel/Cloudflare both let you point a
-   project at a subdirectory of a monorepo).
-3. Build command: `npm run build`. Output directory: `dist`.
-4. Environment variable: `VITE_API_BASE` = the Railway backend URL from step
-   1.4 above (e.g. `https://your-service.up.railway.app`).
-5. Deploy. You'll get a URL like `https://your-app.vercel.app` (or a
-   `.pages.dev` one on Cloudflare) — note it too.
-
-## 3. Connect them
-
-Go back to the Railway backend's **Variables** and set the real
-`CORS_ALLOWED_ORIGINS` to the frontend URL from step 2.5 (comma-separate if
-you also want to allow a custom domain once you set one up, e.g.
-`https://your-app.vercel.app,https://app.yourdomain.com`). Save — Railway
-redeploys automatically on a variable change.
-
-## 4. Billing (Lemon Squeezy) — required before a real customer can subscribe
+## 2. Billing (Lemon Squeezy) — required before a real customer can subscribe
 
 Self-serve billing (`src/persistence/billing_service.py`) is fully built and
 wired in, but it's off until you do the account-side setup below — with no
@@ -132,15 +95,14 @@ handle tax compliance yourself.
      store name.
    - `LEMONSQUEEZY_VARIANT_STARTER` / `LEMONSQUEEZY_VARIANT_PRO` — the two
      Variant IDs from step 2.
-   - `FRONTEND_BASE_URL` — your deployed frontend's exact origin (e.g.
-     `https://your-app.vercel.app`, no trailing slash) — Lemon Squeezy
-     Checkout redirects back here after payment.
+   - `FRONTEND_BASE_URL` — `https://evorove.com` (no trailing slash). Lemon
+     Squeezy Checkout redirects back here after payment.
    - `BILLING_TRIAL_DAYS` — optional, defaults to `7`; keep in sync with
      step 2's dashboard setting (copy-only, doesn't control anything).
    - `LEMONSQUEEZY_WEBHOOK_SECRET` — from step 4 below (you'll come back to
      this).
 4. **Settings → Webhooks → Add webhook** in Lemon Squeezy:
-   - Callback URL: `https://your-backend.up.railway.app/api/v1/billing/webhook`
+   - Callback URL: `https://api.evorove.com/api/v1/billing/webhook`
    - Signing secret: type in your own secret string here (Lemon Squeezy
      doesn't generate one for you like Stripe does) — then set that same
      value as `LEMONSQUEEZY_WEBHOOK_SECRET` in Railway (step 3) and
@@ -161,19 +123,15 @@ handle tax compliance yourself.
    confident it works, flip the store out of Test mode in Lemon Squeezy
    before sending it to real customers.
 
-## 5. Smoke test
+## 3. Smoke test
 
-Once both are live:
-- Visit the frontend URL, sign up a real account, run through onboarding, and
-  confirm the dashboard loads — this exercises the full stack (frontend →
-  backend → Postgres) in one pass.
-- Check the backend URL's `/health` and `/ready` directly in a browser — both
-  should return `200`.
-- If signup fails with a network/CORS-looking error, the almost-certain cause
-  is `CORS_ALLOWED_ORIGINS` not exactly matching the frontend's origin
-  (scheme + host, no trailing slash) — check step 3.
+On the live site, not on localhost:
+- Open https://evorove.com, sign in, confirm `/app` loads.
+- Open https://api.evorove.com/health and `/ready` — both should return `200`.
+- If the browser cannot reach the API, `CORS_ALLOWED_ORIGINS` must be exactly
+  `https://evorove.com`.
 
-## 6. Proactive follow-up SMS (optional)
+## 4. Proactive follow-up SMS (optional)
 
 Re-contacts a stalled lead (never replied, still `NEW_LEAD`/`CONTACTED`/
 `QUALIFYING`) after the delays configured in Business DNA's
@@ -194,26 +152,25 @@ yet; nothing else in the deploy depends on it.
    on whatever cadence you want checked (hourly is reasonable given the
    24h/72h/168h defaults):
    ```
-   curl -X POST https://your-backend.up.railway.app/api/v1/internal/follow-up/run \
+   curl -X POST https://api.evorove.com/api/v1/internal/follow-up/run \
      -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>"
    ```
    The same secret also gates two other sweeps added with migration `0020`.
    Run them on the same hourly (or slower) cadence, or by hand:
    ```
-   curl -X POST https://your-backend.up.railway.app/api/v1/internal/integrations/deliver \
+   curl -X POST https://api.evorove.com/api/v1/internal/integrations/deliver \
      -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>"
 
-   curl -X POST https://your-backend.up.railway.app/api/v1/internal/commercial/expire \
+   curl -X POST https://api.evorove.com/api/v1/internal/commercial/expire \
      -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>"
    ```
    CRM journal Found cards are ingested (cycle 2 writes GREET) with the same
    secret; contract: `docs/cycle-2-found-ingest-contract.md`.
-   Set `CRM_BASE_URL` to the CRM origin so live sales turns enqueue journal
-   touches (`opened` / `in_play` / `hot`) on `lead-touches` and POST a ready
-   person to `hot-leads`. Cycle 2 does not send a calendar hour. Use the same
-   `INTERNAL_TASK_SECRET` as CRM.
+   Set `CRM_BASE_URL` to the board journal's internal origin in this Railway
+   project. That is not a second public site. Cycle 2 does not send a calendar
+   hour. Use the same `INTERNAL_TASK_SECRET`.
    ```
-   curl -X POST https://your-backend.up.railway.app/api/v1/internal/businesses/<business_id>/found \
+   curl -X POST https://api.evorove.com/api/v1/internal/businesses/<business_id>/found \
      -H "X-Internal-Task-Secret: <the same value as INTERNAL_TASK_SECRET>" \
      -H "Content-Type: application/json" \
      -d '{"person_id":"ppl_example","reason":"Asked neighbors this week for help with a broken AC","source":"open-web","channel":"sms","consent_basis":"prior_express_written","identity":{"phone":"+15551234567"}}'
@@ -240,7 +197,7 @@ follow-up consent-capture path yet and will simply never qualify for
 proactive follow-up (safe by default, just incomplete coverage). Conversation
 replies to a number that texted in still go out until that person sends STOP.
 
-## 7. Google Calendar connection (optional, for offline closes)
+## 5. Google Calendar connection (optional, for offline closes)
 
 An offline close is a real hour in the business's own calendar
 (`FOUNDATION.md`); until the owner connects a calendar, a booked hour in a
@@ -252,8 +209,7 @@ writes — and every online (payment-link) close works unchanged.
    `console.cloud.google.com/apis/credentials` (the owner does this herself;
    do not create the app or share its secret):
    - Application type: **Web application**.
-   - Authorized redirect URI: `https://<your-frontend>/app/settings?tab=calendar`
-     (or `http://localhost:5173/app/settings?tab=calendar` for local dev).
+   - Authorized redirect URI: `https://evorove.com/app/settings?tab=calendar`.
    - Add the scope `https://www.googleapis.com/auth/calendar.events` (write-only;
      the engine never reads or lists the owner's calendar).
    - Publish the app for testing or production as Google requires.

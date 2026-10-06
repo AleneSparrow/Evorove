@@ -24,6 +24,7 @@ from src.engine.sales_live_turn import (
     merge_profile_from_analysis,
     operationally_qualified_for_commitment,
     phrase_approved_move,
+    phrase_commercial_offer,
     phrase_outbound_greet,
 )
 from src.engine.sales_objections import matching_knowledge
@@ -268,6 +269,24 @@ def test_outbound_greet_does_not_assume_they_wrote_in() -> None:
     )
     assert "evorove for acme home services" in stamped.casefold()
     assert ensure_evorove_acting_for(text, business_name="Acme Home Services") == text
+
+
+def test_offer_wording_uses_the_refreshed_offer_and_payment_link() -> None:
+    link = "https://checkout.example/evorove"
+    offer = "One board for the sale you already described."
+    text = phrase_commercial_offer(
+        SalesMove.PRESENT_RELEVANT_VALUE,
+        offer_text=offer,
+        payment_link=link,
+    )
+    assert text is not None
+    assert offer in text
+    assert link in text
+    assert "$" not in text
+    assert "discount" not in text.casefold()
+    assert phrase_commercial_offer(
+        SalesMove.GREET_AND_SET_CONTEXT, offer_text=offer, payment_link=link,
+    ) is None
 
 
 def test_ready_to_book_wording_does_not_set_a_slot() -> None:

@@ -159,6 +159,16 @@ class EmailOutreachService:
     def unsubscribe_ready(self) -> bool:
         return bool(self._public_base_url and self._encryption_key)
 
+    def _send_refusal(self, mailbox: EmailConnectionRow | None) -> str | None:
+        """Why this deployment must not send. None means the three gates are open."""
+        if mailbox is None:
+            return "connect a mailbox before sending"
+        if len((mailbox.postal_address or "").strip()) < 10:
+            return "a physical postal address is required in every commercial email (CAN-SPAM)"
+        if not (self._public_base_url or "").strip():
+            return "PUBLIC_API_BASE_URL is required before a commercial email can be sent"
+        return None
+
     def unsubscribe_url(self, business_id: str, email: str) -> str | None:
         if not self.unsubscribe_ready:
             return None
@@ -266,8 +276,10 @@ class EmailOutreachService:
                 body = f"{body.rstrip()}\nUnsubscribe: {link}"
         with self.unit_of_work_factory() as uow:
             session = uow.session
-            if session.get(EmailConnectionRow, business_id) is None:
-                raise EmailOutreachError("connect a mailbox before sending")
+            mailbox = session.get(EmailConnectionRow, business_id)
+            refusal = self._send_refusal(mailbox)
+            if refusal is not None:
+                raise EmailOutreachError(refusal)
             if _is_suppressed(session, business_id, to_address, None):
                 raise EmailOutreachError("this address unsubscribed")
             if session.get(IntegrationOutboxRow, outbox_id) is None:
@@ -328,8 +340,9 @@ class EmailOutreachService:
             if row is None or row.status != "PENDING" or row.kind != COLD_EMAIL_KIND:
                 return row is not None and row.status == "SENT"
             mailbox = session.get(EmailConnectionRow, row.business_id)
-            if mailbox is None:
-                row.status, row.last_error, row.updated_at = "FAILED", "mailbox_not_connected", now
+            refusal = self._send_refusal(mailbox)
+            if refusal is not None or mailbox is None:
+                row.status, row.last_error, row.updated_at = "FAILED", _send_refusal_code(refusal or "connect a mailbox before sending"), now
                 uow.commit()
                 return False
             if _is_suppressed(session, row.business_id, row.payload.get("to"), None):
@@ -369,6 +382,14 @@ class EmailOutreachService:
             row.payload = {**row.payload, "message_id": message["Message-ID"]}
             uow.commit()
             return True
+
+
+def _send_refusal_code(reason: str) -> str:
+    if reason.startswith("connect a mailbox"):
+        return "mailbox_not_connected"
+    if "postal address" in reason:
+        return "postal_address_required"
+    return "public_api_base_url_required"
 
 
 def _is_suppressed(session: Any, business_id: str, email: str | None, phone: str | None) -> bool:

@@ -80,8 +80,8 @@ def world(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         outreach.assign_cold(
             "tenant-a", person_id=PERSON, email=PROSPECT, phone=None, name="Dana Smith",
             reason="Posted that weekend calls go to voicemail", reason_source="forum",
+            segment="shop owners who miss weekend calls",
         )
-        outreach.approve("tenant-a", PERSON, approved_by="alena@example.com")
         assert inbox_service.poll("tenant-a") == {"received": 0, "replied": 0, "opted_out": 0}  # sets the baseline
         smtp.sent.clear()
         posts.clear()
@@ -102,7 +102,7 @@ def test_reply_continues_the_dialogue_in_the_same_thread(world) -> None:
 
     with factory() as uow:
         texts = [row.text for row in uow.session.scalars(select(ConversationMessageRow).order_by(ConversationMessageRow.sequence_number)).all()]
-    assert texts[0].startswith("Quick question for Dana")  # the engine saw what we wrote first
+    assert texts[0].startswith("For Dana")  # the engine saw what we wrote first
     assert texts[1].startswith("Yes, tell me more") and "> Hi Dana" not in texts[1]
 
     messages = [p for p in posts if p["kind"] == "message"]

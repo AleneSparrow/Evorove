@@ -13,6 +13,7 @@
 Репозитории: `evorove_lead` — цикл 1 (поиск, Cold); этот — цикл 2; `evorove-crm` — доска
 CRM и закрытие (Done). Карта: [`docs/three-repos-next-steps-ru.md`](docs/three-repos-next-steps-ru.md).
 Механика sales-агента: [`docs/sales-agent-implementation-plan-ru.md`](docs/sales-agent-implementation-plan-ru.md) — не замена основы.
+Как делали по этапам: [`docs/project-path-ru.md`](docs/project-path-ru.md). Старые документы — в [`archive/`](archive/).
 
 ## Жёсткие правила
 
@@ -21,14 +22,15 @@ CRM и закрытие (Done). Карта: [`docs/three-repos-next-steps-ru.md`
    а не ошибка, которую надо чинить.
 2. **Не трогать секреты.** API-ключи, пароли, платёжные данные, `DATABASE_URL` /
    `DATABASE_PUBLIC_URL` — не читать, не запрашивать, не вводить. Их вводит Alena сама.
-3. **Не входить в аккаунты и не создавать их.**
+3. **Не входить в аккаунты и не создавать их, кроме случаев, когда Alena лично и явно
+   разрешает это в моменте.**
 4. Рынок продукта — США, полностью. Интерфейс и все клиентские тексты на английском.
 
 ## Среда
 
-- Локально: Docker Compose (Postgres 17 + приложение на Python 3.11), `.env.example` →
-  `.env`. Тесты честнее гонять в контейнере — на хосте у Alena Python 3.13.
-  `docker compose run --rm app pytest`.
+- Локально: Docker Compose (Postgres 17 + приложение на Python 3.11),
+  `.env.example` → `.env`. Тесты честнее гонять в контейнере — на хосте у Alena
+  Python 3.13. `docker compose run --rm app pytest`.
 - Интеграционные тесты требуют `TEST_DATABASE_URL` на мигрированную базу; внутри сети
   Docker хост называется `postgres:5432`, снаружи — `localhost:5433`.
 - Внутренние sweep-эндпоинты (`follow-up/run`, `integrations/deliver`,

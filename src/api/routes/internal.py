@@ -34,6 +34,7 @@ from ..dependencies import (
     build_email_inbox_service,
     build_outreach_service,
     get_container,
+    get_crm_board_service,
     get_email_outreach_service,
     get_sms_service,
     get_unit_of_work_factory,
@@ -245,6 +246,7 @@ def apply_lead_command(
             reason=str(body.payload.get("reason") or ""),
             reason_source=str(body.payload.get("reason_source") or ""),
             hypothesis_id=body.payload.get("hypothesis_id"),
+            segment=str(body.payload.get("segment") or "") or None,
         )
         return {"command_id": body.command_id, "action": body.action, "changed": 1, "status": status}
     stopped = 0
@@ -266,3 +268,28 @@ def apply_lead_command(
             return {"status": "ignored", "reason": "sale_takeover_forbidden"}
         return {"status": "applied", "action": "takeover"}
     return {"command_id": body.command_id, "action": body.action, "changed": changed}
+
+
+@router.post(
+    "/businesses/{business_id}/people/{person_id}/payment-recorded",
+    summary="Record a subscription payment for one person already on Offer made",
+)
+def record_person_payment(
+    business_id: str,
+    person_id: str,
+    container: Annotated[ApplicationContainer, Depends(get_container)],
+    x_internal_task_secret: Annotated[str | None, Header()] = None,
+) -> dict[str, str]:
+    """The owner or the checkout webhook calls this after money arrives.
+
+    The body is empty on purpose: this route does not collect a card.
+    """
+
+    _require_task_secret(container, x_internal_task_secret)
+    try:
+        status = get_crm_board_service(container).record_subscription_payment(
+            business_id, person_id
+        )
+    except ValueError as exc:
+        raise RequestDataError(str(exc)) from exc
+    return {"person_id": person_id, "status": status}

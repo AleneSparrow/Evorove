@@ -1,9 +1,30 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { CRM_BOARD_TABS, engagementBand, mapCrmTab } from "./crmBoard.ts";
+import {
+  CRM_BOARD_TABS,
+  boardApiTab,
+  engagementBand,
+  mapBoardApiTab,
+  mapCrmTab,
+  mapLeadTouchKind,
+} from "./crmBoard.ts";
 
 test("owner board is four tabs; lost is mapped aside so it does not vanish", () => {
   assert.deepEqual([...CRM_BOARD_TABS], ["cold", "in_progress", "offer_made", "done"]);
+});
+
+test("maps lead-touch kinds onto the four watch tabs, not ProcessState", () => {
+  assert.equal(mapLeadTouchKind("assembled"), "cold");
+  assert.equal(mapLeadTouchKind("dialogue_started"), "in_progress");
+  assert.equal(mapLeadTouchKind("message"), "in_progress");
+  assert.equal(mapLeadTouchKind("offer_sent"), "offer_made");
+  assert.equal(mapLeadTouchKind("ready_to_book"), "offer_made");
+  assert.equal(mapLeadTouchKind("booked"), "done");
+  assert.equal(mapLeadTouchKind("paid"), "done");
+  assert.equal(mapBoardApiTab("in_work"), "in_progress");
+  assert.equal(mapBoardApiTab("offer_sent"), "offer_made");
+  assert.equal(boardApiTab("in_progress"), "in_work");
+  assert.equal(boardApiTab("offer_made"), "offer_sent");
 });
 
 test("maps process states onto the four CRM tabs plus lost", () => {

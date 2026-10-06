@@ -854,6 +854,36 @@ class CommercialWorkflowService:
             uow, case, dna, commercial, occurred_at=occurred_at
         )
 
+    def record_payment_received(
+        self,
+        uow: UnitOfWork,
+        *,
+        business_id: str,
+        case_id: str,
+        occurred_at: datetime,
+    ) -> ProcessState:
+        """Done is a payment for this person. A checkout URL is not a payment."""
+
+        case = uow.cases.get(business_id, case_id, for_update=True)
+        if case is None:
+            raise ValueError("unknown case")
+        if case.current_state is ProcessState.PAID:
+            return case.current_state
+        if case.current_state is not ProcessState.WON:
+            raise ValueError("payment is recorded only after the offer")
+        payment = uow.payment_requests.get_for_case_type(
+            business_id, case_id, PaymentType.DEPOSIT
+        ) or uow.payment_requests.get_for_case_type(
+            business_id, case_id, PaymentType.FINAL
+        )
+        if payment is None or payment.status is not PaymentStatus.READY:
+            raise ValueError("no payment is waiting for this person")
+        expected = payment.version
+        payment.change_status(PaymentStatus.PAID, occurred_at)
+        uow.payment_requests.save(payment, expected)
+        self._transition(uow, case, ProcessState.PAID, occurred_at, "Payment recorded")
+        return case.current_state
+
     def _handle_quote(
         self,
         uow: UnitOfWork,
@@ -877,10 +907,9 @@ class CommercialWorkflowService:
             )
             message = "Thank you — your quote was already accepted."
             payment_link = _business_payment_link(dna)
-            if payment_link is not None and current is ProcessState.PAID:
-                # A repeat "yes" after the link close: the customer most likely
-                # lost the link, so hand it over again instead of a bare
-                # "already accepted".
+            if payment_link is not None and current in {ProcessState.WON, ProcessState.PAID}:
+                # The link is still the offer until a payment event. A repeat
+                # "yes" gets the same checkout URL again.
                 message += f" You can complete the payment here: {payment_link}"
             return CommercialResponse(
                 message,
@@ -985,17 +1014,9 @@ class CommercialWorkflowService:
             )
             commercial["mode"] = "quote_accepted"
             if payment is not None and payment_link is not None:
-                # FOUNDATION.md: a payment close is the business's own payment
-                # link. Hand it over and close -- no human-approval gate (the
-                # business collects on their own checkout) and no payment
-                # verification on our side.
-                self._transition(
-                    uow,
-                    case,
-                    ProcessState.PAID,
-                    occurred_at,
-                    "Payment link issued to customer",
-                )
+                # The link is the business's own checkout. Handing it over is
+                # the offer. Done waits for a payment event for this person.
+                # The engine does not collect the card.
                 commercial["mode"] = "quote_accepted_payment_link"
                 return CommercialResponse(
                     "Thank you — your quote is accepted. You can complete the payment here: "

@@ -1,16 +1,15 @@
-"""Cycle 2 writes first to the person on the CRM Cold tab (roadmap step 14).
+"""Cycle 2 writes first to the person on the CRM Cold tab.
 
-FOUNDATION.md: the agent itself writes cold to the person from Cold and leads
+FOUNDATION.md: the engine itself writes cold to the person from Cold and leads
 the conversation. Flow, for every tenant alike (Evorove is client 0):
 
-  CRM `cold_assigned` -> prospect + draft -> owner approves (edits allowed)
-  -> cold email from the tenant's own mailbox -> CRM shows it immediately.
+  CRM `cold_assigned` -> letter from the cycle-1 reason, the audience segment,
+  and facts already in Business DNA -> send from the tenant mailbox -> CRM
+  shows the line immediately.
 
-The draft is built only from the cycle-1 reason and facts already in the
-tenant's Business DNA (name, what it does, service names). It never contains
-a price, discount, guarantee or anything else not in the DNA; the owner reads
-and approves every message before it goes out. Cold SMS is never sent
-(TCPA): a person reachable only by phone is kept and marked skipped.
+The owner watches. She does not approve each letter. The letter never contains
+a price, discount, guarantee, or a fact that was not handed in. Cold SMS is
+never sent (TCPA): a person reachable only by phone is kept and marked skipped.
 """
 
 from __future__ import annotations
@@ -51,8 +50,9 @@ def draft_first_email(
     reason: str,
     sender_name: str,
     postal_address: str,
+    segment: str | None = None,
 ) -> Draft:
-    """Deterministic first message from the reason and DNA facts only."""
+    """First message from the cycle-1 reason, the audience segment, and DNA facts."""
     business = dict((dna or {}).get("business") or {})
     business_name = str(business.get("name") or "our team").strip()
     what_we_do = str(business.get("description") or "").strip().rstrip(".")
@@ -66,17 +66,26 @@ def draft_first_email(
     first_name = (name or "").strip().split(" ")[0] if name and "@" not in name else ""
     greeting = f"Hi {first_name}," if first_name else "Hi there,"
     observed = reason.strip().rstrip(".")
-    intro = f"{business_name} — {what_we_do}." if what_we_do else f"I'm with {business_name}."
+    audience = (segment or "").strip().rstrip(".")
+    if what_we_do and audience:
+        about = f"{business_name} is for {audience}. {what_we_do}."
+    elif what_we_do:
+        about = f"{business_name} — {what_we_do}."
+    elif audience:
+        about = f"{business_name} is for {audience}."
+    else:
+        about = f"I'm with {business_name}."
     body = (
         f"{greeting}\n\n"
-        f"I'm reaching out because of this: {observed}.\n\n"
-        f"{intro}\n\n"
-        "Would it be useful if I sent a short note on how that could work for you?\n\n"
+        f"I wrote because of this: {observed}.\n\n"
+        f"{about}\n\n"
+        "If that is the work in front of you, I can show you what it looks like on one board.\n\n"
         f"{sender_name}\n{business_name}\n\n"
         f"--\n{postal_address}\n"
         'Not interested? Reply "no" and we will not write again.'
     )
-    subject = f"Quick question for {first_name}" if first_name else f"Quick question from {business_name}"
+    subject = f"For {first_name}" if first_name else f"A note from {business_name}"
+    check_message_is_safe(subject, body)
     return Draft(subject=subject[:255], body=body)
 
 
@@ -108,44 +117,60 @@ class OutreachService:
         reason: str,
         reason_source: str,
         hypothesis_id: str | None = None,
+        segment: str | None = None,
     ) -> str:
-        """Idempotent: the same person handed over twice keeps its first draft."""
+        """Idempotent. A drafted letter is sent as soon as the mailbox can send."""
         now = utc_now()
+        release = False
         with self.unit_of_work_factory() as uow:
             session = uow.session
             existing = session.get(OutreachProspectRow, (business_id, person_id))
             if existing is not None:
-                return existing.status
-            mailbox = session.get(EmailConnectionRow, business_id)
-            dna_version = uow.business_dna.get_active(business_id)
-            row = OutreachProspectRow(
-                business_id=business_id,
-                person_id=person_id,
-                email=email,
-                phone=phone,
-                name=name,
-                reason=reason or "found by the search for this business",
-                reason_source=reason_source or "",
-                hypothesis_id=hypothesis_id or None,
-                created_at=now,
-                updated_at=now,
-            )
-            if not email:
-                row.status, row.skip_reason = "skipped", "no_email_cold_sms_not_allowed"
-            elif self._email.is_suppressed(business_id, email=email, phone=phone):
-                row.status, row.skip_reason = "skipped", "unsubscribed"
+                release = existing.status == "drafted"
+                status = existing.status
             else:
-                draft = draft_first_email(
-                    dna_version.configuration if dna_version else None,
+                mailbox = session.get(EmailConnectionRow, business_id)
+                dna_version = uow.business_dna.get_active(business_id)
+                grounded = (reason or "").strip()
+                row = OutreachProspectRow(
+                    business_id=business_id,
+                    person_id=person_id,
+                    email=email,
+                    phone=phone,
                     name=name,
-                    reason=row.reason,
-                    sender_name=mailbox.from_name if mailbox else "The team",
-                    postal_address=mailbox.postal_address if mailbox else "[postal address from the mailbox settings]",
+                    reason=grounded,
+                    reason_source=reason_source or "",
+                    hypothesis_id=hypothesis_id or None,
+                    created_at=now,
+                    updated_at=now,
                 )
-                row.status, row.subject, row.body = "drafted", draft.subject, draft.body
-            session.add(row)
+                if not email:
+                    row.status, row.skip_reason = "skipped", "no_email_cold_sms_not_allowed"
+                elif not grounded:
+                    row.status, row.skip_reason = "skipped", "no_reason"
+                elif self._email.is_suppressed(business_id, email=email, phone=phone):
+                    row.status, row.skip_reason = "skipped", "unsubscribed"
+                else:
+                    draft = draft_first_email(
+                        dna_version.configuration if dna_version else None,
+                        name=name,
+                        reason=row.reason,
+                        sender_name=mailbox.from_name if mailbox else "The team",
+                        postal_address=mailbox.postal_address if mailbox else "",
+                        segment=segment,
+                    )
+                    row.status, row.subject, row.body = "drafted", draft.subject, draft.body
+                    release = True
+                session.add(row)
+                status = row.status
             uow.commit()
-            return row.status
+        if release:
+            try:
+                self._release(business_id, person_id)
+            except OutreachError:
+                return status
+            return self.get(business_id, person_id)["status"]
+        return status
 
     def list(self, business_id: str, status: str | None = None) -> list[dict[str, Any]]:
         with self.unit_of_work_factory() as uow:
@@ -154,6 +179,9 @@ class OutreachService:
                 query = query.where(OutreachProspectRow.status == status)
             rows = uow.session.scalars(query.order_by(OutreachProspectRow.created_at.asc())).all()
             return [_view(row) for row in rows]
+
+    def _release(self, business_id: str, person_id: str) -> dict[str, Any]:
+        return self.approve(business_id, person_id, approved_by="engine")
 
     def approve(
         self,
@@ -169,6 +197,9 @@ class OutreachService:
             row = uow.session.get(OutreachProspectRow, (business_id, person_id))
             if row is None:
                 raise OutreachError("unknown person")
+            if subject is not None or body is not None:
+                check_message_is_safe((subject or "").strip(), (body or row.body or "").strip())
+                raise OutreachError("the engine sends its own letter; an edited draft is not sent")
             if row.status != "drafted":
                 raise OutreachError(f"only a drafted message can be approved (now {row.status})")
             if uow.session.get(EmailConnectionRow, business_id) is None:
@@ -177,8 +208,8 @@ class OutreachService:
                 raise OutreachError("the unsubscribe link needs PUBLIC_API_BASE_URL on this deployment")
             if self._email.is_suppressed(business_id, email=row.email, phone=row.phone):
                 raise OutreachError("this person unsubscribed")
-            final_subject = (subject if subject is not None else row.subject or "").strip()
-            final_body = (body if body is not None else row.body or "").strip()
+            final_subject = (row.subject or "").strip()
+            final_body = (row.body or "").strip()
             check_message_is_safe(final_subject, final_body)
             outbox_id = f"cold-email:{business_id}:{person_id}"
             try:

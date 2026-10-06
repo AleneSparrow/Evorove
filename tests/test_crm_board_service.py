@@ -163,6 +163,26 @@ def test_board_commands_pause_the_engine_idempotently(board) -> None:
     assert reply.json()["status"] == "human_takeover_active"
 
 
+def test_offer_without_payment_stays_off_done(board) -> None:
+    """The checkout URL is the offer. Done waits for a recorded payment."""
+
+    from src.persistence.sqlalchemy_models import ProcessCaseRow
+
+    client, factory, posts, _ = board
+    _chat(client, FIRST, "b-1")
+    with factory() as uow:
+        case = uow.session.scalars(select(ProcessCaseRow)).one()
+        case.current_state = "WON"
+        uow.commit()
+    with factory() as uow:
+        conversation_id = uow.session.scalars(select(ConversationRow.id)).one()
+    service = crm_board_service.CrmBoardService(factory, crm_base_url=CRM, secret=SECRET)
+    service.report_conversation("tenant-a", conversation_id)
+
+    assert _touches(posts, "offer_sent")
+    assert _touches(posts, "paid") == []
+
+
 def test_paid_case_reports_paid_touch_to_done_tab(board) -> None:
     """A payment close (business's own payment link) lands the person on the
     CRM Done tab: PAID is the only state that emits the `paid` touch."""
@@ -181,8 +201,106 @@ def test_paid_case_reports_paid_touch_to_done_tab(board) -> None:
 
     paid = _touches(posts, "paid")
     assert len(paid) == 1
-    assert paid[0]["summary"] == "Sale closed — payment link sent to the customer."
+    assert paid[0]["summary"] == "Payment recorded for this person."
     assert paid[0]["cycle"] == 2 and paid[0]["source"] == "evorove"
+
+
+def test_payment_event_for_that_person_moves_done_and_a_cold_person_does_not(board) -> None:
+    """A recorded subscription payment is Done. The link, and a person still on Cold, are not."""
+
+    from datetime import datetime, timezone
+
+    from src.persistence.sqlalchemy_models import LeadRow, OutreachProspectRow, ProcessCaseRow, SalesProfileRow
+
+    client, factory, posts, _ = board
+    _chat(client, FIRST, "b-1")
+    now = datetime(2026, 10, 5, tzinfo=timezone.utc)
+    with factory() as uow:
+        lead = uow.session.scalars(select(LeadRow)).one()
+        lead.email = "owner@example.com"
+        case = uow.session.scalars(select(ProcessCaseRow)).one()
+        profile = uow.session.get(SalesProfileRow, ("tenant-a", case.id))
+        if profile is None:
+            uow.session.add(
+                SalesProfileRow(
+                    business_id="tenant-a",
+                    case_id=case.id,
+                    stage="PRESENTATION",
+                    decision_criteria=[],
+                    commitment_level="CONSIDERING",
+                    metadata_json={},
+                    created_at=now,
+                    updated_at=now,
+                    version=0,
+                )
+            )
+        else:
+            profile.stage = "PRESENTATION"
+        uow.session.add(
+            OutreachProspectRow(
+                business_id="tenant-a",
+                person_id="ppl_rehearsal",
+                email="owner@example.com",
+                name="Owner rehearsal",
+                reason="Rehearsal on an address the owner reads.",
+                reason_source="owner rehearsal",
+                status="sent",
+                created_at=now,
+                updated_at=now,
+            )
+        )
+        uow.session.add(
+            OutreachProspectRow(
+                business_id="tenant-a",
+                person_id="ppl_cold",
+                email="cold@example.com",
+                name="Still cold",
+                reason="No offer yet.",
+                reason_source="owner rehearsal",
+                status="sent",
+                created_at=now,
+                updated_at=now,
+            )
+        )
+        conversation_id = uow.session.scalars(select(ConversationRow.id)).one()
+        uow.commit()
+
+    service = crm_board_service.CrmBoardService(factory, crm_base_url=CRM, secret=SECRET)
+    service.report_conversation("tenant-a", conversation_id)
+    assert _touches(posts, "offer_sent")
+    assert _touches(posts, "paid") == []
+
+    headers = {"X-Internal-Task-Secret": SECRET}
+    missing = client.post(
+        "/api/v1/internal/businesses/tenant-a/people/ppl_rehearsal/payment-recorded"
+    )
+    assert missing.status_code == 401
+    cold = client.post(
+        "/api/v1/internal/businesses/tenant-a/people/ppl_cold/payment-recorded",
+        headers=headers,
+    )
+    assert cold.status_code == 422
+    assert _touches(posts, "paid") == []
+
+    paid = client.post(
+        "/api/v1/internal/businesses/tenant-a/people/ppl_rehearsal/payment-recorded",
+        headers=headers,
+    )
+    assert paid.status_code == 200
+    assert paid.json()["status"] == "recorded"
+    touches = _touches(posts, "paid")
+    assert len(touches) == 1
+    assert touches[0]["person_id"] == "ppl_rehearsal"
+    assert touches[0]["summary"] == "Payment recorded for this person."
+    assert "$" not in touches[0]["summary"]
+
+    again = client.post(
+        "/api/v1/internal/businesses/tenant-a/people/ppl_rehearsal/payment-recorded",
+        headers=headers,
+    )
+    assert again.status_code == 200
+    assert again.json()["status"] == "duplicate"
+    assert len(_touches(posts, "paid")) == 1
 
 
 def test_disabled_without_crm_base_url(tmp_path: Path) -> None:

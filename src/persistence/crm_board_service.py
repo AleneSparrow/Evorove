@@ -16,6 +16,7 @@ Customer text only ever goes to the tenant's own CRM board.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import urllib.error
@@ -186,6 +187,118 @@ class CrmBoardService:
         for conversation_id in conversation_ids:
             self.report_conversation(business_id, conversation_id)
 
+    def record_subscription_payment(self, business_id: str, person_id: str) -> str:
+        """Done for this person is a recorded subscription payment.
+
+        The checkout URL in the offer is not this event. No card data is read.
+        Returns ``recorded`` or ``duplicate``.
+        """
+
+        person_id = person_id.strip()
+        if not person_id:
+            raise ValueError("person_id is required")
+        if not self.enabled:
+            raise ValueError("CRM_BASE_URL is required before a payment can be recorded")
+        touch_id = "evorove:payment:" + hashlib.sha256(
+            f"{business_id}:{person_id}".encode()
+        ).hexdigest()[:32]
+        with self.unit_of_work_factory() as uow:
+            session = getattr(uow, "session", None)
+            if session is None:
+                raise ValueError("unknown person")
+            if session.get(IntegrationOutboxRow, touch_id) is not None:
+                return "duplicate"
+            prospect = session.get(OutreachProspectRow, (business_id, person_id))
+            email = (prospect.email or "").strip() if prospect is not None else ""
+            if prospect is None or not email:
+                raise ValueError("unknown person")
+            identity = {
+                key: value
+                for key, value in (
+                    ("name", prospect.name),
+                    ("email", email),
+                    ("phone", prospect.phone),
+                )
+                if value
+            }
+            offer_made, case_id, state = self._offer_for_email(
+                session, business_id, email, person_id
+            )
+            if not offer_made:
+                raise ValueError("payment is recorded only after the offer")
+        if state == "WON" and case_id:
+            self._mark_won_case_paid(business_id, case_id)
+        self.report_touch(
+            business_id,
+            touch_id=touch_id,
+            kind="paid",
+            summary="Payment recorded for this person.",
+            identity=identity,
+            person_id=person_id,
+            payload={"case_id": case_id} if case_id else {},
+        )
+        return "recorded"
+
+    def _offer_for_email(
+        self, session: Any, business_id: str, email: str, person_id: str
+    ) -> tuple[bool, str | None, str | None]:
+        lead = session.scalars(
+            select(LeadRow).where(
+                LeadRow.business_id == business_id,
+                func.lower(LeadRow.email) == email.casefold(),
+            )
+        ).first()
+        case = None
+        if lead is not None:
+            case = session.scalars(
+                select(ProcessCaseRow)
+                .where(
+                    ProcessCaseRow.business_id == business_id,
+                    ProcessCaseRow.lead_id == lead.id,
+                )
+                .order_by(ProcessCaseRow.updated_at.desc())
+            ).first()
+        stage = None
+        state = None
+        case_id = None
+        if case is not None:
+            case_id = case.id
+            state = case.current_state
+            profile = session.get(SalesProfileRow, (business_id, case.id))
+            stage = profile.stage if profile is not None else None
+        if (
+            stage in OFFER_SALES_STAGES
+            or state in OFFER_PROCESS_STATES
+            or state in {"WON", "PAID"}
+        ):
+            return True, case_id, state
+        for row in session.scalars(
+            select(IntegrationOutboxRow).where(
+                IntegrationOutboxRow.business_id == business_id,
+                IntegrationOutboxRow.kind == TOUCH_KIND,
+            )
+        ):
+            payload = row.payload if isinstance(row.payload, dict) else {}
+            if payload.get("person_id") == person_id and payload.get("kind") == "offer_sent":
+                return True, case_id, state
+        return False, case_id, state
+
+    def _mark_won_case_paid(self, business_id: str, case_id: str) -> None:
+        from src.persistence.commercial_service import CommercialWorkflowService
+
+        try:
+            with self.unit_of_work_factory() as uow:
+                CommercialWorkflowService().record_payment_received(
+                    uow,
+                    business_id=business_id,
+                    case_id=case_id,
+                    occurred_at=utc_now(),
+                )
+                uow.commit()
+        except ValueError as exc:
+            if "no payment is waiting" not in str(exc):
+                raise
+
     def _enqueue(self, business_id: str, conversation_id: str) -> list[str]:
         now = utc_now()
         enqueued: list[str] = []
@@ -281,7 +394,7 @@ class CrmBoardService:
                     {"direction": message.direction, "sequence": message.sequence_number},
                 )
             stage = profile.stage if profile is not None else None
-            if stage in OFFER_SALES_STAGES or case.current_state in OFFER_PROCESS_STATES:
+            if stage in OFFER_SALES_STAGES or case.current_state in OFFER_PROCESS_STATES or case.current_state == "WON":
                 touch("offer", "offer_sent", "Offer made in the conversation.", {"sales_stage": stage})
             if case.current_state in READY_PROCESS_STATES:
                 touch("ready", "ready_to_book", "Ready to book.")
@@ -289,7 +402,7 @@ class CrmBoardService:
             if case.current_state in BOOKED_PROCESS_STATES:
                 touch("booked", "booked", "Appointment booked.")
             if case.current_state in PAID_PROCESS_STATES:
-                touch("paid", "paid", "Sale closed — payment link sent to the customer.")
+                touch("paid", "paid", "Payment recorded for this person.")
             if conversation.status in HUMAN_STATUSES:
                 touch("takeover", "human_takeover", "Handed to a person.")
             uow.commit()

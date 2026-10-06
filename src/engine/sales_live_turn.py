@@ -400,6 +400,37 @@ def business_facts_available(
     return bool(combined_business_facts(dna, service_id, profile))
 
 
+_OFFER_MOVES = frozenset({
+    SalesMove.PRESENT_RELEVANT_VALUE,
+    SalesMove.ASK_FOR_COMMITMENT,
+})
+
+
+def phrase_commercial_offer(
+    move: SalesMove,
+    *,
+    offer_text: str | None,
+    payment_link: str | None,
+) -> str | None:
+    """The offer is the owner's refreshed words plus their checkout link.
+
+    A missing offer or link is omitted. Nothing here invents a price.
+    """
+
+    if move not in _OFFER_MOVES:
+        return None
+    offer = (offer_text or "").strip()
+    link = (payment_link or "").strip()
+    if not offer and not link:
+        return None
+    parts: list[str] = []
+    if offer:
+        parts.append(offer)
+    if link:
+        parts.append(f"You can complete the payment here: {link}")
+    return " ".join(parts)
+
+
 def phrase_approved_move(move: SalesMove, *, safe_fallback: str) -> str:
     if move is SalesMove.HANDOFF_TO_HUMAN:
         return safe_fallback

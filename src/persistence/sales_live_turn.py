@@ -32,7 +32,7 @@ from src.domain.hot_lead_handoff import try_build_hot_lead_handoff_payload
 from src.domain.states import ProcessState
 from src.engine.decision_router import DecisionRequest
 from src.engine.process_engine import ProcessEngine
-from src.engine.owner_material_pick import pick_activated_owner_material
+from src.engine.owner_material_pick import activated_commercial_offer, pick_activated_owner_material
 from src.engine.sales_live_turn import (
     DeterministicSalesTurnAnalyzer,
     booking_available_for_live_turn,
@@ -41,8 +41,10 @@ from src.engine.sales_live_turn import (
     ensure_evorove_acting_for,
     merge_profile_from_analysis,
     phrase_approved_move,
+    phrase_commercial_offer,
     phrase_outbound_greet,
 )
+from src.persistence.commercial_service import _business_payment_link
 from src.engine.sales_objections import (
     answer_prompt,
     diagnose_prompt,
@@ -586,6 +588,14 @@ class SalesLiveTurnService:
         )
         evidence_map = {f"evidence-{index}": item.excerpt for index, item in enumerate(evidence, start=1)}
         knowledge_map = {card.knowledge_id: card for card in knowledge}
+        if fallback_override is None:
+            offered = phrase_commercial_offer(
+                decision.move,
+                offer_text=activated_commercial_offer(uow, conversation.business_id),
+                payment_link=_business_payment_link(dna),
+            )
+            if offered:
+                fallback_override = offered
         fallback = fallback_override or (
             handoff_text if decision.move is SalesMove.HANDOFF_TO_HUMAN
             else discovery_prompt(profile, qualification, dna)
@@ -654,7 +664,13 @@ class SalesLiveTurnService:
             human_takeover_active=decision.requires_human,
         )
         result = self._validator.validate(candidate, context)
-        return result.message_text, {
+        text = result.message_text
+        link = _business_payment_link(dna)
+        if link and link not in text and phrase_commercial_offer(
+            decision.move, offer_text=None, payment_link=link,
+        ):
+            text = f"{text.rstrip()} You can complete the payment here: {link}"
+        return text, {
             "valid": result.valid,
             "violations": list(result.violations),
             "used_fallback": result.used_fallback,

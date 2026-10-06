@@ -1,5 +1,6 @@
-# The whole Evorove system on one machine: cycle 1 (evorove_lead), cycle 2
-# (this repo) and the CRM board (evorove-crm), each with its own database.
+# Local sandbox only. Not production. Not client 0.
+# Production is evorove.com + api.evorove.com in one Railway project.
+# acme-home-services and run-e2e.sh are a fixture walk, not a live sale.
 #
 #   cd system && ./run-e2e.sh
 #
@@ -36,6 +37,9 @@ services:
       APP_ENV: development
       AI_PROVIDER: ${AI_PROVIDER:-deterministic}
       CRM_BASE_URL: http://crm:8000
+      # Owner sets these. Empty means cold email refuses to send.
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-}
+      ACCOUNT_SECURITY_ENCRYPTION_KEY: ${ACCOUNT_SECURITY_ENCRYPTION_KEY:-}
     command: sh -c "alembic upgrade head && python examples/seed_example_business.py && exec uvicorn src.api.app:app --host 0.0.0.0 --port 8000"
     ports:
       - "${ENGINE_PORT:-8001}:8000"
@@ -79,6 +83,12 @@ services:
       <<: *secret
       DATABASE_URL: postgresql+psycopg://evorove:local_development_only@postgres:5432/lead
       CRM_BASE_URL: http://crm:8000
+      # Same business id as the engine and the CRM. Owner types it. Empty is not a search.
+      EVOROVE_CLIENT_ZERO_BUSINESS_ID: ${EVOROVE_CLIENT_ZERO_BUSINESS_ID:-}
+      WEB_SEARCH_BASE_URL: ${WEB_SEARCH_BASE_URL:-}
+      AI_PROVIDER: ${LEAD_AI_PROVIDER:-deterministic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
     ports:
       - "${LEAD_PORT:-8002}:8002"
     healthcheck:

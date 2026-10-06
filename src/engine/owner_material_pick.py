@@ -21,6 +21,21 @@ _WORD = re.compile(r"[a-z0-9]{3,}")
 _KIND_BONUS = {"offer": 2, "notes": 1, "media": 0}
 
 
+def activated_commercial_offer(uow: UnitOfWork, business_id: str) -> str | None:
+    """The owner's refreshed offer, after Refresh. Drafts are not an offer."""
+
+    guidance = uow.marketing_materials.get_guidance(business_id)
+    if guidance is None:
+        return None
+    for item in decode_snapshot(guidance.snapshot_text):
+        if item.kind != "offer":
+            continue
+        text = item.usable_fact_text()
+        if text:
+            return text
+    return None
+
+
 def pick_activated_owner_material(
     uow: UnitOfWork,
     business_id: str,

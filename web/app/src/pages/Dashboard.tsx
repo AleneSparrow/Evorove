@@ -1,58 +1,81 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, Clock, Loader2, Phone, Mail } from "lucide-react";
 import { Sidebar } from "../components/Sidebar";
 import { MaterialsPanel } from "../components/MaterialsPanel";
 import { StatisticsPanel } from "../components/StatisticsPanel";
+import { FindPeople } from "../components/FindPeople";
 import { useAuth, describeError } from "../auth/AuthContext";
-import { api, type DashboardCaseSummary, type DashboardConversationDetail, type ReportingSettings, type ReportingSettingsUpdate } from "../api/client";
 import {
+  api,
+  type BoardPerson,
+  type BoardPersonDetail,
+  type BoardTouch,
+  type ReportingSettings,
+  type ReportingSettingsUpdate,
+} from "../api/client";
+import {
+  BOARD_API_TABS,
   CRM_BOARD_TABS,
   CRM_TAB_META,
-  mapCrmTab,
-  type CrmTab,
+  mapBoardApiTab,
+  type WatchTab,
 } from "../lib/crmBoard";
 import { formatRelativeTime } from "../components/Shared";
 
 const BOARD_VIEWS = ["board", "statistics", "materials"] as const;
-type BoardTab = (typeof BOARD_VIEWS)[number];
+type PageView = (typeof BOARD_VIEWS)[number];
+const WRITTEN_KINDS = new Set(["dialogue_started", "message", "offer_sent", "ready_to_book", "booked", "paid"]);
 
-function isBoardTab(value: string | null): value is BoardTab {
+function isPageView(value: string | null): value is PageView {
   return value !== null && (BOARD_VIEWS as readonly string[]).includes(value);
+}
+
+function personLabel(person: BoardPerson): string {
+  return person.name || person.email || person.phone || "Unnamed lead";
+}
+
+function engineHasWritten(touches: BoardTouch[]): boolean {
+  return touches.some((touch) => WRITTEN_KINDS.has(touch.kind));
+}
+
+function touchIsInbound(touch: BoardTouch): boolean {
+  return touch.payload.direction === "inbound" || touch.summary.startsWith("Customer:");
 }
 
 export default function Dashboard() {
   const { token, businessId } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const pageTab: BoardTab = isBoardTab(searchParams.get("view")) ? searchParams.get("view") as BoardTab : "board";
-  const requestedLead = searchParams.get("lead");
-  const [cases, setCases] = useState<DashboardCaseSummary[] | null>(null);
+  const pageTab: PageView = isPageView(searchParams.get("view")) ? searchParams.get("view") as PageView : "board";
+  const requestedPerson = searchParams.get("lead");
+  const [people, setPeople] = useState<BoardPerson[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [crmTab, setCrmTab] = useState<CrmTab>("cold");
+  const [crmTab, setCrmTab] = useState<WatchTab>("cold");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [thread, setThread] = useState<DashboardConversationDetail | null>(null);
-  const [threadMissing, setThreadMissing] = useState(false);
-  const [threadLoading, setThreadLoading] = useState(false);
+  const [detail, setDetail] = useState<BoardPersonDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [reporting, setReporting] = useState<ReportingSettings | null>(null);
   const [reportingSaving, setReportingSaving] = useState(false);
   const [reportingError, setReportingError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const reloadPeople = useCallback(() => setReloadKey((key) => key + 1), []);
 
   useEffect(() => {
     let cancelled = false;
     if (!token || !businessId) return;
-    api
-      .listCases(token, businessId, { ignoreBaseline: true })
-      .then((res) => {
+    Promise.all(BOARD_API_TABS.map((tab) => api.listBoard(token, businessId, tab)))
+      .then((pages) => {
         if (cancelled) return;
-        setCases(res.cases);
-        const fromUrl = requestedLead
-          ? res.cases.find((item) => item.case_id === requestedLead)
+        const listed = pages.flatMap((page) => page.people);
+        setPeople(listed);
+        const fromUrl = requestedPerson
+          ? listed.find((item) => item.person_id === requestedPerson)
           : undefined;
-        const pick = fromUrl ?? res.cases[0];
+        const pick = fromUrl ?? listed[0];
         if (pick) {
-          setSelectedId(pick.case_id);
-          setCrmTab(mapCrmTab(pick.current_state));
+          setSelectedId(pick.person_id);
+          setCrmTab(mapBoardApiTab(pick.tab === "discarded" ? "cold" : pick.tab));
         }
       })
       .catch((err) => {
@@ -61,14 +84,14 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [token, businessId, requestedLead]);
+  }, [token, businessId, requestedPerson, reloadKey]);
 
   useEffect(() => {
     if (!token || !businessId) return;
     api.getReportingSettings(token, businessId).then(setReporting).catch((err) => setReportingError(describeError(err)));
   }, [token, businessId]);
 
-  const setPageTab = (next: BoardTab) => {
+  const setPageTab = (next: PageView) => {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
       params.set("view", next);
@@ -77,75 +100,59 @@ export default function Dashboard() {
     }, { replace: true });
   };
 
-  const openLead = (caseId: string, tab: CrmTab) => {
-    setSelectedId(caseId);
+  const openPerson = (personId: string, tab: WatchTab) => {
+    setSelectedId(personId);
     setCrmTab(tab);
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
       params.set("view", "board");
-      params.set("lead", caseId);
+      params.set("lead", personId);
       return params;
     }, { replace: true });
   };
 
-  const decorated = useMemo(
-    () => (cases ?? []).map((item) => ({ ...item, crmTab: mapCrmTab(item.current_state) })),
-    [cases],
-  );
-
   const counts = useMemo(() => {
-    const next: Record<CrmTab, number> = { cold: 0, in_progress: 0, offer_made: 0, done: 0, lost: 0 };
-    decorated.forEach((item) => {
-      next[item.crmTab] += 1;
+    const next: Record<WatchTab, number> = { cold: 0, in_progress: 0, offer_made: 0, done: 0 };
+    (people ?? []).forEach((item) => {
+      if (item.tab === "discarded") return;
+      next[mapBoardApiTab(item.tab)] += 1;
     });
     return next;
-  }, [decorated]);
+  }, [people]);
 
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return decorated.filter((item) => {
-      if (item.crmTab !== crmTab) return false;
+    return (people ?? []).filter((item) => {
+      if (item.tab === "discarded") return false;
+      if (mapBoardApiTab(item.tab) !== crmTab) return false;
       if (!query) return true;
-      return [item.lead.name, item.lead.phone, item.lead.email, item.category, item.case_id, item.lead.region]
+      return [item.name, item.phone, item.email, item.summary, item.person_id]
         .some((value) => value?.toLowerCase().includes(query));
     });
-  }, [decorated, crmTab, searchQuery]);
+  }, [people, crmTab, searchQuery]);
 
   const selected = useMemo(
-    () => decorated.find((item) => item.case_id === selectedId) ?? null,
-    [decorated, selectedId],
+    () => (people ?? []).find((item) => item.person_id === selectedId) ?? null,
+    [people, selectedId],
   );
 
   useEffect(() => {
     let cancelled = false;
     if (!token || !businessId || !selectedId) {
-      setThread(null);
+      setDetail(null);
       return;
     }
-    setThreadLoading(true);
-    setThreadMissing(false);
+    setDetailLoading(true);
     api
-      .listConversations(token, businessId)
-      .then(async (res) => {
-        const match = res.conversations.find((item) => item.case_id === selectedId);
-        if (!match) {
-          if (!cancelled) {
-            setThread(null);
-            setThreadMissing(true);
-          }
-          return;
-        }
-        const detail = await api.getConversation(token, businessId, match.conversation_id);
-        if (!cancelled) {
-          setThread(detail);
-          setThreadMissing(false);
-        }
+      .getBoardPerson(token, businessId, selectedId)
+      .then((res) => {
+        if (!cancelled) setDetail(res);
       })
       .catch((err) => {
         if (!cancelled) setError(describeError(err));
       })
       .finally(() => {
-        if (!cancelled) setThreadLoading(false);
+        if (!cancelled) setDetailLoading(false);
       });
     return () => {
       cancelled = true;
@@ -166,6 +173,8 @@ export default function Dashboard() {
       setReportingSaving(false);
     }
   };
+
+  const selectedTab = selected && selected.tab !== "discarded" ? mapBoardApiTab(selected.tab) : crmTab;
 
   return (
     <div className="ev-page min-h-screen w-full flex">
@@ -221,7 +230,7 @@ export default function Dashboard() {
                 Couldn't load the board: {error}
               </div>
             )}
-            {cases === null && !error ? (
+            {people === null && !error ? (
               <div className="flex items-center gap-2 text-sm text-mute py-12 justify-center">
                 <Loader2 size={16} className="animate-spin" /> Loading the board…
               </div>
@@ -240,14 +249,6 @@ export default function Dashboard() {
                         {CRM_TAB_META[tab].label} ({counts[tab]})
                       </button>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() => setCrmTab("lost")}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
-                      style={{ backgroundColor: crmTab === "lost" ? "#F1F1EF" : "transparent", color: "#6B6459" }}
-                    >
-                      Lost ({counts.lost})
-                    </button>
                     <div className="relative ml-auto">
                       <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-clay" />
                       <input
@@ -260,39 +261,37 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <p className="px-5 py-2 text-xs text-mute border-b border-line">{CRM_TAB_META[crmTab].hint}</p>
-                  {decorated.length === 0 ? (
+                  {crmTab === "cold" && <FindPeople onFound={reloadPeople} />}
+                  {(people ?? []).length === 0 ? (
                     <p className="px-5 py-12 text-center text-sm text-mute">
                       The board is empty. After you subscribe and set up the business, the engine finds people and puts them on Cold. Then it writes to them.
                     </p>
                   ) : filtered.length === 0 ? (
-                    <p className="px-5 py-12 text-center text-sm text-mute">No leads on this tab match the search.</p>
+                    <p className="px-5 py-12 text-center text-sm text-mute">No people on this tab match the search.</p>
                   ) : (
                     <ul>
                       {filtered.map((item) => (
                         <li
-                          key={item.case_id}
+                          key={item.person_id}
                           role="button"
                           tabIndex={0}
-                          onClick={() => openLead(item.case_id, item.crmTab)}
+                          onClick={() => openPerson(item.person_id, mapBoardApiTab(item.tab === "discarded" ? "cold" : item.tab))}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
-                              openLead(item.case_id, item.crmTab);
+                              openPerson(item.person_id, mapBoardApiTab(item.tab === "discarded" ? "cold" : item.tab));
                             }
                           }}
                           className="px-5 py-4 border-b border-[#F0EFE9] last:border-0 cursor-pointer"
-                          style={{ backgroundColor: selected?.case_id === item.case_id ? "#FFE8E1" : "transparent" }}
+                          style={{ backgroundColor: selected?.person_id === item.person_id ? "#FFE8E1" : "transparent" }}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="min-w-0">
-                              <div className="text-sm font-semibold truncate">{item.lead.name || "Unnamed lead"}</div>
-                              <div className="text-sm text-mute truncate mt-0.5">
-                                {item.category ?? "Uncategorized"}
-                                {item.lead.region ? ` · ${item.lead.region}` : ""}
-                              </div>
+                              <div className="text-sm font-semibold truncate">{personLabel(item)}</div>
+                              <div className="text-sm text-mute truncate mt-0.5">{item.summary}</div>
                             </div>
                             <span className="text-[11px] text-clay flex items-center gap-1 shrink-0">
-                              <Clock size={11} /> {formatRelativeTime(item.updated_at)}
+                              <Clock size={11} /> {formatRelativeTime(item.last_touch_at)}
                             </span>
                           </div>
                         </li>
@@ -303,40 +302,44 @@ export default function Dashboard() {
 
                 <aside className="w-full xl:w-[420px] shrink-0 bg-white rounded-2xl border border-line flex flex-col min-h-[420px] xl:sticky xl:top-6">
                   {!selected ? (
-                    <p className="text-sm text-mute p-6">Select a lead to watch the thread.</p>
+                    <p className="text-sm text-mute p-6">Select a person to watch the thread.</p>
                   ) : (
                     <>
                       <div className="px-5 py-4 border-b border-line">
-                        <h2 className="text-lg font-semibold">{selected.lead.name || "Unnamed lead"}</h2>
-                        <p className="text-xs text-mute mt-1">{CRM_TAB_META[selected.crmTab].label} · watch only</p>
+                        <h2 className="text-lg font-semibold">{personLabel(selected)}</h2>
+                        <p className="text-xs text-mute mt-1">{CRM_TAB_META[selectedTab].label} · watch only</p>
                         <div className="mt-3 flex flex-wrap gap-3 text-xs text-mute">
-                          <span className="flex items-center gap-1.5"><Phone size={12} /> {selected.lead.phone || "Not on file"}</span>
-                          <span className="flex items-center gap-1.5"><Mail size={12} /> {selected.lead.email || "Not on file"}</span>
+                          <span className="flex items-center gap-1.5"><Phone size={12} /> {selected.phone || "Not on file"}</span>
+                          <span className="flex items-center gap-1.5"><Mail size={12} /> {selected.email || "Not on file"}</span>
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3 max-h-[560px]">
-                        {threadLoading && (
+                        {detailLoading && (
                           <div className="text-sm text-mute flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Opening thread…</div>
                         )}
-                        {!threadLoading && threadMissing && (
-                          <p className="text-sm text-mute">No conversation yet. Cold stays quiet until the engine writes.</p>
+                        {!detailLoading && detail && !engineHasWritten(detail.touches) && (
+                          <p className="text-sm text-mute">No conversation yet. The engine has not written.</p>
                         )}
-                        {thread?.messages.map((message) => (
-                          <div key={message.message_id} className={`flex flex-col ${message.direction === "inbound" ? "items-start" : "items-end"}`}>
-                            <div
-                              className="text-sm max-w-[90%] px-3.5 py-2.5 rounded-2xl"
-                              style={message.direction === "inbound" ? { backgroundColor: "#F1F1EF" } : { backgroundColor: "#FFE4D6" }}
-                            >
-                              {message.text}
-                            </div>
+                        {detail?.touches.map((touch) => (
+                          <div
+                            key={touch.touch_id}
+                            className={`flex flex-col ${touch.kind === "message" && touchIsInbound(touch) ? "items-start" : "items-end"}`}
+                          >
+                            {touch.kind === "message" ? (
+                              <div
+                                className="text-sm max-w-[90%] px-3.5 py-2.5 rounded-2xl"
+                                style={touchIsInbound(touch) ? { backgroundColor: "#F1F1EF" } : { backgroundColor: "#FFE4D6" }}
+                              >
+                                {touch.summary.replace(/^(Customer|Evorove):\s*/, "")}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-mute">{touch.summary}</p>
+                            )}
                             <span className="text-[10px] text-clay mt-1">
-                              {message.role === "customer" ? selected.lead.name || "Lead" : "Engine"} · {formatRelativeTime(message.created_at)}
+                              {touch.kind === "message" && touchIsInbound(touch) ? personLabel(selected) : "Engine"} · {formatRelativeTime(touch.occurred_at)}
                             </span>
                           </div>
                         ))}
-                        {thread && thread.messages.length === 0 && !threadLoading && (
-                          <p className="text-sm text-mute">The thread is open. No lines yet.</p>
-                        )}
                       </div>
                     </>
                   )}

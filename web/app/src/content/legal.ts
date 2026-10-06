@@ -249,12 +249,12 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
         blocks: [
           {
             type: "p",
-            text: "Evorove is a sales engine in a three-cycle system: find the right person, sell until they are ready to book, then CRM records Done — a paid sale or a set hour. This Service today runs the sale on channels you connect, such as website chat and SMS, using rules you configure as Business DNA and advertising materials you Refresh. Finding new people is a planned contour and is not included in the Service as shipped. The owner dashboard shows Cold, In progress, Offer made, and Done for watching; it is not a closer’s inbox. Setting the calendar hour is the CRM step for a person who is already ready to book. A language model may rephrase an already chosen step. It does not invent your prices, discounts, legal advice, or guarantees.",
+            text: "Evorove is a sales engine in a three-cycle system: find the right person in the open web, sell until they are ready to book, then CRM records Done — a paid sale or a set hour. This Service studies the business you describe, finds people from public sources you authorize, puts them on Cold, and runs the sale on channels you connect, using rules you configure as Business DNA and advertising materials you Refresh. The owner dashboard shows Cold, In progress, Offer made, and Done for watching; it is not a closer’s inbox. Setting the calendar hour is the CRM step for a person who is already ready to book. A language model may rephrase an already chosen step. It does not invent your prices, discounts, legal advice, or guarantees.",
           },
           {
             type: "ul",
             items: [
-              "Website chat and SMS are conversation channels for the sale. They are not lead generation, and we do not claim the Service finds people today.",
+              "Website chat and SMS are conversation channels for the sale. They are not how Cold fills. Finding people in the open web is part of the Service.",
               "The Service does not collect payment from your end customer. A payment request in the product is a record, not a charge.",
               "We do not promise you a conversion rate. Getting a qualified person ready to book is the job the product is built to do; the percentage you see in your own account is not a guarantee we make to you.",
             ],

@@ -54,40 +54,56 @@ def _assign(service: OutreachService, **overrides) -> str:
     return service.assign_cold("tenant-a", **values)
 
 
-def test_draft_uses_only_the_reason_and_dna_facts() -> None:
+def test_draft_uses_only_the_reason_segment_and_dna_facts() -> None:
     dna = {"business": {"name": "Cool Air", "description": "HVAC repair in Chicago"}, "services": [{"name": "AC repair"}]}
-    draft = draft_first_email(dna, name="Dana Smith", reason=REASON, sender_name="Alena", postal_address="100 Main St, Springfield, IL")
-    assert draft.subject == "Quick question for Dana"
-    assert REASON in draft.body and "Cool Air — HVAC repair in Chicago." in draft.body
+    draft = draft_first_email(
+        dna, name="Dana Smith", reason=REASON, sender_name="Alena",
+        postal_address="100 Main St, Springfield, IL", segment="shop owners who lose weekend calls",
+    )
+    assert draft.subject == "For Dana"
+    assert REASON in draft.body
+    assert "shop owners who lose weekend calls" in draft.body
+    assert "Cool Air is for shop owners who lose weekend calls. HVAC repair in Chicago." in draft.body
     assert "100 Main St, Springfield, IL" in draft.body and 'Reply "no"' in draft.body
-    assert "$" not in draft.body
+    assert "$" not in draft.body and "discount" not in draft.body.lower()
 
 
-def test_cold_person_gets_one_draft_and_phone_only_is_skipped(world) -> None:
-    service, email, *_ = world
+def test_cold_person_is_sent_once_and_phone_only_is_skipped(world) -> None:
+    service, email, smtp, posts, _ = world
     email.connect("tenant-a", _settings())
-    assert _assign(service) == "drafted"
-    assert _assign(service) == "drafted"  # handed over twice, one draft
+    assert _assign(service, segment="shop owners who lose weekend calls") == "sent"
+    assert _assign(service) == "sent"  # handed over twice, one letter
     assert _assign(service, person_id="person-0002", email=None, phone="+13125550190") == "skipped"
     rows = {row["person_id"]: row for row in service.list("tenant-a")}
     assert len(rows) == 2
     assert rows["person-0002"]["skip_reason"] == "no_email_cold_sms_not_allowed"
-    assert "100 Main St, Springfield, IL 62701" in rows["person-0001"]["body"]
+    body = rows["person-0001"]["body"]
+    assert REASON in body and "shop owners who lose weekend calls" in body
+    assert "100 Main St, Springfield, IL 62701" in body
+    assert "$" not in body and "discount" not in body.lower()
+    assert len(smtp.sent) == 1
+    assert [post["kind"] for post in posts] == ["dialogue_started", "message"]
+    assert REASON in posts[1]["summary"]
 
 
-def test_approved_email_leaves_the_mailbox_and_reaches_the_board(world) -> None:
+def test_engine_sends_without_an_owner_edit(world) -> None:
     service, email, smtp, posts, _ = world
     email.connect("tenant-a", _settings())
-    _assign(service)
-    result = service.approve("tenant-a", "person-0001", approved_by="alena@example.com", subject="Weekend calls")
-    assert result["status"] == "sent"
-    (target, message), = smtp.sent
-    assert message["To"] == "owner@shop.example" and message["Subject"] == "Weekend calls"
+    result = service.assign_cold(
+        "tenant-a", person_id="person-0001", email="owner@shop.example", phone=None, name="Dana Smith",
+        reason=REASON, reason_source="https://forum.example/t/1", segment="shop owners who lose weekend calls",
+    )
+    assert result == "sent"
+    (_, message), = smtp.sent
+    assert message["To"] == "owner@shop.example"
+    assert REASON in message.get_content()
+    assert "$" not in message.get_content()
     kinds = [(p["kind"], p.get("person_id")) for p in posts]
     assert kinds == [("dialogue_started", "person-0001"), ("message", "person-0001")]
-    assert posts[1]["summary"].startswith("Evorove: Weekend calls — ")
     service.sync_sent()
     assert len(posts) == 2
+    with pytest.raises(OutreachError, match="edited draft"):
+        service.approve("tenant-a", "person-0001", approved_by="alena@example.com", subject="Weekend calls")
 
 
 def test_unsafe_edit_and_missing_mailbox_are_refused(world) -> None:
@@ -104,9 +120,8 @@ def test_unsafe_edit_and_missing_mailbox_are_refused(world) -> None:
 def test_board_stop_blocks_a_pending_email(world) -> None:
     service, email, smtp, _, factory = world
     email.connect("tenant-a", _settings())
-    _assign(service)
     smtp.fail_with = OSError("down")
-    assert service.approve("tenant-a", "person-0001", approved_by="a")["status"] == "approved"
+    assert _assign(service) == "approved"
     assert service.stop("tenant-a", email="OWNER@shop.example", phone=None) == 1
     smtp.fail_with = None
     with factory() as uow:
@@ -162,7 +177,6 @@ def test_every_email_carries_a_working_unsubscribe_link(world) -> None:
     service, email, smtp, *_ = world
     email.connect("tenant-a", _settings())
     _assign(service)
-    service.approve("tenant-a", "person-0001", approved_by="a")
     (_, message), = smtp.sent
     link = message["List-Unsubscribe"].strip("<>")
     assert link.startswith(f"{PUBLIC}/api/v1/public/unsubscribe/")
@@ -187,9 +201,8 @@ def test_approve_needs_the_public_url_for_the_link(world) -> None:
 def test_unsubscribed_person_never_gets_anything_again(world) -> None:
     service, email, smtp, posts, factory = world
     email.connect("tenant-a", _settings())
-    _assign(service)
     smtp.fail_with = OSError("down")
-    service.approve("tenant-a", "person-0001", approved_by="a")  # pending, not sent yet
+    assert _assign(service) == "approved"  # queued, not sent yet
     assert service.unsubscribe("tenant-a", "Owner@Shop.example") is True
     assert service.unsubscribe("tenant-a", "owner@shop.example") is False
     smtp.fail_with = None
@@ -225,9 +238,8 @@ def test_sms_stop_also_blocks_cold_email(world) -> None:
 def test_quiet_hours_hold_the_email(world, monkeypatch: pytest.MonkeyPatch) -> None:
     service, email, smtp, _, factory = world
     email.connect("tenant-a", _settings())
-    _assign(service)
     monkeypatch.setattr(email_outreach_service, "in_business_quiet_hours", lambda now, dna: True)
-    assert service.approve("tenant-a", "person-0001", approved_by="a")["status"] == "approved"
+    assert _assign(service) == "approved"
     assert smtp.sent == []
     with factory() as uow:
         row = uow.session.get(IntegrationOutboxRow, "cold-email:tenant-a:person-0001")

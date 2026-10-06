@@ -23,6 +23,7 @@ from src.persistence.sqlalchemy_uow import SQLAlchemyUnitOfWork, create_database
 from tests.test_dashboard import link_business, signup_and_login
 
 KEY = "k" * 40
+PUBLIC = "https://api.example"
 
 
 def _settings(address: str = "alena@getevorove.com", **overrides) -> MailboxSettings:
@@ -70,7 +71,7 @@ class FakeSmtp:
 
 def test_each_business_sends_from_its_own_mailbox(factory) -> None:
     smtp = FakeSmtp()
-    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp)
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp, public_base_url=PUBLIC)
     service.connect("evorove", _settings())
     service.connect("salon", _settings("owner@salon.example", smtp_host="smtp.gmail.com", smtp_port=587, smtp_security="starttls"))
 
@@ -126,7 +127,7 @@ def test_warmup_ramps_up_to_the_daily_limit() -> None:
 
 def test_daily_cap_holds_extra_messages_for_later(factory) -> None:
     smtp = FakeSmtp()
-    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp)
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp, public_base_url=PUBLIC)
     service.connect("evorove", _settings())
     for index in range(12):
         service.enqueue("evorove", to_address=f"p{index}@shop.example", subject="Hi", body="Hi", outbox_id=f"e{index}")
@@ -143,7 +144,7 @@ def test_daily_cap_holds_extra_messages_for_later(factory) -> None:
 
 
 def test_enqueue_is_idempotent_and_needs_a_mailbox(factory) -> None:
-    service = EmailOutreachService(factory, encryption_key=KEY, sender=FakeSmtp())
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=FakeSmtp(), public_base_url=PUBLIC)
     with pytest.raises(EmailOutreachError, match="connect a mailbox"):
         service.enqueue("evorove", to_address="a@b.example", subject="x", body="y")
     service.connect("evorove", _settings())
@@ -157,13 +158,41 @@ def test_enqueue_is_idempotent_and_needs_a_mailbox(factory) -> None:
 def test_smtp_failure_retries_then_gives_up(factory) -> None:
     smtp = FakeSmtp()
     smtp.fail_with = OSError("connection refused")
-    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp)
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp, public_base_url=PUBLIC)
     service.connect("evorove", _settings())
     service.enqueue("evorove", to_address="a@b.example", subject="x", body="y", outbox_id="r1")
     assert service.deliver_one("r1") is False
     with factory() as uow:
         row = uow.session.get(IntegrationOutboxRow, "r1")
         assert row.status == "PENDING" and row.attempt_count == 1 and row.last_error == "OSError"
+
+
+def test_send_refuses_without_public_url_or_postal_address(factory) -> None:
+    smtp = FakeSmtp()
+    blocked = EmailOutreachService(factory, encryption_key=KEY, sender=smtp)
+    blocked.connect("evorove", _settings())
+    with pytest.raises(EmailOutreachError, match="PUBLIC_API_BASE_URL"):
+        blocked.enqueue("evorove", to_address="a@b.example", subject="x", body="y", outbox_id="no-url")
+    assert smtp.sent == []
+
+    ready = EmailOutreachService(factory, encryption_key=KEY, sender=smtp, public_base_url=PUBLIC)
+    with factory() as uow:
+        uow.session.get(EmailConnectionRow, "evorove").postal_address = "PO"
+        uow.commit()
+    with pytest.raises(EmailOutreachError, match="postal address"):
+        ready.enqueue("evorove", to_address="a@b.example", subject="x", body="y", outbox_id="no-address")
+    assert smtp.sent == []
+
+    with factory() as uow:
+        uow.session.get(EmailConnectionRow, "evorove").postal_address = "100 Main St, Springfield, IL 62701"
+        uow.commit()
+    ready.enqueue("evorove", to_address="a@b.example", subject="x", body="y", outbox_id="held")
+    ready._public_base_url = None
+    assert ready.deliver_one("held") is False
+    with factory() as uow:
+        row = uow.session.get(IntegrationOutboxRow, "held")
+        assert row.status == "FAILED" and row.last_error == "public_api_base_url_required"
+    assert smtp.sent == []
 
 
 def test_owner_api_hides_the_password(tmp_path: Path) -> None:

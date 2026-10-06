@@ -692,13 +692,8 @@ def _quote_accept_flow(tmp_path, service: CommercialWorkflowService, dna: dict, 
     return response
 
 
-def test_quote_accept_with_payment_link_closes_to_paid_and_skips_approval(tmp_path) -> None:
-    """FOUNDATION.md: a payment close is the business's own payment link.
-
-    With payment.payment_link set, quote acceptance hands the link to the
-    customer, moves the case straight to PAID, and lifts the human-approval
-    gate (here 5500 > 100 threshold, which without the link escalates).
-    """
+def test_quote_accept_with_payment_link_stays_offer_until_payment(tmp_path) -> None:
+    """The link is the offer. Done waits for a payment event for this person."""
     engine, factory, dna, case_id = make_factory(tmp_path, "equipment-replacement")
     dna["payment"]["human_approval_above"] = "100.00"
     dna["payment"]["payment_link"] = PAYMENT_LINK
@@ -707,11 +702,24 @@ def test_quote_accept_with_payment_link_closes_to_paid_and_skips_approval(tmp_pa
     assert response.reason == "quote_accepted_payment_link"
     assert response.requires_human is False
     assert PAYMENT_LINK in response.message_text
-    assert case_current_state(factory, dna, case_id) is ProcessState.PAID
+    assert case_current_state(factory, dna, case_id) is ProcessState.WON
     with factory() as uow:
         payment = uow.session.scalar(select(PaymentRequestRow))
         assert payment.status == PaymentStatus.READY.value
         assert payment.metadata_json["human_approval_required"] is False
+    with factory() as uow:
+        state = service.record_payment_received(
+            uow,
+            business_id=dna["business"]["id"],
+            case_id=case_id,
+            occurred_at=NOW,
+        )
+        uow.commit()
+    assert state is ProcessState.PAID
+    assert case_current_state(factory, dna, case_id) is ProcessState.PAID
+    with factory() as uow:
+        payment = uow.session.scalar(select(PaymentRequestRow))
+        assert payment.status == PaymentStatus.PAID.value
     engine.dispose()
 
 
@@ -764,7 +772,7 @@ def test_duplicate_accept_after_payment_link_close_resends_link(tmp_path) -> Non
         won = service.handle_message(uow, case, dna, metadata, "yes", occurred_at=NOW)
         uow.commit()
     assert won.reason == "quote_accepted_payment_link"
-    assert case_current_state(factory, dna, case_id) is ProcessState.PAID
+    assert case_current_state(factory, dna, case_id) is ProcessState.WON
     with factory() as uow:
         duplicate = service._handle_quote(uow, stale_case, dna, {}, "yes", occurred_at=NOW)
         uow.commit()
