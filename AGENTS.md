@@ -20,3 +20,14 @@
 - Keep changes inside the assigned file scope. Frontend tasks must not invent or change backend contracts.
 - Run focused tests for the changed behavior before handoff. Do not weaken tests to accommodate an implementation.
 - Customer-facing tone is alive and interesting, not dry corporate copy. Do not ship a correct step that feels like a form or a call center.
+
+## Cursor Cloud specific instructions
+
+- Use the Python 3.11 virtualenv at `/workspace/.venv`. The image `python3` is 3.12; CI and the Dockerfile use 3.11. Run `.venv/bin/python -m pytest -q`.
+- PostgreSQL 17 listens on `127.0.0.1:5432`. Do not use Docker Compose here: `policy-rc.d` blocks `service postgresql start`. The environment start script uses `pg_ctlcluster 17 main start`, creates databases `ai_process_engine` and `ai_process_engine_test`, migrates both, and execs uvicorn on port 8000.
+- Local defaults from `.env.example` are development values, not production secrets: `AI_PROVIDER=deterministic`, database user `ai_process_engine`, password `local_development_only`, `INTERNAL_TASK_SECRET=local_development_only`. Do not read or write a real `.env`.
+- `DATABASE_URL=postgresql+psycopg://ai_process_engine:local_development_only@127.0.0.1:5432/ai_process_engine`
+- `TEST_DATABASE_URL=postgresql+psycopg://ai_process_engine:local_development_only@127.0.0.1:5432/ai_process_engine_test`
+- Login shells export those variables from `/etc/profile.d/evorove-dev.sh`. A non-login shell must export them before pytest or uvicorn.
+- Frontend, from `web/app`: `npm run lint`, `npm test`, `npm run build`. The API serves `web/app/dist` at `http://127.0.0.1:8000`. Liveness is `GET /health`. Database readiness is `GET /ready`.
+- Nine tests skip when `private/sales-corpus` is absent from the checkout. That skip is expected in Cloud Agents.
