@@ -686,6 +686,38 @@ export interface CrmWebhookStatus {
   configured: boolean;
 }
 
+export interface EmailConnectionStatus {
+  connected: boolean;
+  from_address: string | null;
+  from_name: string | null;
+  postal_address: string | null;
+  smtp_host: string | null;
+  smtp_port: number | null;
+  smtp_security: string | null;
+  smtp_username: string | null;
+  imap_host: string | null;
+  imap_port: number | null;
+  daily_limit: number | null;
+  todays_cap: number | null;
+  sent_today: number;
+  send_block: string | null;
+  replies_ready: boolean;
+}
+
+export interface EmailConnectionInput {
+  from_address: string;
+  from_name: string;
+  postal_address: string;
+  smtp_host: string;
+  smtp_port: number;
+  smtp_security: "ssl" | "starttls";
+  smtp_username: string;
+  password: string;
+  imap_host: string;
+  imap_port: number;
+  daily_limit: number;
+}
+
 export interface CalendarStatus {
   enabled: boolean;
   connected: boolean;
@@ -898,6 +930,27 @@ export const api = {
     request<SmsStatus>(
       `/api/v1/businesses/${businessId}/integrations/sms/provision`,
       { method: "POST", body: JSON.stringify({}) },
+      token,
+    ),
+
+  getEmailConnection: (token: string, businessId: string) =>
+    request<EmailConnectionStatus>(
+      `/api/v1/businesses/${businessId}/integrations/email`,
+      { method: "GET" },
+      token,
+    ),
+
+  connectEmail: (token: string, businessId: string, body: EmailConnectionInput) =>
+    request<EmailConnectionStatus>(
+      `/api/v1/businesses/${businessId}/integrations/email`,
+      { method: "PUT", body: JSON.stringify(body) },
+      token,
+    ),
+
+  disconnectEmail: (token: string, businessId: string) =>
+    request<EmailConnectionStatus>(
+      `/api/v1/businesses/${businessId}/integrations/email`,
+      { method: "DELETE" },
       token,
     ),
 
