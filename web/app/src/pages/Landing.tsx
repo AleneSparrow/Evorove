@@ -1,12 +1,9 @@
-import { Suspense, lazy, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { FaqSection } from "../components/FaqSection";
 import { MarketingFooter, MarketingHeader } from "../brand/MarketingChrome";
 import { brand } from "../brand/theme";
-
-const OrbitScene = lazy(() => import("../brand/OrbitScene").then((mod) => ({ default: mod.OrbitScene })));
 
 const SALE_LOG = [
   ["09:41:02", "Find", "Public match — reason on file — Cold"],
@@ -35,19 +32,6 @@ function SaleLogCard({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function useDesktopHero() {
-  const [desktop, setDesktop] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setDesktop(mq.matches);
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return desktop;
-}
-
 function Block({ n, title, body, tone }: { n: string; title: string; body: string; tone: "ink" | "coral" | "lime" }) {
   const bg = tone === "ink" ? brand.ink : tone === "coral" ? brand.coral : brand.lime;
   const fg = tone === "lime" ? brand.ink : brand.cream;
@@ -62,7 +46,6 @@ function Block({ n, title, body, tone }: { n: string; title: string; body: strin
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const desktopHero = useDesktopHero();
   const primaryCtaTarget = user ? (user.business_ids.length > 0 ? "/app" : "/onboarding") : "/signup";
 
   return (
@@ -70,13 +53,6 @@ export default function Landing() {
       <MarketingHeader />
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
-        {desktopHero ? (
-          <div className="absolute top-[46%] right-0 -translate-y-1/2 w-[min(46%,540px)] aspect-square pointer-events-none ev-orbit-frame ev-orbit-desktop" aria-hidden="true">
-            <Suspense fallback={null}>
-              <OrbitScene variant="hero" />
-            </Suspense>
-          </div>
-        ) : null}
         <div className="relative z-10 max-w-xl">
           <div className="inline-block mb-5 text-[11px] font-extrabold uppercase tracking-[0.16em] px-3 py-1.5 -rotate-2" style={{ background: "#C6FF00", color: "#0B0B0D" }}>
             Find · sell · close
@@ -84,13 +60,6 @@ export default function Landing() {
           <h1 className="ev-display text-[72px] md:text-[112px] text-ink">
             COLD IN.<br />DONE ON THE BOARD.
           </h1>
-          {!desktopHero ? (
-            <div className="relative h-[280px] w-[280px] max-w-full mx-auto my-6 ev-orbit-frame ev-orbit-mobile" aria-hidden="true">
-              <Suspense fallback={null}>
-                <OrbitScene variant="hero" />
-              </Suspense>
-            </div>
-          ) : null}
           <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">
             Subscribe. Tell Evorove the business. It studies your setup, finds people in the open web,
             puts them on Cold, then sells until the deal is done — a booked hour, or money in your account.
