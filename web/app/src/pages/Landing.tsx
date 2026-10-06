@@ -5,6 +5,26 @@ import { FaqSection } from "../components/FaqSection";
 import { MarketingFooter, MarketingHeader } from "../brand/MarketingChrome";
 import { brand } from "../brand/theme";
 
+function ArchitectureSandboxNotice() {
+  return (
+    <aside aria-label="Product status" style={{ background: brand.ink, color: brand.cream }}>
+      <p className="max-w-6xl mx-auto px-6 py-2.5 m-0 text-[13px] leading-relaxed flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <span className="inline-flex items-center gap-2 font-semibold tracking-[0.01em]">
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
+            style={{ background: brand.lime, boxShadow: "0 0 0 3px rgba(198,255,0,0.16)" }}
+            aria-hidden="true"
+          />
+          V1.0 Architecture Sandbox Active.
+        </span>
+        <span style={{ color: "#D9D0C2" }}>
+          Frontend UI is currently in private beta. Request developer sandbox access via email.
+        </span>
+      </p>
+    </aside>
+  );
+}
+
 function Block({ n, title, body, tone }: { n: string; title: string; body: string; tone: "ink" | "coral" | "lime" }) {
   const bg = tone === "ink" ? brand.ink : tone === "coral" ? brand.coral : brand.lime;
   const fg = tone === "lime" ? brand.ink : brand.cream;
@@ -23,6 +43,7 @@ export default function Landing() {
 
   return (
     <div className="ev-page min-h-screen w-full overflow-x-hidden">
+      <ArchitectureSandboxNotice />
       <MarketingHeader />
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
