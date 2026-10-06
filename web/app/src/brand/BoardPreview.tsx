@@ -76,24 +76,25 @@ export function BoardPreview() {
 
   return (
     <figure
-      className="relative m-0 min-w-0 pt-2 pr-3 pb-4"
+      className="relative m-0 min-w-0"
       aria-label="Architecture preview of the live CRM board"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
     >
-      <div
-        aria-hidden="true"
-        className="absolute left-2 right-0 top-0 bottom-2 -rotate-2"
-        style={{ background: brand.lime }}
-      />
-      <div
-        className="relative overflow-hidden"
-        style={{
-          background: brand.panel,
-          border: `1px solid ${brand.ink}`,
-          boxShadow: `8px 8px 0 ${brand.ink}`,
-        }}
-      >
+      <div className="relative pt-2 pr-3 pb-3">
+        <div
+          aria-hidden="true"
+          className="absolute left-2 right-0 top-0 bottom-0 -rotate-2"
+          style={{ background: brand.lime }}
+        />
+        <div
+          className="relative overflow-hidden"
+          style={{
+            background: brand.panel,
+            border: `1px solid ${brand.ink}`,
+            boxShadow: `8px 8px 0 ${brand.ink}`,
+          }}
+        >
         <div
           className="flex items-center justify-between gap-3 px-4 py-2.5"
           style={{ background: brand.ink, color: brand.cream }}
@@ -226,8 +227,9 @@ export function BoardPreview() {
             )}
           </div>
         </div>
+        </div>
       </div>
-      <figcaption className="relative mt-3 text-[11px] text-clay tracking-[0.04em]">
+      <figcaption className="mt-3 text-[11px] text-clay tracking-[0.04em]">
         {BOARD_PREVIEW_CAPTION}. The step and the dialogue, as they happen.
       </figcaption>
     </figure>

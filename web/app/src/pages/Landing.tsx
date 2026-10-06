@@ -26,6 +26,30 @@ function ArchitectureSandboxNotice() {
   );
 }
 
+function HeroStats() {
+  return (
+    <>
+      <div className="flex gap-10">
+        <div>
+          <div className="ev-display text-5xl">24/7</div>
+          <div className="text-xs uppercase tracking-[0.16em] text-clay">The sale keeps moving</div>
+        </div>
+        <div>
+          <div className="ev-display text-5xl">$199</div>
+          <div className="text-xs uppercase tracking-[0.16em] text-clay">Instead of a hire</div>
+        </div>
+        <div>
+          <div className="ev-display text-5xl">4</div>
+          <div className="text-xs uppercase tracking-[0.16em] text-clay">Live CRM tabs</div>
+        </div>
+      </div>
+      <p className="text-xs text-clay mt-6 max-w-md">
+        Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.
+      </p>
+    </>
+  );
+}
+
 function Block({ n, title, body, tone }: { n: string; title: string; body: string; tone: "ink" | "coral" | "lime" }) {
   const bg = tone === "ink" ? brand.ink : tone === "coral" ? brand.coral : brand.lime;
   const fg = tone === "lime" ? brand.ink : brand.cream;
@@ -61,7 +85,7 @@ export default function Landing() {
               puts them on Cold, then sells until the deal is done — a booked hour, or money in your account.
               You watch the board. You do not hop in to close.
             </p>
-            <div className="flex flex-wrap items-center gap-3 mb-12">
+            <div className="flex flex-wrap items-center gap-3 mb-10 lg:mb-12">
               <button
                 onClick={() => navigate(primaryCtaTarget)}
                 className="text-[12px] font-bold uppercase tracking-[0.14em] px-5 py-3 rounded-full inline-flex items-center gap-2"
@@ -73,25 +97,14 @@ export default function Landing() {
                 See how it works
               </a>
             </div>
-            <div className="flex gap-10">
-              <div>
-                <div className="ev-display text-5xl">24/7</div>
-                <div className="text-xs uppercase tracking-[0.16em] text-clay">The sale keeps moving</div>
-              </div>
-              <div>
-                <div className="ev-display text-5xl">$199</div>
-                <div className="text-xs uppercase tracking-[0.16em] text-clay">Instead of a hire</div>
-              </div>
-              <div>
-                <div className="ev-display text-5xl">4</div>
-                <div className="text-xs uppercase tracking-[0.16em] text-clay">Live CRM tabs</div>
-              </div>
+            <div className="hidden lg:block">
+              <HeroStats />
             </div>
-            <p className="text-xs text-clay mt-6 max-w-md">
-              Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.
-            </p>
           </div>
           <BoardPreview />
+          <div className="lg:hidden">
+            <HeroStats />
+          </div>
         </div>
       </section>
 
