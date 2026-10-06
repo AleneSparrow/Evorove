@@ -3,10 +3,12 @@ import test from "node:test";
 import { CRM_BOARD_TABS, CRM_TAB_META } from "../lib/crmBoard.ts";
 import {
   BOARD_PREVIEW_DEFAULT_TAB,
+  BOARD_PREVIEW_HOLD_MS,
   BOARD_PREVIEW_SCENES,
   BOARD_PREVIEW_TABS,
   boardPreviewCounts,
   flattenBoardPreviewCopy,
+  nextBoardPreviewTab,
 } from "../brand/boardPreview.ts";
 
 test("landing board preview uses the four live CRM tabs", () => {
@@ -35,4 +37,14 @@ test("preview copy does not invent conversion rates, ticket ids, or discounts", 
   assert.doesNotMatch(copy, /\bdiscount\b/i);
   assert.match(BOARD_PREVIEW_SCENES.done.people[0].summary, /Paid on the business link/);
   assert.match(BOARD_PREVIEW_SCENES.offer_made.people[0].messages.at(-1)?.text ?? "", /\$199/);
+});
+
+test("preview path walks the four tabs in order and then repeats", () => {
+  assert.equal(nextBoardPreviewTab("cold"), "in_progress");
+  assert.equal(nextBoardPreviewTab("in_progress"), "offer_made");
+  assert.equal(nextBoardPreviewTab("offer_made"), "done");
+  assert.equal(nextBoardPreviewTab("done"), "cold");
+  for (const tab of BOARD_PREVIEW_TABS) {
+    assert.ok(BOARD_PREVIEW_HOLD_MS[tab] > 0);
+  }
 });

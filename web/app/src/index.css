@@ -75,14 +75,12 @@ body {
   to { transform: rotate(360deg); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ev-mark-spin {
-    animation: none;
-  }
-}
-
 .dna-fade {
   animation: dnaFade 0.25s ease;
+}
+
+.ev-board-msg {
+  animation: dnaFade 0.35s ease both;
 }
 
 @keyframes dnaFade {
@@ -93,5 +91,13 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ev-mark-spin,
+  .ev-board-msg,
+  .dna-fade {
+    animation: none;
   }
 }

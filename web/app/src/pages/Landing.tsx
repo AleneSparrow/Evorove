@@ -48,12 +48,12 @@ export default function Landing() {
       <MarketingHeader />
 
       <section className="relative min-h-[92vh] max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-10">
-        <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,1fr)] gap-10 xl:gap-12 items-center">
+        <div className="grid lg:grid-cols-[minmax(0,0.92fr)_minmax(360px,1.15fr)] gap-10 xl:gap-12 lg:items-start">
           <div className="relative z-10 max-w-xl">
             <div className="inline-block mb-5 text-[11px] font-extrabold uppercase tracking-[0.16em] px-3 py-1.5 -rotate-2" style={{ background: "#C6FF00", color: "#0B0B0D" }}>
               Find · sell · close
             </div>
-            <h1 className="ev-display text-[64px] md:text-[92px] lg:text-[80px] xl:text-[100px] text-ink">
+            <h1 className="ev-display text-[64px] md:text-[92px] lg:text-[76px] xl:text-[96px] text-ink">
               COLD IN.<br />DONE ON THE BOARD.
             </h1>
             <p className="text-base md:text-lg text-mute leading-relaxed mt-6 mb-8 max-w-md">

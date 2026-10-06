@@ -53,7 +53,7 @@ export const BOARD_PREVIEW_SCENES: Record<BoardPreviewTab, BoardPreviewScene> = 
         messages: [
           {
             from: "engine",
-            text: "Jordan — your Thursday hours still sit empty. Evorove finds people in the open web, puts them on Cold, and writes until Done. You watch the board.",
+            text: "Jordan — Thursday still sits empty. Evorove finds people in the open web, puts them on Cold, and writes until Done. You watch.",
           },
           {
             from: "person",
@@ -61,7 +61,7 @@ export const BOARD_PREVIEW_SCENES: Record<BoardPreviewTab, BoardPreviewScene> = 
           },
           {
             from: "engine",
-            text: "This isn't an inbox. Cold is people who have not been written yet. The engine writes first and stays until the sale is done. You don't hop in to close.",
+            text: "This isn't an inbox. Cold is people not written yet. The engine writes first and stays until Done. You don't hop in to close.",
           },
         ],
       },
@@ -98,7 +98,7 @@ export const BOARD_PREVIEW_SCENES: Record<BoardPreviewTab, BoardPreviewScene> = 
           },
           {
             from: "engine",
-            text: "Seven days on the board. After that, $199 a month — instead of a hire. The payment link is the Evorove subscription. Say the word and it is yours.",
+            text: "Seven days on the board. Then $199 a month — instead of a hire. The payment link is the Evorove subscription.",
           },
         ],
       },
@@ -119,7 +119,7 @@ export const BOARD_PREVIEW_SCENES: Record<BoardPreviewTab, BoardPreviewScene> = 
           },
           {
             from: "engine",
-            text: "It's on its way. Same board. Same rules. You stay on watch.",
+            text: "Sent. Same board, same rules. You stay on watch.",
           },
         ],
       },
@@ -132,6 +132,18 @@ export const BOARD_PREVIEW_TABS = ["cold", "in_progress", "offer_made", "done"] 
 export const BOARD_PREVIEW_DEFAULT_TAB: BoardPreviewTab = "in_progress";
 
 export const BOARD_PREVIEW_CAPTION = "Client 0 board · architecture preview";
+
+export const BOARD_PREVIEW_HOLD_MS: Record<BoardPreviewTab, number> = {
+  cold: 2800,
+  in_progress: 5600,
+  offer_made: 4000,
+  done: 3200,
+};
+
+export function nextBoardPreviewTab(tab: BoardPreviewTab): BoardPreviewTab {
+  const index = BOARD_PREVIEW_TABS.indexOf(tab);
+  return BOARD_PREVIEW_TABS[(index + 1) % BOARD_PREVIEW_TABS.length];
+}
 
 export function boardPreviewCounts(): Record<BoardPreviewTab, number> {
   return Object.fromEntries(
