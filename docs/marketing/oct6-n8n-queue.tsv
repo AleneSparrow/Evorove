@@ -3,14 +3,14 @@ publish_date	channel	audience	status	post_text	cta_url	image_url	posted_url	note
 
 Four tabs. The thread sits next to them. The engine writes. You watch.
 
-Architecture sandbox. Frontend still private beta.		https://litter.catbox.moe/g78hqp.png		oct6_card_tabs.png | durable https://evorove.com/brand/evorove-oct6-card-tabs.png
+Architecture sandbox. Frontend still private beta.		https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-card-tabs.png		oct6_card_tabs.png
 2026-10-06	facebook	brand	Ready	You can watch the sale from the homepage.
 
 Not a pitch deck. The landing is the board: Cold, In progress, Offer made, Done — and the actual thread sitting next to the tabs. The engine writes. Someone answers. You do not hop in to close.
 
 This is the V1.0 architecture sandbox. Frontend is still private beta. Client 0 is Evorove selling Evorove, on the same board, with the same rules.
 
-Be honest: if you opened your CRM at 11am, would you see this thread, or last night’s snapshot?		https://litter.catbox.moe/qotchy.png		oct6_site_hero.png | durable https://evorove.com/brand/evorove-oct6-site-hero.png
+Be honest: if you opened your CRM at 11am, would you see this thread, or last night’s snapshot?		https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-site-hero.png		oct6_site_hero.png
 2026-10-06	instagram	brand	Ready	You can see the chat on the homepage now.
 
 Most sites describe the product.
@@ -21,4 +21,4 @@ The engine writes. The reply comes back. You watch.
 
 V1.0 architecture sandbox. Frontend still private beta. Client 0 is us selling us — same board, same rules.
 
-Would you rather watch the sale live, or get the recap after it already went quiet?		https://litter.catbox.moe/iger3a.png		oct6_site_board.png | extras https://litter.catbox.moe/qotchy.png https://litter.catbox.moe/82bs7b.png https://litter.catbox.moe/g78hqp.png | durable https://evorove.com/brand/evorove-oct6-site-board.png
+Would you rather watch the sale live, or get the recap after it already went quiet?		https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-site-board.png		oct6_site_board.png | extras: https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-site-hero.png https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-site-board-cold.png https://cdn.jsdelivr.net/gh/AleneSparrow/Evorove@cursor/n8n-bluesky-meta-queue-20d9/web/app/public/brand/evorove-oct6-card-tabs.png
