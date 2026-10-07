@@ -87,8 +87,13 @@ class EmailConnectionStatusResponse(BaseModel):
     connected: bool
     from_address: str | None = None
     from_name: str | None = None
+    postal_address: str | None = None
     smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_security: str | None = None
+    smtp_username: str | None = None
     imap_host: str | None = None
+    imap_port: int | None = None
     daily_limit: int | None = None
     todays_cap: int | None = None
     sent_today: int = 0
