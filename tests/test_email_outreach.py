@@ -213,8 +213,13 @@ def test_owner_api_hides_the_password(tmp_path: Path) -> None:
         body = {field: getattr(_settings(), field) for field in _settings().__slots__}
         put = client.put("/api/v1/businesses/evorove/integrations/email", json=body, headers=headers)
         assert put.status_code == 200, put.text
-        assert put.json()["connected"] is True and put.json()["todays_cap"] == 10
-        assert "password" not in put.text and "app-password-1" not in put.text
+        saved = put.json()
+        assert saved["connected"] is True and saved["todays_cap"] == 10
+        assert saved["postal_address"] == "100 Main St, Springfield, IL 62701"
+        assert saved["smtp_port"] == 465 and saved["smtp_security"] == "ssl"
+        assert saved["smtp_username"] == "alena@getevorove.com"
+        assert saved["imap_host"] == "imap.zoho.com" and saved["imap_port"] == 993
+        assert "password" not in saved and "app-password-1" not in put.text
         other = client.get("/api/v1/businesses/evorove/integrations/email")
         assert other.status_code == 401
         deleted = client.delete("/api/v1/businesses/evorove/integrations/email", headers=headers)

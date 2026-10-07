@@ -8,6 +8,7 @@ import { API_BASE, api, type BusinessDNASettings, type CalendarStatus, type Comm
 import { StatisticsPanel } from "../components/StatisticsPanel";
 import { SalesPlaybookSettings } from "../components/SalesPlaybookSettings";
 import { MaterialsPanel } from "../components/MaterialsPanel";
+import { MailboxPanel } from "../components/MailboxPanel";
 
 // Grouped by the task a business owner actually has, not by which Business
 // DNA schema section a field happens to live in -- "Services" and "Booking"
@@ -23,6 +24,7 @@ const SETTINGS_TABS = [
   { key: "playbook", label: "Sales Playbook" },
   { key: "materials", label: "Materials" },
   { key: "reporting", label: "Statistics" },
+  { key: "mailbox", label: "Mailbox" },
   { key: "sms", label: "SMS" },
   { key: "calendar", label: "Calendar" },
   { key: "widget", label: "Site chat" },
@@ -1220,6 +1222,8 @@ export default function Settings() {
                   )}
                 </div>
               )}
+
+              {tab === "mailbox" && <MailboxPanel />}
 
               {tab === "sms" && (
                 <div>
