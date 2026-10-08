@@ -7,7 +7,17 @@
     <title>Evorove — the sales process, already running</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Cycle 1 reads this HTML before JavaScript runs. The app replaces #root on startup. -->
+      <div style="position:absolute;width:1px;height:1px;overflow:hidden">
+      <h1>Evorove — the sales process, already running</h1>
+      <p>It studies your setup, finds people in the open web, puts them on Cold, then sells until the deal is done.</p>
+      <p>Subscribe. Tell Evorove the business. You watch the board. You do not hop in to close.</p>
+      <p>Seven-day trial. No prompt engineering. $199/mo after trial — instead of a hire.</p>
+      <p>The United States today.</p>
+      <p>Client 0 is Evorove itself — we sell our own subscription through the same board, same rules, before anyone else's.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
