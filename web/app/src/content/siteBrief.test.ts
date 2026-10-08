@@ -14,8 +14,8 @@ test("the static page carries the published offer before JavaScript runs", () =>
   assert.ok(text.length > 150);
   assert.match(text, /finds people in the open web/);
   assert.match(text, /\$199\/mo after trial — instead of a hire/);
-  assert.match(text, /no industry-specific branch/);
   assert.match(text, /The United States today/);
+  assert.doesNotMatch(text, /small business/i);
   assert.doesNotMatch(text, /salon/i);
   assert.doesNotMatch(text, /repair shop/i);
 });
