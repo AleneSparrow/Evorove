@@ -77,9 +77,9 @@ class EmailConnectionRequest(BaseModel):
     smtp_port: int = Field(ge=1, le=65535)
     smtp_security: Literal["ssl", "starttls"]
     smtp_username: str = Field(min_length=1, max_length=320)
-    password: str = Field(min_length=1, max_length=1024)
-    imap_host: str | None = Field(default=None, max_length=255)
-    imap_port: int | None = Field(default=None, ge=1, le=65535)
+    password: str = Field(default="", max_length=1024)
+    imap_host: str = Field(min_length=1, max_length=255)
+    imap_port: int = Field(ge=1, le=65535)
     daily_limit: int = Field(default=30, ge=1, le=500)
 
 
@@ -87,11 +87,18 @@ class EmailConnectionStatusResponse(BaseModel):
     connected: bool
     from_address: str | None = None
     from_name: str | None = None
+    postal_address: str | None = None
     smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_security: str | None = None
+    smtp_username: str | None = None
     imap_host: str | None = None
+    imap_port: int | None = None
     daily_limit: int | None = None
     todays_cap: int | None = None
     sent_today: int = 0
+    send_block: str | None = None
+    replies_ready: bool = False
 
 
 def _email_status(status: MailboxStatus) -> EmailConnectionStatusResponse:
@@ -128,4 +135,4 @@ def disconnect_email(
     service: Annotated[EmailOutreachService, Depends(get_email_outreach_service)],
 ) -> EmailConnectionStatusResponse:
     service.disconnect(business_id)
-    return EmailConnectionStatusResponse(connected=False)
+    return _email_status(service.status(business_id))
