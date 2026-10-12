@@ -1,7 +1,8 @@
 # Evorove agent instructions
 
+- Current owner instructions override historical product documents. Evorove is not restricted to small service businesses; do not infer its audience from old SMB examples. Verify current implementation status separately from the foundation.
 - Communicate with the product owner in Russian. Product UI and customer-facing copy remain English.
-- Read `FOUNDATION.md` first (revised 13 September 2026). Every action is checked against the three cycles and the four CRM tabs: Cold → In progress → Offer made → Done. The board is live: the step and its dialogue must be visible in CRM as they happen, not as an evening snapshot. `CLAUDE.md` is only a pointer plus hard operational rules. The alignment-stage file is historical and does not override the north star.
+- Read `FOUNDATION.md` first (positioning correction 12 October 2026). Every action is checked against the three cycles and the four CRM tabs: Cold → In progress → Offer made → Done. The board is live: the step and its dialogue must be visible in CRM as they happen, not as an evening snapshot. `CLAUDE.md` is only a pointer plus hard operational rules. How the owner built it, by stage: `docs/project-path-ru.md`. Stage documents live in `archive/` and do not override the north star.
 - Evorove is client 0. Search, the first write, and the first metrics are for selling Evorove itself. A payment close is the business's own payment link; for client 0 that link is the Evorove subscription. An offline close is an hour on the business calendar. Do not treat a missing calendar connection as a booked hour.
 - This repository owns cycle 2 only (cold write and sale). Cycle 1 lives in `evorove_lead` (open-web find → CRM Cold). The CRM board and close live in `evorove-crm`. Do not mix those goals. Do not scrape people here.
 - Three-repo map: `docs/three-repos-next-steps-ru.md`. Cycle 1 bootstrap prompt: `docs/agent-prompts/evorove-lead-bootstrap.md`.
