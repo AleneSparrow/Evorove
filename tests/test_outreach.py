@@ -365,3 +365,12 @@ def test_crm_command_forwards_observed_pain(tmp_path: Path, monkeypatch: pytest.
         assert row.observed_pain == PAIN
         assert row.body is not None and row.body.split("\n\n")[1] == f"Something I noticed: {PAIN}."
     engine.dispose()
+
+
+@pytest.mark.parametrize("ending", [".", "!", "?", "!!", " ."])
+def test_pain_sentence_ends_with_one_full_stop(ending: str) -> None:
+    draft = draft_first_email(
+        None, name="Dana Smith", reason=REASON, sender_name="Alena",
+        postal_address="100 Main St", observed_pain=PAIN + ending,
+    )
+    assert f"Something I noticed: {PAIN}.\n" in draft.body
