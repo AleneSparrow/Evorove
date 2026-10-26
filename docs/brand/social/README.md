@@ -5,7 +5,7 @@ Pulse system. Tokens match `web/app/src/brand/theme.ts`: cream `#F7F1E4`, ink `#
 **Brand book:** `docs/brand/evorove-pulse-brandbook.html`  
 **Source boards:** `boards.html` (re-render with `NODE_PATH=… node capture.mjs`)
 
-Public-facing copy is English. After frontend deploy, files are also at `/brand/...` on the site. Autopost needs that HTTPS URL in queue field `image_url` (f7) — local paths do not post.
+Public-facing copy is English. After frontend deploy, files are also at `/brand/...` on the site. n8n autopost needs that HTTPS URL in sheet column `image_url` — local paths do not post. Live channels: `bluesky`, `facebook`, `instagram`.
 
 ## Avatars — upload these
 
