@@ -97,6 +97,7 @@ def start_outbound_first_touch(
             messenger_id=body.messenger_id,
             gender=body.gender,
             region=body.region,
+            observed_pain=body.observed_pain,
         )
     except FoundPersonRejected as exc:
         raise RequestDataError(str(exc)) from exc

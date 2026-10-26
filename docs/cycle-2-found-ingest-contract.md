@@ -31,6 +31,7 @@ Content-Type: application/json
 | `identity.gender` | нет | Только если цикл 1 **уже записал**. Не угадывать по имени |
 | `identity.region` | нет | Только если цикл 1 **уже записал** (штат / город). Не выводить из ZIP здесь |
 | `idempotency_key` | нет | По умолчанию `found:{person_id}` |
+| `observed_pain` | нет, но нужен для касания на боли | Конкретная проблема человека, найденная циклом 1 (до 500 символов). Первое сообщение открывается ею. Ярлык вместо описания — отказ. См. [`pain-first-touch-ru.md`](pain-first-touch-ru.md) |
 
 `preferred_channel=whatsapp` **без** `channel=sms` или `email` пишет в WhatsApp при `whatsapp_opt_in`. SMS-согласие `prior_express_written` **не** открывает WhatsApp. `channel=sms` при предпочтении WhatsApp по-прежнему шлёт SMS.
 
@@ -46,7 +47,7 @@ Content-Type: application/json
 
 - `401` — нет / неверный секрет
 - `404` `business_not_found`
-- `422` с `error.code`: `found_person_reason_required`, `found_person_id_required`, `outbound_consent_required`, `whatsapp_not_configured`, `outbound_channel_invalid`, …
+- `422` с `error.code`: `found_person_reason_required`, `found_person_id_required`, `observed_pain_not_grounded`, `outbound_consent_required`, `whatsapp_not_configured`, `outbound_channel_invalid`, …
 - `409` `sms_suppressed` / `conversation_already_active`
 
 Цикл 2 **не** шлёт POST `hot_lead` из ingest. GREET кладёт событие `opened` в журнал. Горячий выход — отдельный `POST .../hot-leads` после `OFFER_BOOKING_SLOTS`.

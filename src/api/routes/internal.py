@@ -191,6 +191,7 @@ def ingest_crm_found_card(
             messenger_id=person.messenger_id,
             gender=person.gender,
             region=person.region,
+            observed_pain=person.observed_pain,
         )
     except FoundPersonRejected as exc:
         raise PublicApiError(422, exc.code, str(exc)) from exc

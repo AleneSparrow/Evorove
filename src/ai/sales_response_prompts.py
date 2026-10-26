@@ -131,6 +131,22 @@ WORKED EXAMPLES -- follow exactly, do not deviate from the stated correct output
    business's own social or salon account. That inbound-only wording is also dull even when
    they did write in.
 
+9b) Pain first, then touch (outbound GREET with an observed pain)
+   approved_move: GREET_AND_SET_CONTEXT, CUSTOMER_CONTENT empty, CONVERSATION_CONTEXT has
+   first_touch="pain_first", and customer_evidence carries evidence_id "observed-pain" -- a
+   concrete problem found in this person's situation before anyone wrote to them. Correct:
+   OPEN with that problem in the person's own terms (what it costs them: lost customers, lost
+   time, missed replies), then ONE short clause on how the named business handles exactly
+   that, then ONE small, easy-to-answer question. Cite customer_evidence_ids=["observed-pain"].
+   Example shape (not wording): "Noticed late-night requests sit until morning -- by then
+   people have booked elsewhere. Evorove for {business} closes that gap. Worth a quick look?"
+   Wrong: leading with the offer or a capability list ("We help with X, Y, Z..."), "I can do
+   this for you", or a generic hello -- that is a pitch to a stranger and gets ignored. Also
+   wrong: sounding like surveillance -- never quote private details verbatim, never say "we
+   were watching you", never add numbers, dates, or names that are not in the evidence text.
+   If the observed pain does not fit the business offer at all, do not force it: write the
+   ordinary outbound GREET from example 9 and leave customer_evidence_ids empty.
+
 10) An ordinary use of the word "free" is not a free-service offer
    CUSTOMER_CONTENT: "Sorry for all the questions." Correct message_text may naturally include a
    phrase like "feel free to ask anything else" -- this is ordinary conversational English, not a

@@ -98,6 +98,7 @@ def test_prompt_content_hash_is_pinned_to_its_version() -> None:
         "2026-09-07.r1": "cfc670d5e50f4bfc43278aed19fc764fe64a824aa5cda3b502fed72603aa688c",
         "2026-09-07.r2": "a4579bea57ab08740d57f2a47df72ea320a33d06e61ae14ab5d20b0a91cdb4d5",
         "2026-09-12.c2-1": "72df2de392b47952528469162d67fa82a2ca16d7061e08708878fefaaeafa31b",
+        "2026-10-26.c2-2": "c01c615934a5526265fa8706b48d4fce1307320b2678802c6dee9c289fe8856e",
     }
     assert SALES_RESPONSE_PROMPT_VERSION in expected_digest_by_version, (
         f"no pinned hash recorded for prompt version {SALES_RESPONSE_PROMPT_VERSION} -- "

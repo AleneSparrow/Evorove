@@ -3,6 +3,12 @@
 This is not people search. A contact dump without a grounded reason is rejected.
 Outbound consent is stricter than the inbound widget: never inferred.
 
+Pain first, then touch (owner rule, 26 October 2026): cycle 1 should hand over
+``observed_pain`` -- a concrete problem it saw in this person's situation that
+the business can solve. The first touch opens with that pain, not with the
+business offer. It is optional for backward compatibility; a card without it
+is still accepted, but the touch is marked as offer-led, not pain-led.
+
 Send mouths: sms | email | whatsapp. WhatsApp is Evorove's provider number,
 not the tenant's Instagram/WhatsApp OAuth. Email send is still a later slice.
 Social Direct (IG and the like) is never a mouth.
@@ -64,6 +70,7 @@ class FoundPerson:
     messenger_id: str | None = None
     gender: str | None = None
     region: str | None = None
+    observed_pain: str | None = None
 
     @property
     def address(self) -> str:
@@ -106,6 +113,7 @@ def parse_crm_found_card(payload: Mapping[str, object]) -> FoundPerson:
             or _stated_label(nested.get("region"))
             or _stated_label(nested.get("state"))
         ),
+        observed_pain=_optional_text(payload.get("observed_pain")),
     )
 
 
@@ -124,6 +132,7 @@ def parse_found_person(
     messenger_id: str | None = None,
     gender: str | None = None,
     region: str | None = None,
+    observed_pain: str | None = None,
 ) -> FoundPerson:
     key = (idempotency_key or "").strip()
     if not key:
@@ -137,6 +146,12 @@ def parse_found_person(
     origin = (source or "").strip()
     if not origin:
         raise FoundPersonRejected("found_person_source_required", "A source is required")
+    pain = (observed_pain or "").strip() or None
+    if pain is not None and not _has_grounded_reason(pain):
+        raise FoundPersonRejected(
+            "observed_pain_not_grounded",
+            "observed_pain must describe a concrete problem, not a label or a keyword",
+        )
     send, preferred = _resolve_channels(channel, preferred_channel)
     basis = (consent_basis or "").strip().casefold()
     if not basis or basis in REJECTED_CONSENT_BASES:
@@ -208,6 +223,7 @@ def parse_found_person(
         messenger_id=cleaned_messenger,
         gender=_stated_label(gender),
         region=_stated_label(region),
+        observed_pain=pain,
     )
 
 

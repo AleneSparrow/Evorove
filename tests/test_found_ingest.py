@@ -240,3 +240,42 @@ def test_found_ingest_requires_the_internal_secret(tmp_path) -> None:
         assert sms.sent == []
     finally:
         engine.dispose()
+
+
+PAIN = "Recent reviews say AC repair requests sit unanswered overnight and people book elsewhere"
+
+
+def test_crm_found_ingest_stores_observed_pain_for_a_pain_first_touch(tmp_path) -> None:
+    app, engine, sms, _wa = _client(tmp_path)
+    try:
+        with TestClient(app, raise_server_exceptions=False) as client:
+            response = client.post(
+                f"/api/v1/internal/businesses/{BUSINESS_ID}/found",
+                json=_card(observed_pain=PAIN),
+                headers={"X-Internal-Task-Secret": SECRET},
+            )
+        assert response.status_code == 200, response.text
+        assert sms.sent
+        with SQLAlchemyUnitOfWork.factory_for_engine(engine)() as uow:
+            conversation = uow.conversations.get(BUSINESS_ID, response.json()["conversation_id"])
+            assert conversation is not None
+            assert conversation.metadata["first_touch_basis"] == "observed_pain"
+            assert conversation.metadata["observed_pain"] == PAIN
+    finally:
+        engine.dispose()
+
+
+def test_crm_found_ingest_rejects_a_keyword_as_pain(tmp_path) -> None:
+    app, engine, sms, _wa = _client(tmp_path)
+    try:
+        with TestClient(app, raise_server_exceptions=False) as client:
+            response = client.post(
+                f"/api/v1/internal/businesses/{BUSINESS_ID}/found",
+                json=_card(observed_pain="slow replies"),
+                headers={"X-Internal-Task-Secret": SECRET},
+            )
+        assert response.status_code == 422, response.text
+        assert response.json()["error"]["code"] == "observed_pain_not_grounded"
+        assert sms.sent == []
+    finally:
+        engine.dispose()

@@ -456,11 +456,27 @@ class SalesLiveTurnService:
             business_name=business_name,
             offer=_business_offer(dna),
         )
+        observed_pain = _observed_pain(conversation)
         message_text, validation = self._phrase_and_validate(
             decision, analysis, knowledge, "", conversation, case,
             handoff_text, profile, qualification, dna, uow,
             fallback_override=outbound_fallback,
+            extra_evidence=(
+                {OBSERVED_PAIN_EVIDENCE_ID: observed_pain} if observed_pain else None
+            ),
+            extra_context=(
+                {"first_touch": "pain_first", "observed_pain_evidence_id": OBSERVED_PAIN_EVIDENCE_ID}
+                if observed_pain else {"first_touch": "offer_only"}
+            ),
         )
+        validation = {
+            **validation,
+            "first_touch_basis": "observed_pain" if observed_pain else "offer",
+            "pain_first_applied": bool(
+                observed_pain
+                and OBSERVED_PAIN_EVIDENCE_ID in validation.get("cited_evidence_ids", [])
+            ),
+        }
         lowered = message_text.casefold()
         if any(
             marker in lowered
@@ -472,7 +488,11 @@ class SalesLiveTurnService:
             )
         ):
             message_text = outbound_fallback
-            validation = {**validation, "outbound_inbound_phrasing_replaced": True}
+            validation = {
+                **validation,
+                "outbound_inbound_phrasing_replaced": True,
+                "pain_first_applied": False,
+            }
         stamped = ensure_evorove_acting_for(message_text, business_name=business_name)
         if stamped != message_text:
             message_text = stamped
@@ -582,11 +602,15 @@ class SalesLiveTurnService:
         callback_recorded: bool = False,
         booking_available: bool = False,
         fallback_override: str | None = None,
+        extra_evidence: Mapping[str, str] | None = None,
+        extra_context: Mapping[str, Any] | None = None,
     ) -> tuple[str, dict[str, Any]]:
         evidence = tuple(item.evidence for item in analysis.signals) + tuple(
             item.evidence for item in analysis.objections
         )
         evidence_map = {f"evidence-{index}": item.excerpt for index, item in enumerate(evidence, start=1)}
+        if extra_evidence:
+            evidence_map.update(extra_evidence)
         knowledge_map = {card.knowledge_id: card for card in knowledge}
         if fallback_override is None:
             offered = phrase_commercial_offer(
@@ -641,7 +665,10 @@ class SalesLiveTurnService:
                     ],
                     handoff_template=handoff_text,
                     safe_fallback_text=fallback,
-                    conversation_context={"case_state": case.current_state.value},
+                    conversation_context={
+                        "case_state": case.current_state.value,
+                        **dict(extra_context or {}),
+                    },
                     customer_message=customer_text,
                     retrieval_context=_retrieval_context_for(customer_text, profile.active_objection),
                 ))
@@ -674,6 +701,9 @@ class SalesLiveTurnService:
             "valid": result.valid,
             "violations": list(result.violations),
             "used_fallback": result.used_fallback,
+            "cited_evidence_ids": (
+                [] if result.used_fallback else list(candidate.customer_evidence_ids)
+            ),
         }
 
     def _persist_turn(
@@ -928,6 +958,19 @@ def _business_name(dna: Mapping[str, Any]) -> str | None:
         return None
     name = business.get("name")
     return name.strip() if isinstance(name, str) and name.strip() else None
+
+
+OBSERVED_PAIN_EVIDENCE_ID = "observed-pain"
+
+
+def _observed_pain(conversation: Conversation) -> str | None:
+    """Cycle-1 pain on the Found card. Pain first, then touch."""
+
+    metadata = conversation.metadata if isinstance(conversation.metadata, dict) else {}
+    raw = metadata.get("observed_pain")
+    if isinstance(raw, str) and raw.strip():
+        return raw.strip()
+    return None
 
 
 def _business_offer(dna: Mapping[str, Any]) -> str | None:

@@ -318,3 +318,154 @@ def test_whatsapp_send_requires_evorove_mouth(tmp_path) -> None:
         assert sms.sent == []
     finally:
         engine.dispose()
+
+
+# Pain first, then touch (owner rule, 26 October 2026).
+
+PAIN = "Recent reviews say AC repair requests sit unanswered overnight and people book elsewhere"
+
+
+class _Generated:
+    def __init__(self, output) -> None:
+        self.output = output
+
+
+class PainCitingGenerator:
+    """Stands in for the model: opens with the observed pain and cites it."""
+
+    def __init__(self, *, cite_pain: bool = True) -> None:
+        self.cite_pain = cite_pain
+        self.inputs: list = []
+
+    def generate(self, value):
+        from src.ai.sales_response_models import SalesResponseOutput
+
+        self.inputs.append(value)
+        return _Generated(SalesResponseOutput(
+            move=value.approved_move,
+            message_text=(
+                "Noticed AC requests can sit overnight, and by morning people have booked "
+                "someone else. Evorove for Acme Home Services answers right away. Worth a look?"
+            ),
+            knowledge_ids=[],
+            business_fact_ids=[],
+            customer_evidence_ids=["observed-pain"] if self.cite_pain else [],
+            used_safe_fallback=False,
+        ))
+
+
+def _start_with_generator(factory, generator, **overrides: object):
+    from src.persistence.sales_live_turn import SalesLiveTurnService
+
+    values: dict[str, object] = {
+        "idempotency_key": "found-ada-ac-001",
+        "reason": REASON,
+        "source": "cycle1-candidate-ada",
+        "channel": "sms",
+        "consent_basis": "prior_express_written",
+        "name": "Ada",
+        "phone": "+15551234567",
+        "now": NOW,
+    }
+    values.update(overrides)
+    return OutboundFirstTouchService(
+        factory,
+        sms_service=FakeSms(),
+        sales_live=SalesLiveTurnService(
+            response_generator=generator, crm_touch_publisher=_NoCrm(),
+        ),
+    ).start(BUSINESS_ID, **values)  # type: ignore[arg-type]
+
+
+class _NoCrm:
+    def publish(self, business_id: str, payload) -> None:
+        del business_id, payload
+
+
+def _greet_validation(factory, result) -> dict:
+    with factory() as uow:
+        turns = uow.sales_turns.list_for_case(BUSINESS_ID, result.case_id)
+    assert len(turns) == 1
+    return dict(turns[0].validation)
+
+
+def test_observed_pain_leads_the_first_touch(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    generator = PainCitingGenerator()
+    try:
+        result = _start_with_generator(factory, generator, observed_pain=PAIN)
+        assert result.message_text.startswith("Noticed AC requests can sit overnight")
+        sent = generator.inputs[0]
+        assert {"evidence_id": "observed-pain", "text": PAIN} in list(sent.customer_evidence)
+        assert sent.conversation_context["first_touch"] == "pain_first"
+        validation = _greet_validation(factory, result)
+        assert validation["first_touch_basis"] == "observed_pain"
+        assert validation["pain_first_applied"] is True
+        with factory() as uow:
+            conversation = uow.conversations.get(BUSINESS_ID, result.conversation_id)
+            assert conversation is not None
+            assert conversation.metadata["first_touch_basis"] == "observed_pain"
+            assert conversation.metadata["observed_pain"] == PAIN
+            lead = uow.leads.get(BUSINESS_ID, result.lead_id)
+            assert lead is not None
+            assert lead.attributes["observed_pain"] == PAIN
+    finally:
+        engine.dispose()
+
+
+def test_pain_that_the_wording_ignored_is_not_counted_as_pain_first(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    try:
+        result = _start_with_generator(
+            factory, PainCitingGenerator(cite_pain=False), observed_pain=PAIN,
+        )
+        validation = _greet_validation(factory, result)
+        assert validation["first_touch_basis"] == "observed_pain"
+        assert validation["pain_first_applied"] is False
+    finally:
+        engine.dispose()
+
+
+def test_card_without_pain_is_marked_offer_led(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    generator = PainCitingGenerator(cite_pain=False)
+    try:
+        result = _start_with_generator(factory, generator)
+        assert generator.inputs[0].conversation_context["first_touch"] == "offer_only"
+        assert all(
+            item["evidence_id"] != "observed-pain"
+            for item in generator.inputs[0].customer_evidence
+        )
+        validation = _greet_validation(factory, result)
+        assert validation["first_touch_basis"] == "offer"
+        assert validation["pain_first_applied"] is False
+        with factory() as uow:
+            conversation = uow.conversations.get(BUSINESS_ID, result.conversation_id)
+            assert conversation is not None
+            assert conversation.metadata["first_touch_basis"] == "offer"
+            assert "observed_pain" not in conversation.metadata
+    finally:
+        engine.dispose()
+
+
+def test_model_cannot_cite_pain_that_was_not_supplied(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    try:
+        result = _start_with_generator(factory, PainCitingGenerator(cite_pain=True))
+        validation = _greet_validation(factory, result)
+        assert "unknown_customer_evidence_id" in validation["violations"]
+        assert validation["pain_first_applied"] is False
+        assert "evorove for acme home services" in result.message_text.casefold()
+    finally:
+        engine.dispose()
+
+
+def test_replaying_a_card_without_pain_keeps_its_idempotency(tmp_path) -> None:
+    factory, engine = _factory(tmp_path)
+    try:
+        first = _start(factory)
+        again = _start(factory)
+        assert again.duplicate is True
+        assert again.case_id == first.case_id
+    finally:
+        engine.dispose()

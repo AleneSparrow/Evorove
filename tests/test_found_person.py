@@ -186,3 +186,59 @@ def test_crm_journal_card_does_not_invent_gender_from_a_name() -> None:
     })
     assert person.gender is None
     assert person.region is None
+
+
+PAIN = "Two-star reviews this month say AC repair requests go unanswered for days"
+
+
+def test_observed_pain_is_kept_on_the_found_person() -> None:
+    person = parse_found_person(
+        idempotency_key="found-ada-ac-001",
+        reason=REASON,
+        source="crm-journal-found",
+        channel="sms",
+        consent_basis="prior_express_written",
+        phone="+15551234567",
+        observed_pain=f"  {PAIN}  ",
+    )
+    assert person.observed_pain == PAIN
+
+
+def test_found_person_without_pain_is_still_accepted() -> None:
+    person = parse_found_person(
+        idempotency_key="found-ada-ac-001",
+        reason=REASON,
+        source="crm-journal-found",
+        channel="sms",
+        consent_basis="prior_express_written",
+        phone="+15551234567",
+    )
+    assert person.observed_pain is None
+
+
+@pytest.mark.parametrize("label", ["slow replies", "pain", "HVAC owner busy"])
+def test_keyword_is_not_an_observed_pain(label: str) -> None:
+    with pytest.raises(FoundPersonRejected) as error:
+        parse_found_person(
+            idempotency_key="found-ada-ac-001",
+            reason=REASON,
+            source="crm-journal-found",
+            channel="sms",
+            consent_basis="prior_express_written",
+            phone="+15551234567",
+            observed_pain=label,
+        )
+    assert error.value.code == "observed_pain_not_grounded"
+
+
+def test_crm_found_card_carries_observed_pain() -> None:
+    person = parse_crm_found_card({
+        "person_id": "crm-found-ada-001",
+        "reason": REASON,
+        "source": "crm-journal-found",
+        "channel": "sms",
+        "consent_basis": "prior_express_written",
+        "identity": {"phone": "+15551234567"},
+        "observed_pain": PAIN,
+    })
+    assert person.observed_pain == PAIN
