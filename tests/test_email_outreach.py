@@ -88,6 +88,27 @@ def test_each_business_sends_from_its_own_mailbox(factory) -> None:
     assert by_host["smtp.gmail.com"][1]["From"].endswith("<owner@salon.example>")
 
 
+def test_updating_the_mailbox_keeps_the_saved_password(factory) -> None:
+    smtp = FakeSmtp()
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=smtp, public_base_url=PUBLIC)
+    service.connect("evorove", _settings())
+    service.connect("evorove", _settings(password="", imap_host="imap.fastmail.com", imap_port=993))
+    service.enqueue("evorove", to_address="owner@shop.example", subject="Hi", body="Hi", outbox_id="kept")
+    assert service.deliver_due()["sent"] == 1
+    assert smtp.sent[0][0].password == "app-password-1"
+    assert smtp.sent[0][0].host == "smtp.zoho.com"
+
+
+def test_status_names_why_a_connected_mailbox_still_cannot_send(factory) -> None:
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=FakeSmtp())
+    assert service.status("evorove").send_block == "connect a mailbox before sending"
+    service.connect("evorove", _settings())
+    status = service.status("evorove")
+    assert status.replies_ready is True
+    assert status.send_block == "PUBLIC_API_BASE_URL is required before a commercial email can be sent"
+    assert status.postal_address.startswith("100 Main")
+
+
 def test_password_is_encrypted_and_never_returned(factory) -> None:
     service = EmailOutreachService(factory, encryption_key=KEY, sender=FakeSmtp())
     status = service.connect("evorove", _settings())
@@ -95,6 +116,14 @@ def test_password_is_encrypted_and_never_returned(factory) -> None:
     with factory() as uow:
         stored = uow.session.get(EmailConnectionRow, "evorove").password_encrypted
     assert "app-password-1" not in stored
+
+
+def test_status_names_a_missing_encryption_key(factory) -> None:
+    service = EmailOutreachService(factory, encryption_key=KEY, sender=FakeSmtp(), public_base_url=PUBLIC)
+    service.connect("evorove", _settings())
+    service._encryption_key = None
+    status = service.status("evorove")
+    assert status.send_block == "ACCOUNT_SECURITY_ENCRYPTION_KEY is required before a commercial email can be sent"
 
 
 def test_connecting_without_an_encryption_key_is_refused(factory) -> None:
@@ -110,6 +139,7 @@ def test_connecting_without_an_encryption_key_is_refused(factory) -> None:
         ({"smtp_security": "none"}, "smtp_security"),
         ({"from_address": "not-an-email"}, "from_address"),
         ({"daily_limit": 0}, "daily_limit"),
+        ({"imap_host": None, "imap_port": None}, "imap_host"),
     ],
 )
 def test_invalid_mailbox_settings_are_rejected(factory, overrides, message) -> None:
@@ -213,7 +243,10 @@ def test_owner_api_hides_the_password(tmp_path: Path) -> None:
         body = {field: getattr(_settings(), field) for field in _settings().__slots__}
         put = client.put("/api/v1/businesses/evorove/integrations/email", json=body, headers=headers)
         assert put.status_code == 200, put.text
-        assert put.json()["connected"] is True and put.json()["todays_cap"] == 10
+        payload = put.json()
+        assert payload["connected"] is True and payload["todays_cap"] == 10
+        assert payload["replies_ready"] is True
+        assert "PUBLIC_API_BASE_URL" in payload["send_block"]
         assert "password" not in put.text and "app-password-1" not in put.text
         other = client.get("/api/v1/businesses/evorove/integrations/email")
         assert other.status_code == 401

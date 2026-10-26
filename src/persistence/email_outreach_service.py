@@ -83,10 +83,17 @@ class MailboxStatus:
     from_address: str | None = None
     from_name: str | None = None
     smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_security: str | None = None
+    smtp_username: str | None = None
+    postal_address: str | None = None
     imap_host: str | None = None
+    imap_port: int | None = None
     daily_limit: int | None = None
     todays_cap: int | None = None
     sent_today: int = 0
+    send_block: str | None = None
+    replies_ready: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -167,6 +174,8 @@ class EmailOutreachService:
             return "a physical postal address is required in every commercial email (CAN-SPAM)"
         if not (self._public_base_url or "").strip():
             return "PUBLIC_API_BASE_URL is required before a commercial email can be sent"
+        if not (self._encryption_key or "").strip():
+            return "ACCOUNT_SECURITY_ENCRYPTION_KEY is required before a commercial email can be sent"
         return None
 
     def unsubscribe_url(self, business_id: str, email: str) -> str | None:
@@ -200,11 +209,16 @@ class EmailOutreachService:
 
     def connect(self, business_id: str, settings: MailboxSettings) -> MailboxStatus:
         _validate(settings)
-        encrypted = self._box().encrypt(settings.password)
         now = utc_now()
         with self.unit_of_work_factory() as uow:
             session = uow.session
             row = session.get(EmailConnectionRow, business_id)
+            if not settings.password:
+                if row is None:
+                    raise EmailOutreachError("smtp_username and password are required")
+                encrypted = row.password_encrypted
+            else:
+                encrypted = self._box().encrypt(settings.password)
             if row is None:
                 row = EmailConnectionRow(business_id=business_id, created_at=now, warmup_started_at=now)
                 session.add(row)
@@ -237,16 +251,23 @@ class EmailOutreachService:
         with self.unit_of_work_factory() as uow:
             row = uow.session.get(EmailConnectionRow, business_id)
             if row is None:
-                return MailboxStatus(connected=False)
+                return MailboxStatus(connected=False, send_block="connect a mailbox before sending")
             return MailboxStatus(
                 connected=True,
                 from_address=row.from_address,
                 from_name=row.from_name,
                 smtp_host=row.smtp_host,
+                smtp_port=row.smtp_port,
+                smtp_security=row.smtp_security,
+                smtp_username=row.smtp_username,
+                postal_address=row.postal_address,
                 imap_host=row.imap_host,
+                imap_port=row.imap_port,
                 daily_limit=row.daily_limit,
                 todays_cap=todays_cap(row.daily_limit, row.warmup_started_at, now),
                 sent_today=_sent_since(uow.session, business_id, _day_start(now)),
+                send_block=self._send_refusal(row),
+                replies_ready=bool((row.imap_host or "").strip() and row.imap_port),
             )
 
     def enqueue(
@@ -389,6 +410,8 @@ def _send_refusal_code(reason: str) -> str:
         return "mailbox_not_connected"
     if "postal address" in reason:
         return "postal_address_required"
+    if "ACCOUNT_SECURITY_ENCRYPTION_KEY" in reason:
+        return "encryption_key_required"
     return "public_api_base_url_required"
 
 
@@ -441,7 +464,11 @@ def _validate(settings: MailboxSettings) -> None:
         raise EmailOutreachError("smtp_security must be ssl or starttls")
     if not settings.smtp_host.strip() or not 1 <= settings.smtp_port <= 65535:
         raise EmailOutreachError("smtp_host and smtp_port are required")
-    if not settings.smtp_username.strip() or not settings.password:
+    if not settings.smtp_username.strip():
         raise EmailOutreachError("smtp_username and password are required")
+    if not (settings.imap_host or "").strip() or settings.imap_port is None:
+        raise EmailOutreachError("imap_host and imap_port are required")
+    if not 1 <= settings.imap_port <= 65535:
+        raise EmailOutreachError("imap_host and imap_port are required")
     if not 1 <= settings.daily_limit <= 500:
         raise EmailOutreachError("daily_limit must be between 1 and 500")

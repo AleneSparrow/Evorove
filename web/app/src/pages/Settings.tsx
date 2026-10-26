@@ -8,6 +8,7 @@ import { API_BASE, api, type BusinessDNASettings, type CalendarStatus, type Comm
 import { StatisticsPanel } from "../components/StatisticsPanel";
 import { SalesPlaybookSettings } from "../components/SalesPlaybookSettings";
 import { MaterialsPanel } from "../components/MaterialsPanel";
+import { MailboxPanel } from "../components/MailboxPanel";
 
 // Grouped by the task a business owner actually has, not by which Business
 // DNA schema section a field happens to live in -- "Services" and "Booking"
@@ -23,6 +24,7 @@ const SETTINGS_TABS = [
   { key: "playbook", label: "Sales Playbook" },
   { key: "materials", label: "Materials" },
   { key: "reporting", label: "Statistics" },
+  { key: "mailbox", label: "Mailbox" },
   { key: "sms", label: "SMS" },
   { key: "calendar", label: "Calendar" },
   { key: "widget", label: "Site chat" },
@@ -1018,7 +1020,7 @@ export default function Settings() {
 
                   <Field
                     label="Payment link"
-                    hint="Your own checkout URL (Stripe, Square, PayPal — anything). When the sale closes, the engine sends this link to the customer and stops there. Leave blank if you collect payment yourself after the conversation."
+                    hint="Your checkout URL. The engine puts this exact link in the offer. Leave it blank and the offer goes out with no way to pay."
                   >
                     <input
                       className={inputCls}
@@ -1219,6 +1221,10 @@ export default function Settings() {
                     />
                   )}
                 </div>
+              )}
+
+              {tab === "mailbox" && token && businessId && (
+                <MailboxPanel token={token} businessId={businessId} />
               )}
 
               {tab === "sms" && (
