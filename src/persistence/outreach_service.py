@@ -87,7 +87,7 @@ def draft_first_email(
         about = f"I'm with {business_name}."
     pain = usable_observed_pain(observed_pain)
     if pain:
-        opening = f"Something I noticed: {pain.rstrip('.')}."
+        opening = f"Something I noticed: {pain.rstrip('.!?;:, ')}."
         ask = "Is that worth a quick look on your side?"
     else:
         opening = f"I wrote because of this: {observed}."
