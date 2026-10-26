@@ -74,6 +74,7 @@ class OutboundFirstTouchService:
         messenger_id: str | None = None,
         gender: str | None = None,
         region: str | None = None,
+        observed_pain: str | None = None,
     ) -> OutboundFirstTouchResult:
         person = parse_found_person(
             idempotency_key=idempotency_key,
@@ -89,6 +90,7 @@ class OutboundFirstTouchService:
             messenger_id=messenger_id,
             gender=gender,
             region=region,
+            observed_pain=observed_pain,
         )
         occurred_at = now or utc_now()
         fingerprint = _fingerprint(person)
@@ -272,6 +274,7 @@ class OutboundFirstTouchService:
             metadata={
                 "outbound_first_touch": True,
                 "found_source": person.source,
+                "first_touch_basis": first_touch_basis(person),
                 **_found_card_attributes(person),
             },
         )
@@ -281,6 +284,12 @@ class OutboundFirstTouchService:
         conversation.link_case(lead.lead_id, case.case_id)
         uow.conversations.save(conversation, conversation.version)
         return case, conversation
+
+
+def first_touch_basis(person: FoundPerson) -> str:
+    """Pain first, then touch: say on the card what the first message stood on."""
+
+    return "observed_pain" if person.observed_pain else "offer"
 
 
 def _active_dna(uow: UnitOfWork, business_id: str) -> Mapping[str, Any]:
@@ -303,6 +312,8 @@ def _fingerprint(person: FoundPerson) -> str:
         "messenger_id": person.messenger_id,
         "person_id": person.person_id,
     }
+    if person.observed_pain:
+        payload["observed_pain"] = person.observed_pain
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
@@ -320,6 +331,8 @@ def _found_card_attributes(person: FoundPerson) -> dict[str, str]:
         extra["gender"] = person.gender
     if person.region:
         extra["region"] = person.region
+    if person.observed_pain:
+        extra["observed_pain"] = person.observed_pain
     return extra
 
 

@@ -282,3 +282,86 @@ def test_cold_phone_only_person_is_never_texted(world) -> None:
     with factory() as uow:
         kinds = {row.kind for row in uow.session.scalars(select(IntegrationOutboxRow)).all()}
     assert not any("sms" in kind for kind in kinds) and smtp.sent == []
+
+
+# Pain first, then touch (owner rule, 26 October 2026) on the live cold-email path.
+
+PAIN = "Recent reviews say weekend repair calls go to voicemail and people book another shop"
+
+
+def test_draft_opens_with_the_observed_pain_not_the_offer() -> None:
+    dna = {"business": {"name": "Cool Air", "description": "HVAC repair in Chicago"}}
+    draft = draft_first_email(
+        dna, name="Dana Smith", reason=REASON, sender_name="Alena",
+        postal_address="100 Main St", observed_pain=PAIN,
+    )
+    opening = draft.body.split("\n\n")[1]
+    assert opening == f"Something I noticed: {PAIN}."
+    assert draft.body.index(PAIN) < draft.body.index("HVAC repair in Chicago")
+    assert "I wrote because of this" not in draft.body
+    assert "Is that worth a quick look on your side?" in draft.body
+    assert 'Reply "no"' in draft.body
+
+
+@pytest.mark.parametrize("pain", ["", "   ", "slow replies", "x" * 501 + " a b c"])
+def test_a_label_or_oversized_pain_keeps_the_reason_letter(pain: str) -> None:
+    draft = draft_first_email(
+        None, name="Dana Smith", reason=REASON, sender_name="Alena",
+        postal_address="100 Main St", observed_pain=pain,
+    )
+    assert f"I wrote because of this: {REASON}." in draft.body
+
+
+def test_cold_assigned_with_pain_sends_a_pain_first_letter(world) -> None:
+    service, email, smtp, posts, _ = world
+    email.connect("tenant-a", _settings())
+    assert _assign(service, observed_pain=f"  {PAIN}  ") == "sent"
+    (_, message), = smtp.sent
+    assert f"Something I noticed: {PAIN}." in message.get_content()
+    row = service.get("tenant-a", "person-0001")
+    assert row["observed_pain"] == PAIN
+    assert row["first_touch_basis"] == "observed_pain"
+    assert PAIN in posts[1]["summary"]
+
+
+def test_cold_assigned_with_a_label_is_marked_reason_led(world) -> None:
+    service, email, smtp, *_ = world
+    email.connect("tenant-a", _settings())
+    assert _assign(service, observed_pain="slow replies") == "sent"
+    row = service.get("tenant-a", "person-0001")
+    assert row["observed_pain"] is None
+    assert row["first_touch_basis"] == "reason"
+    assert f"I wrote because of this: {REASON}." in row["body"]
+
+
+def test_crm_command_forwards_observed_pain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(crm_board_service, "post_internal_json", lambda url, secret, payload: (True, None))
+    monkeypatch.setattr(email_outreach_service, "in_business_quiet_hours", lambda now, dna: False)
+    database_url = f"sqlite+pysqlite:///{tmp_path / 'api.db'}"
+    engine = create_database_engine(database_url)
+    Base.metadata.create_all(engine)
+    factory = SQLAlchemyUnitOfWork.factory_for_engine(engine)
+    seed(factory, "tenant-a")
+    app = create_app(settings=Settings(
+        database_url=database_url, app_env="test", internal_task_secret=SECRET,
+        crm_base_url=CRM, account_security_encryption_key=KEY, public_api_base_url=PUBLIC,
+    ))
+    command = {
+        "command_id": "cold:person-0001", "person_id": "person-0001", "action": "cold_assigned",
+        "payload": {"reason": REASON, "reason_source": "forum", "observed_pain": PAIN},
+        "email": "owner@shop.example", "name": "Dana Smith",
+    }
+    with TestClient(app, raise_server_exceptions=False) as client:
+        accepted = client.post(
+            "/api/v1/internal/businesses/tenant-a/lead-commands",
+            json=command, headers={"X-Internal-Task-Secret": SECRET},
+        )
+        assert accepted.status_code == 200, accepted.text
+    from src.persistence.sqlalchemy_models import OutreachProspectRow
+
+    with factory() as uow:
+        row = uow.session.get(OutreachProspectRow, ("tenant-a", "person-0001"))
+        assert row is not None
+        assert row.observed_pain == PAIN
+        assert row.body is not None and row.body.split("\n\n")[1] == f"Something I noticed: {PAIN}."
+    engine.dispose()

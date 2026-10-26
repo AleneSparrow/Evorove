@@ -1306,6 +1306,7 @@ class CrmFoundIngestRequest(ApiModel):
     consent_basis: Annotated[str | None, Field(max_length=64)] = None
     identity: CrmFoundIdentitySchema
     idempotency_key: Annotated[str | None, Field(min_length=8, max_length=128)] = None
+    observed_pain: Annotated[str | None, Field(min_length=1, max_length=500)] = None
 
 
 class OutboundFirstTouchRequest(ApiModel):
@@ -1322,6 +1323,7 @@ class OutboundFirstTouchRequest(ApiModel):
     messenger_id: Annotated[str | None, Field(min_length=1, max_length=128)] = None
     gender: Annotated[str | None, Field(min_length=1, max_length=80)] = None
     region: Annotated[str | None, Field(min_length=1, max_length=80)] = None
+    observed_pain: Annotated[str | None, Field(min_length=1, max_length=500)] = None
 
 
 class OutboundFirstTouchResponse(ApiModel):

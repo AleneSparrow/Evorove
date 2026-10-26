@@ -191,6 +191,7 @@ class OutreachProspectRow(Base):
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     reason_source: Mapped[str] = mapped_column(Text, nullable=False)
     hypothesis_id: Mapped[str | None] = mapped_column(String(128))
+    observed_pain: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(16), nullable=False)
     skip_reason: Mapped[str | None] = mapped_column(String(64))
     subject: Mapped[str | None] = mapped_column(String(255))
