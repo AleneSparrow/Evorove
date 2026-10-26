@@ -682,6 +682,36 @@ export interface SmsStatus {
   phone_number: string | null;
 }
 
+export interface MailboxStatus {
+  connected: boolean;
+  from_address: string | null;
+  from_name: string | null;
+  postal_address: string | null;
+  smtp_host: string | null;
+  smtp_port: number | null;
+  smtp_security: "ssl" | "starttls" | null;
+  smtp_username: string | null;
+  imap_host: string | null;
+  imap_port: number | null;
+  daily_limit: number | null;
+  todays_cap: number | null;
+  sent_today: number;
+}
+
+export interface MailboxConnectionRequest {
+  from_address: string;
+  from_name: string;
+  postal_address: string;
+  smtp_host: string;
+  smtp_port: number;
+  smtp_security: "ssl" | "starttls";
+  smtp_username: string;
+  password: string;
+  imap_host: string;
+  imap_port: number;
+  daily_limit: number;
+}
+
 export interface CrmWebhookStatus {
   configured: boolean;
 }
@@ -890,6 +920,19 @@ export const api = {
       { method: "POST", body: JSON.stringify({}) },
       token,
     ),
+
+  getMailbox: (token: string, businessId: string) =>
+    request<MailboxStatus>(`/api/v1/businesses/${businessId}/integrations/email`, { method: "GET" }, token),
+
+  connectMailbox: (token: string, businessId: string, body: MailboxConnectionRequest) =>
+    request<MailboxStatus>(
+      `/api/v1/businesses/${businessId}/integrations/email`,
+      { method: "PUT", body: JSON.stringify(body) },
+      token,
+    ),
+
+  disconnectMailbox: (token: string, businessId: string) =>
+    request<MailboxStatus>(`/api/v1/businesses/${businessId}/integrations/email`, { method: "DELETE" }, token),
 
   getSmsStatus: (token: string, businessId: string) =>
     request<SmsStatus>(`/api/v1/businesses/${businessId}/integrations/sms`, { method: "GET" }, token),

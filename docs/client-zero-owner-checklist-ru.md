@@ -41,11 +41,12 @@ SearxNG только забирает страницы. Читает их Anthro
 
 ## Ящик и оплата
 
-Вводите на evorove.com, Settings.
+Вводите на evorove.com, Settings → Mailbox.
 
-- `ACCOUNT_SECURITY_ENCRYPTION_KEY` у продажи. Без него пароль ящика не сохраняется.
+- `ACCOUNT_SECURITY_ENCRYPTION_KEY` у продажи. Без него пароль ящика не сохраняется,
+  и вкладка Mailbox покажет эту ошибку. Ключ задаёте вы на деплое, не в форме.
 - Ящик: адрес отправителя, SMTP, IMAP, пароль и почтовый адрес (CAN-SPAM, не короче 10 символов).
-  Пароль вводите вы. В ответ он не возвращается. API: `PUT /api/v1/businesses/{business_id}/integrations/email`.
+  Пароль вводите вы. В ответ он не возвращается. Тот же контракт: `PUT /api/v1/businesses/{business_id}/integrations/email`.
 - Payment link в Settings → Services & booking: checkout подписки Evorove.
   Это не цена в письме. Карту продукт не собирает.
   Ссылка в оффере оставляет карточку на Offer made. Done — только записанная
