@@ -248,6 +248,7 @@ def apply_lead_command(
             reason_source=str(body.payload.get("reason_source") or ""),
             hypothesis_id=body.payload.get("hypothesis_id"),
             segment=str(body.payload.get("segment") or "") or None,
+            observed_pain=str(body.payload.get("observed_pain") or "") or None,
         )
         return {"command_id": body.command_id, "action": body.action, "changed": 1, "status": status}
     stopped = 0

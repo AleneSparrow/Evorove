@@ -307,6 +307,12 @@ def _normalize_channel_token(value: str | None) -> str:
     return _CHANNEL_ALIASES.get(raw, raw)
 
 
+def has_grounded_text(text: str | None) -> bool:
+    """Same test for a reason and an observed pain: a concrete phrase, not a label."""
+
+    return _has_grounded_reason((text or "").strip())
+
+
 def _has_grounded_reason(reason: str) -> bool:
     if len(reason) < 16:
         return False

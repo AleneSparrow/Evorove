@@ -51,3 +51,7 @@ Content-Type: application/json
 - `409` `sms_suppressed` / `conversation_already_active`
 
 Цикл 2 **не** шлёт POST `hot_lead` из ingest. GREET кладёт событие `opened` в журнал. Горячий выход — отдельный `POST .../hot-leads` после `OFFER_BOOKING_SLOTS`.
+
+## Холодное письмо из CRM (`lead-commands`)
+
+Основной маршрут первого касания из CRM — не этот эндпоинт, а `POST /api/v1/internal/businesses/{business_id}/lead-commands` с `action=cold_assigned`. Там `payload.observed_pain` (необязательно, до 500 символов) открывает письмо. Одному человеку — один маршрут. См. [`pain-first-touch-ru.md`](pain-first-touch-ru.md).

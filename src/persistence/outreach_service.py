@@ -7,6 +7,10 @@ the conversation. Flow, for every tenant alike (Evorove is client 0):
   and facts already in Business DNA -> send from the tenant mailbox -> CRM
   shows the line immediately.
 
+Pain first, then touch (owner rule, 26 October 2026): when CRM hands over a
+grounded `observed_pain`, the letter opens with that pain instead of the
+cycle-1 reason, then one line on the business, then one small question.
+
 The owner watches. She does not approve each letter. The letter never contains
 a price, discount, guarantee, or a fact that was not handed in. Cold SMS is
 never sent (TCPA): a person reachable only by phone is kept and marked skipped.
@@ -21,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Mapping
 
 from sqlalchemy import select
 
+from src.domain.found_person import has_grounded_text
 from src.domain.models import utc_now
 
 from .crm_board_service import CrmBoardService
@@ -30,6 +35,7 @@ from .sqlalchemy_models import EmailConnectionRow, IntegrationOutboxRow, Outreac
 if TYPE_CHECKING:
     from .repositories import UnitOfWorkFactory
 
+OBSERVED_PAIN_MAX = 500
 _FORBIDDEN = re.compile(r"\$\s?\d|\bdiscount\b|\bguarantee|\bfree trial\b|%\s*off\b", re.IGNORECASE)
 
 
@@ -51,8 +57,12 @@ def draft_first_email(
     sender_name: str,
     postal_address: str,
     segment: str | None = None,
+    observed_pain: str | None = None,
 ) -> Draft:
-    """First message from the cycle-1 reason, the audience segment, and DNA facts."""
+    """First message from the cycle-1 reason, the audience segment, and DNA facts.
+
+    With a grounded observed pain the letter opens with the pain, not the offer.
+    """
     business = dict((dna or {}).get("business") or {})
     business_name = str(business.get("name") or "our team").strip()
     what_we_do = str(business.get("description") or "").strip().rstrip(".")
@@ -75,11 +85,18 @@ def draft_first_email(
         about = f"{business_name} is for {audience}."
     else:
         about = f"I'm with {business_name}."
+    pain = usable_observed_pain(observed_pain)
+    if pain:
+        opening = f"Something I noticed: {pain.rstrip('.')}."
+        ask = "Is that worth a quick look on your side?"
+    else:
+        opening = f"I wrote because of this: {observed}."
+        ask = "If that is the work in front of you, I can show you what it looks like on one board."
     body = (
         f"{greeting}\n\n"
-        f"I wrote because of this: {observed}.\n\n"
+        f"{opening}\n\n"
         f"{about}\n\n"
-        "If that is the work in front of you, I can show you what it looks like on one board.\n\n"
+        f"{ask}\n\n"
         f"{sender_name}\n{business_name}\n\n"
         f"--\n{postal_address}\n"
         'Not interested? Reply "no" and we will not write again.'
@@ -87,6 +104,15 @@ def draft_first_email(
     subject = f"For {first_name}" if first_name else f"A note from {business_name}"
     check_message_is_safe(subject, body)
     return Draft(subject=subject[:255], body=body)
+
+
+def usable_observed_pain(value: str | None) -> str | None:
+    """A pain the letter may open with: concrete, not a label, not oversized."""
+
+    pain = " ".join((value or "").split())
+    if not pain or len(pain) > OBSERVED_PAIN_MAX or not has_grounded_text(pain):
+        return None
+    return pain
 
 
 def check_message_is_safe(subject: str, body: str) -> None:
@@ -118,6 +144,7 @@ class OutreachService:
         reason_source: str,
         hypothesis_id: str | None = None,
         segment: str | None = None,
+        observed_pain: str | None = None,
     ) -> str:
         """Idempotent. A drafted letter is sent as soon as the mailbox can send."""
         now = utc_now()
@@ -141,6 +168,7 @@ class OutreachService:
                     reason=grounded,
                     reason_source=reason_source or "",
                     hypothesis_id=hypothesis_id or None,
+                    observed_pain=usable_observed_pain(observed_pain),
                     created_at=now,
                     updated_at=now,
                 )
@@ -158,6 +186,7 @@ class OutreachService:
                         sender_name=mailbox.from_name if mailbox else "The team",
                         postal_address=mailbox.postal_address if mailbox else "",
                         segment=segment,
+                        observed_pain=row.observed_pain,
                     )
                     row.status, row.subject, row.body = "drafted", draft.subject, draft.body
                     release = True
@@ -332,6 +361,8 @@ def _view(row: OutreachProspectRow) -> dict[str, Any]:
         "phone": row.phone,
         "reason": row.reason,
         "reason_source": row.reason_source,
+        "observed_pain": row.observed_pain,
+        "first_touch_basis": "observed_pain" if row.observed_pain else "reason",
         "status": row.status,
         "skip_reason": row.skip_reason,
         "subject": row.subject,
