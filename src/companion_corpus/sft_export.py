@@ -13,16 +13,53 @@ from typing import Any, Mapping
 from src.ai.sales_models import SalesTurnAnalysisOutput
 from src.ai.sales_response_models import SalesResponseOutput, check_move_matches_approved
 from src.companion_corpus.known_titles import CORE_CATALOG_IDS
-from src.domain.sales import SalesMove
+from src.domain.sales import (
+    CommitmentLevel,
+    ObjectionStatus,
+    ObjectionType,
+    SalesMove,
+    SalesStage,
+)
 
 REPO = Path(__file__).resolve().parents[2]
 STEP1 = REPO / "evals" / "companion_step1"
 STEP2 = REPO / "evals" / "companion_step2"
 HOSTED = STEP2 / "hosted"
 
+_MOVES = ", ".join(move.value for move in SalesMove)
+_STAGES = ", ".join(stage.value for stage in SalesStage)
+_OBJECTION_TYPES = ", ".join(obj.value for obj in ObjectionType)
+_OBJECTION_STATUSES = ", ".join(
+    status.value for status in ObjectionStatus if status is not ObjectionStatus.HUMAN_REVIEW
+)
+_COMMITMENT_LEVELS = ", ".join(level.value for level in CommitmentLevel)
+
+# The JSON schemas are spelled out here (fields + closed enums) rather than
+# only named, because the hosted Qwen3.5-9B LoRA otherwise invented field
+# names, enum values (ASK_FOR_INTENT), and extra fields at inference: with
+# only "output JSON matching SalesTurnAnalysisOutput" in the system prompt,
+# the model learned the shape from examples but not the exact contract.
+# Both prompts are shared by the SFT export and the eval scorer
+# (lora_eval.prompt_messages), so the model trains on, and is evaluated with,
+# the same explicit schema.
 ANALYZER_SYSTEM = (
     "You are Evorove's companion analyzer for cycle 2 (sale until ready to book). "
-    "Output one JSON object matching SalesTurnAnalysisOutput. "
+    "Emit exactly one JSON object and nothing else -- no prose, no markdown fences, no extra "
+    "fields beyond those listed. The object has exactly these fields:\n"
+    "{\n"
+    '  "observed_stage": string, one of: ' + _STAGES + ";\n"
+    '  "confidence": number from 0 to 1;\n'
+    '  "customer_intent": string or null;\n'
+    '  "signals": list of {"kind": string, "value": string, "evidence": string};\n'
+    '  "objections": list of {"objection_type": string, "status": string, "evidence": string, '
+    '"cause": string or null};\n'
+    '  "commitment_level": string, one of: ' + _COMMITMENT_LEVELS + ";\n"
+    '  "recommended_moves": list of strings, each one of: ' + _MOVES + ";\n"
+    '  "requested_callback_at": ISO 8601 datetime with a Z or numeric offset, or null;\n'
+    '  "requires_human": boolean.\n'
+    "}\n"
+    "objection_type must be one of: " + _OBJECTION_TYPES + ". "
+    "objection status must be one of: " + _OBJECTION_STATUSES + " (never HUMAN_REVIEW). "
     "Evidence on signals and objections must be a verbatim substring of the customer message. "
     "recommended_moves are advisory; SalesPolicyEngine still chooses the move. "
     "You do not set price, grant a discount, invent a guarantee, or book a slot. "
@@ -37,7 +74,16 @@ ANALYZER_SYSTEM = (
 
 GENERATOR_SYSTEM = (
     "You are Evorove's companion mouth for cycle 2. "
-    "Output one JSON object matching SalesResponseOutput. "
+    "Emit exactly one JSON object and nothing else -- no prose, no markdown fences, no extra "
+    "fields beyond those listed. The object has exactly these fields:\n"
+    "{\n"
+    '  "move": string, exactly the approved_move given in the prompt (one of: ' + _MOVES + ");\n"
+    '  "message_text": string;\n'
+    '  "knowledge_ids": list of strings;\n'
+    '  "business_fact_ids": list of strings;\n'
+    '  "customer_evidence_ids": list of strings;\n'
+    '  "used_safe_fallback": boolean.\n'
+    "}\n"
     "Echo approved_move in the move field. Do not pick a different SalesMove. "
     "Do not invent a price, discount, guarantee, scarcity, gift, throw-in, or complimentary extra. "
     "When refusing a gift request, do not reuse phrases like free extra, throw in, or on the house. "

@@ -54,6 +54,7 @@ from src.ai.errors import AIProviderError
 from src.ai.models import AIRequest
 from src.ai.provider import RetryingAIProvider
 from src.ai.anthropic_provider import AnthropicProvider
+from src.ai.openai_provider import OpenAIProvider
 from src.ai.sales_response_models import (
     SALES_RESPONSE_PROMPT_VERSION,
     SalesResponseOutput,
@@ -295,25 +296,39 @@ def _load_and_validate_fixtures(path: Path = FIXTURES_PATH) -> list[dict[str, An
 
 
 def _build_live_provider() -> tuple[RetryingAIProvider, str] | None:
-    """Returns (provider, model) if Anthropic credentials are already
-    configured through the project's normal runtime, else None (dry-run)."""
+    """Returns (provider, model) when the project's normal runtime has a live
+    provider configured -- Anthropic, or OpenAI-compatible (DeepSeek, Gemini,
+    Qwen, Groq via OPENAI_BASE_URL) -- else None (dry-run)."""
     try:
         settings = Settings.from_environment()
     except RuntimeError:
         return None
-    if settings.ai_provider != "anthropic":
-        return None
-    if not settings.anthropic_api_key or not settings.anthropic_model:
-        return None
-    provider = RetryingAIProvider(
-        AnthropicProvider(
-            api_key=settings.anthropic_api_key,
-            model=settings.anthropic_model,
-            timeout_seconds=settings.ai_timeout_seconds,
-        ),
-        max_retries=settings.ai_max_retries,
-    )
-    return provider, settings.anthropic_model
+    if settings.ai_provider == "anthropic":
+        if not settings.anthropic_api_key or not settings.anthropic_model:
+            return None
+        provider = RetryingAIProvider(
+            AnthropicProvider(
+                api_key=settings.anthropic_api_key,
+                model=settings.anthropic_model,
+                timeout_seconds=settings.ai_timeout_seconds,
+            ),
+            max_retries=settings.ai_max_retries,
+        )
+        return provider, settings.anthropic_model
+    if settings.ai_provider == "openai":
+        if not settings.openai_api_key or not settings.openai_model:
+            return None
+        provider = RetryingAIProvider(
+            OpenAIProvider(
+                api_key=settings.openai_api_key,
+                model=settings.openai_model,
+                timeout_seconds=settings.ai_timeout_seconds,
+                base_url=settings.openai_base_url,
+            ),
+            max_retries=settings.ai_max_retries,
+        )
+        return provider, settings.openai_model
+    return None
 
 
 def _check(

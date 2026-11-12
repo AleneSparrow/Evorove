@@ -1052,7 +1052,7 @@ Building in public. Незакончено. Сбор оплаты конечно
 
 - Git-история основной ветки и продуктовых веток, 11.08–04.09.2026.
 - `README.md` — актуальные возможности и ограничения.
-- `docs/product-spec.md` — доменные границы, persistence, AI и security.
-- `docs/architecture.md` — устройство движка.
-- `docs/flywheel-status-snapshot-17aug-reconstructed.md` — продуктовая рамка и UX-аудит.
+- `archive/inbound-engine-2026-08/product-spec.md` — доменные границы, persistence, AI и security.
+- `archive/inbound-engine-2026-08/architecture.md` — устройство движка.
+- `archive/inbound-engine-2026-08/flywheel-status-snapshot-17aug-reconstructed.md` — продуктовая рамка и UX-аудит.
 - `docs/marketing/social-posts-closed-cycle-engineering-2026-09.md` — поздний этап перехода к closed-cycle positioning.

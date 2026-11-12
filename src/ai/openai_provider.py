@@ -1,5 +1,13 @@
-"""Official OpenAI SDK adapter using typed Responses API parsing."""
+"""OpenAI-compatible chat-completions adapter with JSON structured output.
 
+Uses chat completions + ``response_format={"type": "json_object"}`` (not the
+newer Responses API) so the same adapter works against any OpenAI-compatible
+endpoint -- DeepSeek, Gemini, Qwen, OpenRouter, Groq, Together -- not just
+OpenAI itself. The schema is enforced client-side with model_validate.
+"""
+
+import json
+import re
 from time import perf_counter
 from typing import Any, TypeVar
 
@@ -12,7 +20,7 @@ from openai import (
     PermissionDeniedError,
     RateLimitError,
 )
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from .errors import (
     AIAuthenticationError,
@@ -27,6 +35,14 @@ from .models import AIInvocationMetadata, AIRequest, AIResult
 
 
 OutputT = TypeVar("OutputT", bound=BaseModel)
+
+
+def _parse_json(content: str) -> Any:
+    text = content.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    return json.loads(text)
 
 
 class OpenAIProvider:
@@ -62,27 +78,26 @@ class OpenAIProvider:
     def generate(self, request: AIRequest[OutputT]) -> AIResult[OutputT]:
         started = perf_counter()
         try:
-            response = self._client.responses.parse(
+            response = self._client.chat.completions.create(
                 model=self.model,
-                input=[
+                messages=[
                     {"role": "system", "content": request.system_prompt},
                     {"role": "user", "content": request.user_prompt},
                 ],
-                text_format=request.output_model,
+                response_format={"type": "json_object"},
             )
-            output = response.output_parsed
-            if output is None:
+            content = response.choices[0].message.content
+            if not content:
                 raise AIInvalidOutputError("OpenAI returned no usable structured output")
-            if not isinstance(output, request.output_model):
-                output = request.output_model.model_validate(output)
+            output = request.output_model.model_validate(_parse_json(content))
             usage = getattr(response, "usage", None)
             metadata = self._metadata(
                 request,
                 started,
                 success=True,
                 category="success",
-                input_tokens=getattr(usage, "input_tokens", None),
-                output_tokens=getattr(usage, "output_tokens", None),
+                input_tokens=getattr(usage, "prompt_tokens", None),
+                output_tokens=getattr(usage, "completion_tokens", None),
                 total_tokens=getattr(usage, "total_tokens", None),
             )
             return AIResult(output, metadata)
@@ -90,7 +105,9 @@ class OpenAIProvider:
             if exc.metadata is None:
                 exc.metadata = self._metadata(request, started, success=False, category=exc.category)
             raise
-        except ValidationError as exc:
+        except ValueError as exc:
+            # Covers json.JSONDecodeError (model emitted non-JSON) and pydantic
+            # ValidationError (schema mismatch) alike.
             raise AIInvalidOutputError(
                 "OpenAI returned invalid structured output",
                 metadata=self._metadata(request, started, success=False, category="invalid_output"),

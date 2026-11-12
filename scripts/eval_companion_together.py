@@ -79,6 +79,10 @@ def call_together(model: str, messages: list[dict[str, str]], api_key: str, max_
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            # Cloudflare sits in front of api.together.xyz and blocks urllib's
+            # default "Python-urllib/x.y" as a bot (HTTP 403, error 1010).
+            # A real client signature passes the check; curl already did.
+            "User-Agent": "evorove-companion-eval/0.1 (+https://evorove.com)",
         },
         method="POST",
     )
@@ -94,7 +98,15 @@ def call_together(model: str, messages: list[dict[str, str]], api_key: str, max_
             if exc.code == 429:
                 time.sleep(2 * (attempt + 1))
                 continue
-            raise
+            # Together explains the failure in the response body (endpoint not
+            # ready, invalid key, no access, model not found). Surface it --
+            # "HTTP Error 403: Forbidden" alone hides which of those it is.
+            detail = ""
+            try:
+                detail = exc.read().decode("utf-8", "replace")
+            except Exception:  # noqa: BLE001
+                pass
+            raise RuntimeError(f"HTTP {exc.code}: {detail[:600]}") from exc
         except Exception as exc:  # network hiccup -- retry
             last_error = exc
             time.sleep(1 * (attempt + 1))

@@ -628,26 +628,30 @@ def test_ai_notes_redact_contact_details_before_domain_and_audit_use() -> None:
     assert "[contact redacted]" in result.notes
 
 
-def test_openai_adapter_uses_sdk_typed_parse_contract_without_live_call() -> None:
-    class ResponsesStub:
+def test_openai_adapter_uses_chat_completions_json_contract_without_live_call() -> None:
+    class CompletionsStub:
         def __init__(self) -> None:
             self.arguments: dict[str, object] = {}
 
-        def parse(self, **arguments: object):
+        def create(self, **arguments: object):
             self.arguments = arguments
             return type("Response", (), {
-                "output_parsed": IntentOutput.model_validate(intent_output()),
+                "choices": [type("Choice", (), {
+                    "message": type("Message", (), {"content": json.dumps(intent_output())})(),
+                })()],
                 "usage": type("Usage", (), {
-                    "input_tokens": 12,
-                    "output_tokens": 6,
+                    "prompt_tokens": 12,
+                    "completion_tokens": 6,
                     "total_tokens": 18,
                 })(),
             })()
 
-    responses = ResponsesStub()
+    completions = CompletionsStub()
     provider = object.__new__(OpenAIProvider)
     provider.model = "test-openai-model"
-    provider._client = type("Client", (), {"responses": responses})()
+    provider._client = type("Client", (), {
+        "chat": type("Chat", (), {"completions": completions})(),
+    })()
     request = AIRequest(
         "intent",
         "v1",
@@ -659,8 +663,10 @@ def test_openai_adapter_uses_sdk_typed_parse_contract_without_live_call() -> Non
 
     result = provider.generate(request)
 
-    assert responses.arguments["text_format"] is IntentOutput
-    assert responses.arguments["model"] == "test-openai-model"
+    assert completions.arguments["model"] == "test-openai-model"
+    assert completions.arguments["response_format"] == {"type": "json_object"}
+    assert [m["role"] for m in completions.arguments["messages"]] == ["system", "user"]
+    assert result.output.model_dump() == IntentOutput.model_validate(intent_output()).model_dump()
     assert result.metadata.total_tokens == 18
 
 

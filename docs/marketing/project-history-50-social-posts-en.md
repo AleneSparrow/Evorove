@@ -1052,7 +1052,7 @@ The public name is Evorove. Same job: inbound inquiry → booked job. Not lead g
 
 - Git history from the main and product branches, August 11–September 4, 2026.
 - `README.md` — current capabilities and limitations.
-- `docs/product-spec.md` — domain boundaries, persistence, AI, and security.
-- `docs/architecture.md` — engine design.
-- `docs/flywheel-status-snapshot-17aug-reconstructed.md` — product framing and UX audit.
+- `archive/inbound-engine-2026-08/product-spec.md` — domain boundaries, persistence, AI, and security.
+- `archive/inbound-engine-2026-08/architecture.md` — engine design.
+- `archive/inbound-engine-2026-08/flywheel-status-snapshot-17aug-reconstructed.md` — product framing and UX audit.
 - `docs/marketing/social-posts-closed-cycle-engineering-2026-09.md` — the later shift toward closed-cycle positioning.

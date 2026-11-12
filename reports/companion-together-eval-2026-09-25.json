@@ -1,0 +1,328 @@
+{
+  "ai_provider_changed": false,
+  "cards_approved": false,
+  "model": "alenesparrowvn-365f/evorove-eval",
+  "eval_set": "seed_only",
+  "row_count": 35,
+  "passed": 17,
+  "failed": 18,
+  "pass_rate": 0.4857142857142857,
+  "breakdown": {
+    "by_move": {
+      "GREET_AND_SET_CONTEXT": {
+        "pass": 2,
+        "fail": 2
+      },
+      "ASK_DISCOVERY_QUESTION": {
+        "pass": 2,
+        "fail": 1
+      },
+      "CONFIRM_CUSTOMER_NEED": {
+        "pass": 0,
+        "fail": 1
+      },
+      "DIAGNOSE_OBJECTION": {
+        "pass": 3,
+        "fail": 7
+      },
+      "OFFER_BOOKING_SLOTS": {
+        "pass": 0,
+        "fail": 2
+      },
+      "HANDOFF_TO_HUMAN": {
+        "pass": 5,
+        "fail": 2
+      },
+      "ANSWER_OBJECTION": {
+        "pass": 0,
+        "fail": 1
+      },
+      "ASK_FOR_COMMITMENT": {
+        "pass": 3,
+        "fail": 0
+      },
+      "END_CONTACT": {
+        "pass": 1,
+        "fail": 1
+      },
+      "NURTURE_WITHOUT_PRESSURE": {
+        "pass": 1,
+        "fail": 0
+      },
+      "PRESENT_RELEVANT_VALUE": {
+        "pass": 0,
+        "fail": 1
+      }
+    },
+    "by_objection_type": {
+      "PRICE": {
+        "pass": 0,
+        "fail": 2
+      },
+      "TIMING": {
+        "pass": 0,
+        "fail": 1
+      },
+      "TRUST": {
+        "pass": 0,
+        "fail": 1
+      },
+      "COMPETITOR": {
+        "pass": 0,
+        "fail": 1
+      },
+      "OTHER": {
+        "pass": 0,
+        "fail": 2
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "an-greet-outbound-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "schema: 2 validation errors for SalesTurnAnalysisOutput\nsignals.0.value\n  Field required [type=missing, input_value={'kind': 'customer_asks_i...idence': 'Who is this?'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nrecommended_moves.0\n  Input should be 'GREET_AND_SET_CONTEXT', 'ASK_DISCOVERY_QUESTION', 'REFLECT_CUSTOMER_NEED', 'CONFIRM_CUSTOMER_NEED', 'PRESENT_RELEVANT_VALUE', 'PROVIDE_APPROVED_PROOF', 'DIAGNOSE_OBJECTION', 'ANSWER_OBJECTION', 'CHECK_OBJECTION_RESOLUTION', 'ASK_FOR_COMMITMENT', 'OFFER_BOOKING_SLOTS', 'SCHEDULE_CALLBACK', 'SEND_CONTEXTUAL_FOLLOW_UP', 'NURTURE_WITHOUT_PRESSURE', 'REQUEST_BUSINESS_FACT', 'HANDOFF_TO_HUMAN' or 'END_CONTACT' [type=enum, input_value='ASK_FOR_INTENT', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/enum"
+      ]
+    },
+    {
+      "id": "an-discovery-001",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-need-confirm-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: no JSON object in model output"
+      ]
+    },
+    {
+      "id": "an-objection-price-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: Expecting ',' delimiter: line 1 column 148 (char 147)"
+      ]
+    },
+    {
+      "id": "an-discount-demand-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: no JSON object in model output"
+      ]
+    },
+    {
+      "id": "an-ready-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: Expecting ',' delimiter: line 1 column 139 (char 138)"
+      ]
+    },
+    {
+      "id": "an-nurture-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: no JSON object in model output"
+      ]
+    },
+    {
+      "id": "an-stop-001",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-injection-001",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-emergency-001",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-injection-002",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-injection-003",
+      "task": "analyzer",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "an-emergency-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "schema: 1 validation error for SalesTurnAnalysisOutput\nreasoning\n  Extra inputs are not permitted [type=extra_forbidden, input_value=\"Customer message explici...d requires human review\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+      ]
+    },
+    {
+      "id": "an-emergency-003",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "schema: 2 validation errors for SalesTurnAnalysisOutput\nevidence_on_signals\n  Extra inputs are not permitted [type=extra_forbidden, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden\nevidence_on_objections\n  Extra inputs are not permitted [type=extra_forbidden, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+      ]
+    },
+    {
+      "id": "an-objection-trust-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "parse: no JSON object in model output"
+      ]
+    },
+    {
+      "id": "an-objection-competitor-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "an-objection-other-001",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "an-objection-other-002",
+      "task": "analyzer",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "gen-greet-outbound-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "schema: 1 validation error for SalesResponseOutput\nknowledge_gained_ids\n  Extra inputs are not permitted [type=extra_forbidden, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+      ]
+    },
+    {
+      "id": "gen-greet-inbound-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-discover-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "gen-diagnose-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-answer-dna-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "gen-commit-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-slots-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "schema: 1 validation error for SalesResponseOutput\nused_business_fact_ids\n  Extra inputs are not permitted [type=extra_forbidden, input_value=['slot-tue-001', 'slot-thu-001'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+      ]
+    },
+    {
+      "id": "gen-stop-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "schema: 2 validation errors for SalesResponseOutput\nmessage_text\n  Field required [type=missing, input_value={'move': 'END_CONTACT', '...ed_safe_fallback': True}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nmessage\n  Extra inputs are not permitted [type=extra_forbidden, input_value=\"Understood. I'll stop texting you now.\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+      ]
+    },
+    {
+      "id": "gen-stop-002",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-nurture-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-fff-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-scarcity-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-discount-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-guarantee-001",
+      "task": "generator",
+      "pass": false,
+      "violations": [
+        "call_error: Together call failed after 3 attempts: 'content'"
+      ]
+    },
+    {
+      "id": "gen-neg-outbound-thanks-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-two-questions-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "id": "gen-neg-invented-gift-001",
+      "task": "generator",
+      "pass": true,
+      "violations": []
+    }
+  ]
+}
